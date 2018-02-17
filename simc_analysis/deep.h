@@ -169,7 +169,7 @@ public :
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
-   virtual void     Loop();
+   virtual void     Loop(TString simc_file, Double_t Ib, Double_t time);
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
@@ -177,16 +177,20 @@ public :
 #endif
 
 #ifdef deep_cxx
-deep::deep(TTree *tree) : fChain(0) 
+deep::deep(TTree *tree)  
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dummy.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("dummy.root");
+     
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../worksim/dummy.root");
+      if (!f) {
+         f = new TFile("../worksim/dummy.root");
       }
-      f->GetObject("SNT",tree);
+
+      tree = (TTree*)gDirectory->Get("SNT");
+
+      //f->GetObject("SNT",tree);
 
    }
    Init(tree);

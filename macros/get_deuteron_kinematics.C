@@ -48,7 +48,7 @@ void get_deuteron_kinematics()
     TString beamE = "10.60";
      
     ofstream ofs;
-    TString my_file = "d2_kinematics_0.5to0.8_" + Q_sqrd +  beamE + ".dat"; 
+    TString my_file = "d2_kinematics_updated_" + Q_sqrd +  beamE + ".dat"; 
     ofs.open(my_file);     
     ofs << "#! p_miss[f,0]/ " << " " << " x_bj[f,1]/ " << " " << " w[f,2]/ " << " Ee_f[f,3]/ " << " " << " Ep_f[f,4]/ " << " " << " En_f[f,5]/ " << " " 
 	<< " P_p[f,6]/ " << " " << " q[f,7]/ " << " " << " theta_q[f,8]/ " << " theta_e[f,9]/ " << " " << " theta_p[f,10]/ " << " " << " theta_nq[f,11]/ " << " " << " theta_pq[f,12]/ " << "    " << " Q_sqrd[f,13] " << endl;
@@ -56,11 +56,11 @@ void get_deuteron_kinematics()
     //for (Q2 = 4.245; Q2 < 4.251; Q2 = Q2 + 0.01)
     
 //LOOP OVER Missing Momentum
-    for (p_miss = 0.5;  p_miss<=0.80; p_miss = p_miss+0.15)
+    for (p_miss = 0.580;  p_miss<=0.750; p_miss = p_miss+0.17)
       {
 	
 	//LOOP X-Bjorken
-	for (x_bj = 1.2; x_bj <= 1.4; x_bj = x_bj + 0.001)
+	for (x_bj = 1.35; x_bj <= 1.35; x_bj = x_bj + 0.001)
 	  
 	{
 	
