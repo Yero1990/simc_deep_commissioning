@@ -53,27 +53,26 @@ void get_deuteron_kinematics()
     ofs << "#! p_miss[f,0]/ " << " " << " x_bj[f,1]/ " << " " << " w[f,2]/ " << " Ee_f[f,3]/ " << " " << " Ep_f[f,4]/ " << " " << " En_f[f,5]/ " << " " 
 	<< " P_p[f,6]/ " << " " << " q[f,7]/ " << " " << " theta_q[f,8]/ " << " theta_e[f,9]/ " << " " << " theta_p[f,10]/ " << " " << " theta_nq[f,11]/ " << " " << " theta_pq[f,12]/ " << "    " << " Q_sqrd[f,13] " << endl;
 
-    //for (Q2 = 4.245; Q2 < 4.251; Q2 = Q2 + 0.01)
-    
-//LOOP OVER Missing Momentum
-    for (p_miss = 0.580;  p_miss<=0.750; p_miss = p_miss+0.17)
-      {
-	
-	//LOOP X-Bjorken
-	for (x_bj = 1.35; x_bj <= 1.35; x_bj = x_bj + 0.001)
-	  
-	{
-	
-	    //Calculate electron scattering angle
-	    w = Q2 / (2. * x_bj * m_p);
+
+	//LOOP OVER Missing Momentum
+	for (p_miss = 0.58;  p_miss<=0.750; p_miss = p_miss+0.17)
+	  {
 	    
-	    //	cout << "p_miss = " << p_miss << endl;
-	    //	cout << "w = " << w << endl;
-	    //	cout << "x_bj = " << x_bj << endl;
-	    
-	    E_ep = E_e - w;                        //scattered e- energy
-	    //	cout << "E_ep = " << E_ep << endl;
-	    
+	    //LOOP X-Bjorken
+	    for (x_bj = 1.35; x_bj <= 1.35; x_bj = x_bj + 0.001)
+	      
+	      {
+		
+		//Calculate electron scattering angle
+		w = Q2 / (2. * x_bj * m_p);
+		
+		//	cout << "p_miss = " << p_miss << endl;
+		//	cout << "w = " << w << endl;
+		//	cout << "x_bj = " << x_bj << endl;
+		
+		E_ep = E_e - w;                        //scattered e- energy
+		//	cout << "E_ep = " << E_ep << endl;
+		
 		theta_e = 2. * asin( sqrt(Q2/(4.*E_e*E_ep) ) );
 		//	cout << "theta_e = " << theta_e*rad2deg << endl;
 		
@@ -83,48 +82,48 @@ void get_deuteron_kinematics()
 		p_ep = sqrt(E_ep*E_ep - m_e*m_e);     //E^2 = me^2 + pe^2 ~ pe^2 
 		//	cout << "p_ep = " << p_ep << endl;
 		
-
-
-	//Calculate scattered proton momenta
-	q = sqrt(Q2 + w*w);
-	E_n = sqrt(m_n*m_n + p_miss*p_miss);
-	E_p = w + m_d - E_n;
-	p_p = sqrt(E_p*E_p - m_p*m_p);
-
-
+		
+		
+		//Calculate scattered proton momenta
+		q = sqrt(Q2 + w*w);
+		E_n = sqrt(m_n*m_n + p_miss*p_miss);
+		E_p = w + m_d - E_n;
+		p_p = sqrt(E_p*E_p - m_p*m_p);
+		
+		
+		
+		if ( (fabs(p_e*p_e + q*q - p_ep*p_ep) < fabs(2.*p_e*q) ) && (fabs(p_p*p_p + q*q - p_miss*p_miss) < fabs(2.*p_p*q) )  
+		     && (fabs(q*q + p_miss*p_miss - p_p*p_p) < fabs(2.*q*p_miss)) )
+		  {
+		    
+		    
+		    //Calculate theta_q
+		    theta_q = acos((p_e*p_e + q*q - p_ep*p_ep) / (2.*p_e*q));
+		    //    cout << "theta_q = " << theta_q*rad2deg << endl;  
 	
-	     if ( (fabs(p_e*p_e + q*q - p_ep*p_ep) < fabs(2.*p_e*q) ) && (fabs(p_p*p_p + q*q - p_miss*p_miss) < fabs(2.*p_p*q) )  
-			&& (fabs(q*q + p_miss*p_miss - p_p*p_p) < fabs(2.*q*p_miss)) )
-						{
-					
-						
-						//Calculate theta_q
-						theta_q = acos((p_e*p_e + q*q - p_ep*p_ep) / (2.*p_e*q));
-						//    cout << "theta_q = " << theta_q*rad2deg << endl;  
-	
-						//Calculate theta_pq
-						theta_pq = acos((p_p*p_p + q*q - p_miss*p_miss)/(2.*p_p*q));
-						//cout << "theta_pq = " << theta_pq*rad2deg << endl;
-						//Calculate theta_nq
-						theta_nq = acos( (q*q + p_miss*p_miss - p_p*p_p) / (2.*q*p_miss) ) ;
-						//cout << "theta_nq = " << theta_nq*rad2deg << endl;
-
-						//Calculate theta_p
-						theta_p = theta_q + theta_pq;	
-						//cout << "theta_p = " << theta_p*rad2deg << endl;
-					
-						
-						ofs << p_miss  << "     " <<  x_bj  << "    " <<  w  << "    " << E_ep  << "    " << E_p << "    " << E_n << "   " << p_p << "    " << q << "    " << theta_q*rad2deg << "    " << theta_e*rad2deg  << "    " << theta_p*rad2deg << "    " << theta_nq*rad2deg << "    " << theta_pq*rad2deg << "    " << Q2 <<  endl;
-
-	
-	/*
-						ofs << "              USER INPUT: p_miss = "  << p_miss << " GeV " << endl;
-						ofs << "**************************************************" << endl;
+		    //Calculate theta_pq
+		    theta_pq = acos((p_p*p_p + q*q - p_miss*p_miss)/(2.*p_p*q));
+		    //cout << "theta_pq = " << theta_pq*rad2deg << endl;
+		    //Calculate theta_nq
+		    theta_nq = acos( (q*q + p_miss*p_miss - p_p*p_p) / (2.*q*p_miss) ) ;
+		    //cout << "theta_nq = " << theta_nq*rad2deg << endl;
+		    
+		    //Calculate theta_p
+		    theta_p = theta_q + theta_pq;	
+		    //cout << "theta_p = " << theta_p*rad2deg << endl;
+		    
+		    
+		    ofs << p_miss  << "     " <<  x_bj  << "    " <<  w  << "    " << E_ep  << "    " << E_p << "    " << E_n << "   " << p_p << "    " << q << "    " << theta_q*rad2deg << "    " << theta_e*rad2deg  << "    " << theta_p*rad2deg << "    " << theta_nq*rad2deg << "    " << theta_pq*rad2deg << "    " << Q2 <<  endl;
+		    
+		    
+		    /*
+		      ofs << "              USER INPUT: p_miss = "  << p_miss << " GeV " << endl;
+		      ofs << "**************************************************" << endl;
 						ofs << "Q^2 = " << Q2 << " GeV " << endl;
 						ofs << "Electron Energy E = " << E_e << " GeV " << endl;
 						ofs << "x-Bjorken = " << x_bj << endl;
 						ofs << "neutron missing momentum = " << p_miss << " GeV " << endl;
-	
+						
 						ofs << "             KINEMATIC SETTINGS fot p_miss = " <<  p_miss << endl; 
 						ofs << "                                            " << endl;
 						ofs << "e- scattering angle = " <<theta_e*rad2deg << " degrees " << endl;
@@ -139,13 +138,14 @@ void get_deuteron_kinematics()
 						ofs << "**************************************************" << endl;
 		*/			
 						
-						}
-
-						else (cout << "Non-Sense" << endl);
-	}
-	
-      }
-
+		  }
+		
+		else (cout << "Non-Sense" << endl);
+	      }
+	    
+	  }
+      
+    
 
 //Plot kinematic variables as a function of missing momenta	
 /*	

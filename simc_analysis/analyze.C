@@ -60,16 +60,51 @@ void analyze()
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
 
-  /*
-  //pmiss = 750 MeV
+    
+  //pmiss = 750 MeV  -- PWIA
   Ib = 40.;
   time = 42.;
-  simc_file = "d2_pm750_pwia_rad.root";
+  simc_file = "d2_pm750_lagetpwia_rad.root";
   cout << "Analyzing: " << simc_file << endl;
   chain.Add("../worksim/"+simc_file);
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-  */
+
+  //pmiss = 750 MeV  --  FSI
+  Ib = 40.;
+  time = 42.;
+  simc_file = "d2_pm750_lagetfsi_rad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
   
+
+
+  /*
+
+  //Calibration run at low missing momentum
+ //pmiss = 80 MeV  -- PWIA
+  Ib = 40.;
+  time = 1.;
+  simc_file = "d2_pm80_lagetpwia_rad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
+
+  //pmiss = 80 MeV  --  FSI
+  Ib = 40.;
+  time = 1.;
+  simc_file = "d2_pm80_lagetfsi_rad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
+  
+  */
 }

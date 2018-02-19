@@ -63,8 +63,8 @@ ofs.open(file1);
 
 ofs << "# " << " p_miss " << " w_th " << " x_bj_th " << endl;
 
- double p_miss_min = 0.1;   //units of GeV
-double p_miss_max = 1.0;
+ double p_miss_min = 0.04;   //units of GeV
+double p_miss_max = 0.120;
 double step = 0.01;
 
 

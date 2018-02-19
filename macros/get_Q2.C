@@ -50,7 +50,7 @@ void get_Q2()
   ofs << "#! p_miss[f,0]/ " << "  " << " x_bj[f,1]/ " << " " << " w[f,2]/ " << "  E_ep[f,3]/ " << " " << " Ep_f[f,4]/ " << " " << " En_f[f,5]/ " << " " 
       << " P_p[f,6]/ " << " " << " q[f,7]/ " << " " << "    theta_q[f,8]/ " << " Q2[f,9]/ " << " " << "    theta_p[f,10]/ " << " " << " theta_nq[f,11]/ " << " " << " theta_pq[f,12]/ " << endl;
   
-       for (p_miss = 0.5; p_miss <= 0.8; p_miss = p_miss + 0.15)
+       for (p_miss = 0.05; p_miss <= 0.120; p_miss = p_miss + 0.01)
 	 {
 	 //Loop over scattered electron energy [GeV]
 	   for (E_ep =8.40; E_ep < 8.95; E_ep = E_ep + 0.0001)
@@ -74,7 +74,9 @@ void get_Q2()
 	       theta_q = acos( (p_e*p_e + q*q - p_ep*p_ep) / (2.*p_e*q) );  //in radians
 	       theta_pq = acos((p_p*p_p + q*q - p_miss*p_miss)/(2.*p_p*q));
 	       theta_p = theta_q + theta_pq;	
-	       theta_nq = acos( (q*q + p_miss*p_miss - p_p*p_p) / (2.*q*p_miss) ) ;
+	       //theta_nq = acos( (q*q + p_miss*p_miss - p_p*p_p) / (2.*q*p_miss) ) ;
+	       theta_nq = acos( (q - p_p*cos(theta_pq))/ p_miss);
+
 		 }
 	       
 	       if (w!=0 && theta_p*rad2deg < 70.0) {
