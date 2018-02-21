@@ -1,4 +1,4 @@
-//Analysis for HMS/SHMS coincidence D(e,e'p)n
+//Analysis for HMS/SHMS coincidence D(e,e'p)n, High Missing Momentum Setting (580, 750) MeV
 
 
 #define deep_cxx
@@ -184,6 +184,18 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH2F *cut_e_xfp_vs_yfp = new TH2F("cut_e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -20., 30., bins, -40., 20.);
 
    
+   //2D theta_nq correlations with other kinematics
+   TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "", bins, 0., 80., bins, 2.0, 5.5);
+   TH2F *cut_xbj_vs_thnq = new TH2F("cut_xbj_vs_thnq", "", bins, 0., 80., bins, 0.5, 1.5);
+   TH2F *cut_pm_vs_thnq = new TH2F("cut_pm_vs_thnq", "", bins, 0., 80., 30, -0.1, 0.5);
+   TH2F *cut_Em_vs_thnq = new TH2F("cut_Em_vs_thnq", "", bins, 0., 80., 50, -0.1, 0.7);
+
+   //2D HMS v. SHMS Acceptance Correlations
+   TH2F *cut_hxptar_vs_exptar = new TH2F("cut_hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.05, 0.05, bins, -0.1, 0.1);
+   TH2F *cut_hyptar_vs_eyptar = new TH2F("cut_hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", bins, -0.04, 0.03, bins, -0.05, 0.05);
+   TH2F *cut_hdelta_vs_edelta = new TH2F("cut_hdelta_vs_edelta", "HMS vs. SHMS, #delta", bins, -15., 8, bins, -15., 15.);
+
+   
    //---------------------------------------------------------
 
 
@@ -215,8 +227,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t xbj_max = 1.40; //1.40;
 
    //Missing Energy, Em = 2.2 MeV (-10 MeV, 25 MeV)
-   Double_t Em_min = -10.e-3;
-   Double_t Em_max = 25.e-3;
+   Double_t Em_min = -0.1;
+   Double_t Em_max = 0.1;
    
 
 
@@ -382,7 +394,19 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 	  //Focal Plane Quantities
 	  cut_e_xfp_vs_yfp->Fill(h_yfp, h_xfp, FullWeight);
 	  cut_e_xfp_vs_yfp->Fill(e_yfp, e_xfp, FullWeight);
+
 	  
+	  //2D theta_nq correlations with other kinematics
+	  cut_Q2_vs_thnq->Fill(th_nq/dtr, Q2, FullWeight); 
+	  cut_xbj_vs_thnq->Fill(th_nq/dtr, X, FullWeight);  
+	  cut_pm_vs_thnq->Fill(th_nq/dtr, Pm, FullWeight);  
+	  cut_Em_vs_thnq->Fill(th_nq/dtr, Em, FullWeight); 
+	  
+	  //2D HMS v. SHMS Acceptance Correlations
+	  cut_hxptar_vs_exptar->Fill(e_xptar, h_xptar, FullWeight); 
+	  cut_hyptar_vs_eyptar->Fill(e_yptar, h_yptar, FullWeight); 
+	  cut_hdelta_vs_edelta->Fill(e_delta, h_delta, FullWeight);
+
 	}//End CUTS LOOP
          
 
@@ -458,8 +482,13 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    }
 
    Double_t Yield = pm->Integral();
-   cout << "Missing Momentum Integral: " << Yield << endl;
-   cout << "Estimated RATE: " << Yield /( time *3600. )<< " events/sec (Hz) " << endl;
-      outfile->Write();
+   cout << "Missing Momentum Integral (NO CUTS): " << Yield << endl;
+   cout << "Estimated RATE: " << Yield /( time )<< " events/hr " << endl;
+   cout << "*******************" << endl;
+   Double_t Yield_cut = cut_pm->Integral();
+   cout << "Missing Momentum Integral: " << Yield_cut << endl;
+   cout << "Estimated RATE: " << Yield_cut /( time  )<< " events/hr " << endl;
+
+   outfile->Write();
 
 }

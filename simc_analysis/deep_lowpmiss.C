@@ -1,4 +1,4 @@
-//Analysis for HMS/SHMS coincidence D(e,e'p)n
+//Analysis for HMS/SHMS coincidence D(e,e'p)n --Low Missing Momentum Setting (80 MeV)
 
 
 #define deep_cxx
@@ -57,8 +57,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Int_t bins = 65;
 
    //Kinematics Quantities
-   TH1F *Emiss = new TH1F("Emiss","missing energy", 50, -0.1, 0.7);  //binwidth = 0.0025
-   TH1F *pm = new TH1F("pm","missing momentum", 30, -0.1, 0.5);
+   TH1F *Emiss = new TH1F("Emiss","missing energy", bins, -0.1, 0.7);  //binwidth = 0.0025
+   TH1F *pm = new TH1F("pm","missing momentum", 15, -0.1, 0.5);
    TH1F *Q_2 = new TH1F("Q_2","Q2", bins, 1.5, 5.5);
    TH1F *omega = new TH1F("omega","Energy Transfer, #omega", bins, 1.5, 3.3);
    TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", bins, 0, 2.3);
@@ -108,8 +108,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
 
    //2D Focal Plane Quantities
-   TH2F *h_xfp_vs_yfp = new TH2F("h_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -25., 25., bins, -60., 50.);
-   TH2F *e_xfp_vs_yfp = new TH2F("e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -30., 20., bins, -35., 5.);
+   TH2F *h_xfp_vs_yfp = new TH2F("h_xfp_vs_yfp", hadron_arm + " X_{fp} vs Y_{fp}", bins, -25., 25., bins, -60., 50.);
+   TH2F *e_xfp_vs_yfp = new TH2F("e_xfp_vs_yfp", electron_arm + " X_{fp} vs Y_{fp}", bins, -30., 20., bins, -35., 5.);
 
    //2D theta_nq correlations with other kinematics
    TH2F *Q2_vs_thnq = new TH2F("Q2_vs_thnq", "", bins, 0., 180., bins, 1.5, 5.5);
@@ -122,8 +122,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH2F *hyptar_vs_eyptar = new TH2F("hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", bins, -0.04, 0.03, bins, -0.05, 0.05);
    TH2F *hdelta_vs_edelta = new TH2F("hdelta_vs_edelta", "HMS vs. SHMS, #delta", bins, -15., 3, bins, -15., 15.);
 
-   TH2F *hdelta_vs_thnq = new TH2F("hdelta_vs_thnq", "", bins, 0, 180., bins, -15., 15.);
-   TH2F *edelta_vs_thnq = new TH2F("edelta_vs_thnq", "", bins, 0, 180., bins, -15., 3.);
+   TH2F *hdelta_vs_thnq = new TH2F("hdelta_vs_thnq", hadron_arm + " #delta vs. #theta_{nq} ", bins, 0, 180., bins, -15., 15.);
+   TH2F *edelta_vs_thnq = new TH2F("edelta_vs_thnq", electron_arm " #delta vs. #theta_{nq}", bins, 0, 180., bins, -15., 3.);
    
    
    /************Define Histos to APPLY CUTS*********************************/
@@ -218,17 +218,17 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t thnq_min = thnq_cent - dth;
    Double_t thnq_max = thnq_cent + dth;
 
-   //Q2_cent = 4.25 +/- 0.25 limits
-   Double_t Q2_min = 4.0;
-   Double_t Q2_max = 4.5; //4.5;
+   //Q2_cent = 4.00 +/- 0.25 limits
+   Double_t Q2_min = 3.75
+   Double_t Q2_max = 4.25 //4.5;
 
-   //x-Bjorken Limits x = 1.35 +/- 0.05
-   Double_t xbj_min = 1.30;
-   Double_t xbj_max = 1.40; //1.40;
+   //x-Bjorken Limits x = 1 +/- 0.05
+   Double_t xbj_min = 0.95;
+   Double_t xbj_max = 1.05; //1.40;
 
-   //Missing Energy, Em = 2.2 MeV (-10 MeV, 25 MeV)
-   Double_t Em_min = -10.e-3;
-   Double_t Em_max = 25.e-3;
+   //Missing Energy, Em = 2.2 MeV (-100 MeV, 100 MeV)
+   Double_t Em_min = -0.1;
+   Double_t Em_max = 0.1;
    
 
 
@@ -484,11 +484,12 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
    Double_t Yield = pm->Integral();
    cout << "Missing Momentum Integral (NO CUTS): " << Yield << endl;
-   cout << "Estimated RATE: " << Yield /( time *3600. )<< " events/sec (Hz) " << endl;
-   
+   cout << "Estimated RATE: " << Yield /( time )<< " events/hr " << endl;
+   cout << "***************" << endl;
    Double_t Yield_cut = cut_pm->Integral();
    cout << "Missing Momentum Integral: " << Yield_cut << endl;
-   cout << "Estimated RATE: " << Yield_cut /( time *3600. )<< " events/sec (Hz) " << endl;
-      outfile->Write();
+   cout << "Estimated RATE: " << Yield_cut /( time  )<< " events/hr " << endl;
+
+   outfile->Write();
 
 }
