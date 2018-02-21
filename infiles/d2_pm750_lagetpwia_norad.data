@@ -15,7 +15,7 @@
      doing_pion  =  F		!  (T = TRUE)
      doing_decay  =  F		!  1=decay ON, 0=decay OFF.
      ctau  =  780.4			!  decay length (cm)
-     extra_dbase_file = 'extra_hydrogen_rad.data' !  additional input parameters.
+     extra_dbase_file = 'extra_hydrogen_norad.data' !  additional input parameters.
 / 
  =?
  &KINEMATICS_MAIN
@@ -70,7 +70,7 @@
 / 
 
  &THEORY_CTRL
-    theory_par%model = ''               ! select a model name
+    theory_par%model = 'LAGET_DEUT'               ! select a model name
     theory_par%data_file = './'         ! directory for the data file
     theory_par%FLAGS = 10*F             ! 10 flags are available
     theory_par%parameter(1) = 0         ! 1 do fsi, 0 do pwia
