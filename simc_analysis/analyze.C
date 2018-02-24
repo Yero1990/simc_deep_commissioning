@@ -38,8 +38,37 @@ void analyze()
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
   */
+
   
+  //----LOW MISSING MOMENTUM ( 80MeV ) calibration-------
+  //PWIA = FSI
   
+  //pmiss = 80 MeV  -- PWIA
+  Ib = 40.;
+  time = 1.;
+  simc_file = "d2_pm80_lagetpwia_rad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
+
+  //pmiss = 80 MeV  --  FSI
+  Ib = 40.;
+  time = 1.;
+  simc_file = "d2_pm80_lagetfsi_rad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
+  
+  //--------------------------------------------------------
+
+  
+  //-------------HIGH MISSING MOMENTUM SETTINGS-------------
+
+  /*
   //pmiss = 580 MeV  -- PWIA
   Ib = 40.;
   time = 20.;
@@ -50,6 +79,7 @@ void analyze()
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
 
+  
   //pmiss = 580 MeV  --  FSI
   Ib = 40.;
   time = 20.;
@@ -59,8 +89,9 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-
-    
+  */
+  
+  /*
   //pmiss = 750 MeV  -- PWIA
   Ib = 40.;
   time = 42.;
@@ -80,10 +111,11 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-  
-
-
+  */
   /*
+  //---------------------------------------------------
+
+ 
 
   //Calibration run at low missing momentum
  //pmiss = 80 MeV  -- PWIA
