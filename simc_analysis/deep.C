@@ -57,26 +57,46 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t hP0 = 2.93223;       //proton arm central momentum  in GeV/c
    Double_t eP0 = 8.7000;       //electron arm central momentum
    
-   //Define fit funtion
-   TF1 *hfit = new TF1("hfit", "gaus", -0.8, 0.8);
    
-   
-   //define variables to hold fit parameter sigma
-   Double_t h_sigma;         //h_sigma = h_dP/P_central
-   Double_t h_Psigma;
+   //define variables to hold standard deviatons 
+   Double_t h_sigma;         //h_sigma = (h_deltai - h_delta) 'delta resolution'
+   Double_t h_Psigma;         //hadron arm momentum resolution
+   Double_t e_sigma;          //e_sigma = (e_deltai - e_delta) 'delta resolution'
+   Double_t e_Psigma;         //electron arm momentum resolution
    Double_t Pm_sigma;
+   Double_t Em_sigma;
    
    //variables to be filled
+   Double_t h_Pf_thrown;   //thrown final hadron momentum
+   Double_t e_kf_thrown;   //thrown final electron momentum
+   Double_t Pm_thrown;
+   Double_t Em_thrown;
+   Double_t nu_thrown;      //thrown energy transfer
+   Double_t Ep_thrown;      //final proton energy, thrown
+   Double_t En_thrown;      //final neutron energy, thrown
+   Double_t Kp_thrown;      //thrown proton kinetic energy
+   Double_t Kn_thrown;      //thrown neutron kinetic energy
+   
    Double_t h_dP;          //hms momentum resolution
    Double_t h_d_delta;    //hms delta resolution
+
+
    Double_t dPmiss;        //missing momentum resolution
+   Double_t dEmiss;        //missing energy resolution
+   
+   Double_t e_dP;         //electron arm momentum resolution
+   Double_t e_d_delta;    //electron arm delta resolution
+   
+   //histograms to store filled variables
+   TH1F * res_hdelta = new TH1F("res_hdelta", hadron_arm + " #delta_{i} - #delta", 100,  -2., 2.);   //HISTO to store (hdelta_i - hdelta)
+   TH1F * res_hP = new TH1F("res_hP", "HMS Momentum Resolution", 200, -0.1, 0.1);
+   TH1F * res_pmiss = new TH1F("res_pmiss", "Missing Momentum Resolution", 100,  -0.2, 0.2);
+   TH1F * res_emiss = new TH1F("res_Emiss", "Missing Energy Resolution", 100,  -0.2, 0.2);
+
 
    
-   
-   TH1F * hDdelta = new TH1F("hDdelta", "#delta_{i} - #delta", 100,  -2., 2.);   //HISTO to store (hdelta_i - hdelta)
-   TH1F * hDP = new TH1F("hDP", "HMS Momentum Resolution", 200, -0.1, 0.1);
-   TH1F * Dpmiss = new TH1F("Dpmiss", "Missing Momentum Resolution", 200,  -0.2, 0.2);
-   
+   TH1F * res_edelta = new TH1F("res_edelta", electron_arm + " #delta_{i} - #delta", 100,  -2., 2.);   //HISTO to store (hdelta_i - hdelta)
+   TH1F * res_ekf = new TH1F("res_ekf", "SHMS Momentum Resolution", 200, -0.1, 0.1);
 
 
    //----------------------------------------------------
@@ -87,10 +107,10 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Int_t bins = 60;
 
    //Kinematics Quantities
-   TH1F *Emiss = new TH1F("Emiss","missing energy", 50, -0.1, 0.7); 
-   TH1F *pm = new TH1F("pm","missing momentum", bins, -0.1, 0.5);     //20 MeV binwidth
-   TH1F *pm_the = new TH1F("pm_the","missing momentumn theta_e weight", 30, -0.1, 0.5);     //40 MeV binwidth
-   TH1F *pm_mc = new TH1F("pm_mc","missing momentum (weight=1)", 30, -0.1, 0.5);     //40 MeV binwidth
+   TH1F *Emiss = new TH1F("Emiss","missing energy", 32, -0.1, 0.7);    //min. bin width = 22.29 MeV  ---Set to Counts/25 MeV
+   TH1F *pm = new TH1F("pm","missing momentum", 24, -0.1, 0.5);     //min. bin width = 14.27 MeV     --Set to Counts/25 MeV
+   // TH1F *pm_the = new TH1F("pm_the","missing momentumn theta_e weight", 30, -0.1, 0.5);     //20 MeV binwidth
+   //TH1F *pm_mc = new TH1F("pm_mc","missing momentum (weight=1)", 30, -0.1, 0.5);     //20 MeV binwidth
    TH1F *Q_2 = new TH1F("Q_2","Q2", bins, 1.5, 5.5);
    TH1F *omega = new TH1F("omega","Energy Transfer, #omega", bins, 1.5, 3.3);
    TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", bins, 0, 2.3);
@@ -143,13 +163,13 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH2F *h_xfp_vs_yfp = new TH2F("h_xfp_vs_yfp", hadron_arm + " X_{fp} vs Y_{fp}", bins, -25., 25., bins, -60., 50.);
    TH2F *e_xfp_vs_yfp = new TH2F("e_xfp_vs_yfp", electron_arm + " X_{fp} vs Y_{fp}", bins, -30., 20., bins, -35., 5.);
 
-   TH2F *emiss_vs_pmiss = new TH2F("emiss_vs_pmiss", hadron_arm + " E_{miss} vs. P_{miss}", bins, -0.1, 0.5, bins, -0.1, 0.7);
+   TH2F *emiss_vs_pmiss = new TH2F("emiss_vs_pmiss", hadron_arm + " E_{miss} vs. P_{miss}", 24, -0.1, 0.5, 32, -0.1, 0.7);
 
    //2D theta_nq correlations with other kinematics
    TH2F *Q2_vs_thnq = new TH2F("Q2_vs_thnq", "", bins, 0., 180., bins, 1.5, 5.5);
    TH2F *xbj_vs_thnq = new TH2F("xbj_vs_thnq", "", bins, 0., 180., bins, 0.5, 1.5);
-   TH2F *pm_vs_thnq = new TH2F("pm_vs_thnq", "", bins, 0., 180., 30, -0.1, 0.5);
-   TH2F *Em_vs_thnq = new TH2F("Em_vs_thnq", "", bins, 0., 180., 50, -0.1, 0.7);
+   TH2F *pm_vs_thnq = new TH2F("pm_vs_thnq", "", bins, 0., 180., 24, -0.1, 0.5);
+   TH2F *Em_vs_thnq = new TH2F("Em_vs_thnq", "", bins, 0., 180., 32, -0.1, 0.7);
 
    //2D HMS v. SHMS Acceptance Correlations
    TH2F *hxptar_vs_exptar = new TH2F("hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.05, 0.05, bins, -0.1, 0.1);
@@ -163,8 +183,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    /************Define Histos to APPLY CUTS*********************************/
  
      //Kinematics Quantities
-   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", 80, -0.1, 0.7);  //binwidth = 0.0025
-   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", bins, -0.1, 0.5);
+   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", 32, -0.1, 0.7);  //binwidth = 0.0025
+   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", 24, -0.1, 0.5);
    TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", bins, 1.5, 5.5);
    TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", bins, 1.5, 3.3);
    TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", bins, 0, 2.3);
@@ -215,13 +235,13 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
    TH2F *cut_h_xfp_vs_yfp = new TH2F("cut_h_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -25., 25., bins, -60., 50.);
    TH2F *cut_e_xfp_vs_yfp = new TH2F("cut_e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -30., 20., bins, -35., 5.);
-   TH2F *cut_emiss_vs_pmiss = new TH2F("cut_emiss_vs_pmiss", " E_{miss} vs. P_{miss}", bins, -0.1, 0.5, bins, -0.1, 0.7);
+   TH2F *cut_emiss_vs_pmiss = new TH2F("cut_emiss_vs_pmiss", " E_{miss} vs. P_{miss}", 24, -0.1, 0.5, 32, -0.1, 0.7);
 
    //2D theta_nq correlations with other kinematics
    TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "", bins, 0., 180., bins, 1.5, 5.5);
    TH2F *cut_xbj_vs_thnq = new TH2F("cut_xbj_vs_thnq", "", bins, 0., 180., bins, 0.5, 1.5);
-   TH2F *cut_pm_vs_thnq = new TH2F("cut_pm_vs_thnq", "", bins, 0., 180., 30, -0.1, 0.5);
-   TH2F *cut_Em_vs_thnq = new TH2F("cut_Em_vs_thnq", "", bins, 0., 180., 50, -0.1, 0.7);
+   TH2F *cut_pm_vs_thnq = new TH2F("cut_pm_vs_thnq", "", bins, 0., 180., 24, -0.1, 0.5);
+   TH2F *cut_Em_vs_thnq = new TH2F("cut_Em_vs_thnq", "", bins, 0., 180., 32, -0.1, 0.7);
 
    //2D HMS v. SHMS Acceptance Correlations
    TH2F *cut_hxptar_vs_exptar = new TH2F("cut_hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.05, 0.05, bins, -0.1, 0.1);
@@ -239,6 +259,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t Pf;             //Final Proton Momentum 
    Double_t ki;             //Incident e- momentum
    Double_t kf;             //Final electron momentum
+   Double_t Ee;              //Electron final energy
    Double_t En;             //Neutron Energy
    Double_t Ep;             //proton Energy
    Double_t th_nq;       //Angle betweenq-vector and neutron
@@ -261,9 +282,9 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t xbj_min = 0.95;
    Double_t xbj_max = 1.05; //1.40;
 
-   //Missing Energy, Em = 2.2 MeV (-100 MeV, 100 MeV)
-   Double_t Em_min = -0.06;
-   Double_t Em_max = 0.08;
+   //Missing Energy, Em = 2.2 MeV (-60 MeV, 80 MeV)
+   Double_t Em_min = -0.06;//-0.06;
+   Double_t Em_max = 0.08; //0.08;
    
 
 
@@ -325,20 +346,41 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       Ep = sqrt(MP*MP + Pf*Pf);
       ki = sqrt(Ein*Ein - me*me);
       kf = Q2 / (4.*ki*pow(sin(theta_e/2.), 2));
+      Ee = sqrt(me*me + kf*kf);
       th_nq = acos((q - Pf*cos(theta_pq))/Pm);
       th_q = theta_pq + theta_p;
 
 
       //-------Spectrometer resolution variables-----------
       h_d_delta = h_deltai - h_delta;
-      h_dP = h_d_delta*hP0/100.;
-      dPmiss = - Pf/(Ep*Pm) * (nu + MD -Ep) * h_dP;
+      h_dP = h_d_delta*hP0/100.;         //hadron arm momentum resolution
+
+      e_d_delta = e_deltai - e_delta;
+      e_dP = e_d_delta*eP0/100.;         //electron arm momentum resolution
+
+      h_Pf_thrown = h_deltai*hP0/100. + hP0;             //thrown final hadron momentum
+      e_kf_thrown = e_deltai*eP0/100. + eP0;             //thrown final electron momentum
+      nu_thrown = Ein - e_kf_thrown;                     //thown energy transfer
+      Ep_thrown = sqrt(MP*MP + h_Pf_thrown*h_Pf_thrown);   //thrown proton final energy
+
+      Pm_thrown = sqrt( pow(nu_thrown + MD - Ep_thrown, 2) - MN*MN  );  //thrown missing momentum
+      En_thrown = sqrt( MN*MN + Pm_thrown*Pm_thrown);
+      Kp_thrown = Ep_thrown - MP;
+      Kn_thrown = En_thrown - MN;
+      Em_thrown = nu_thrown - Kp_thrown - Kn_thrown;
+
+      dPmiss = Pm_thrown - Pm;  //missing momentum resolution
+      dEmiss = (Em_thrown - Em);  //missing energy resolution
 
       //Fill variables
-      hDdelta->Fill(h_d_delta);
-      hDP->Fill(h_dP);
-      Dpmiss->Fill(dPmiss);
-      
+      res_hdelta->Fill(h_d_delta);
+      res_hP->Fill(h_dP);
+
+      res_edelta->Fill(e_d_delta);
+      res_ekf->Fill(e_dP);
+      res_pmiss->Fill(dPmiss);
+      res_emiss->Fill(dEmiss);
+ 
       //---------------------------------------------------
 
 
@@ -375,6 +417,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //can be compare to actual data
       FullWeight = (Normfac*Weight*charge_factor*e_trk_eff*h_trk_eff)/nentries;
 
+
       //-----------DEBUGGING------------------
       //cout << "Normfac: " << Normfac << endl;
       //cout << "Weight: " << Weight << endl;
@@ -388,6 +431,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //APPLY CUTS: BEGIN CUTS LOOP
       if (c_Em)
 	{
+
+	 
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
 	  cut_Emiss->Sumw2(kFALSE);
@@ -547,15 +592,22 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
    //----Spectrometer resolution calculation-----
 
-   hDdelta->Fit(hfit, "R");
-   h_sigma = hfit->GetParameter(2);
-
-   
+   //hDdelta->Fit(hfit, "R");
+   //h_sigma = hfit->GetParameter(2);
    //h_P =  h_sigma/100. * hP0 * 1000.;
 
+   //Get Standard deviation from histograms
+   h_sigma = res_hdelta->GetStdDev();
+   h_Psigma = res_hP->GetStdDev();
+
+   e_sigma = res_edelta->GetStdDev();
+   e_Psigma = res_ekf->GetStdDev();
+
+   Pm_sigma = res_pmiss->GetStdDev();
+   Em_sigma = res_emiss->GetStdDev();
 
    //Open a data file to store spec. resolution, estimated yields, rates, and statistical uncertainties
-   simc_file.ReplaceAll(".root", "_err.data");   // 5 = length( $name )
+   simc_file.ReplaceAll(".root", ".report");   // 5 = length( $name )
  
    ofstream data;
    data.open(simc_file); 
@@ -563,6 +615,15 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    
    
    data << "HMS Delta Resolution: " << h_sigma << " %" << endl;
+   data << "HMS Momentum Resolution: " << h_Psigma*1000. << " MeV" << endl;
+   data << "  " << endl;
+   data << "SHMS Delta Resolution: " << e_sigma << " %" << endl;
+   data << "SHMS Momentum Resolution: " << e_Psigma*1000. << " MeV" << endl;
+
+
+   data << "Missing Momentum Resolution: " << Pm_sigma*1000. << " MeV" << endl;
+   data << "Missing Energy Resolution: " << Em_sigma*1000. << " MeV" << endl;
+   data << "  " << endl;
    //data << "HMS Momentum Resolution " << h_dP << " MeV" << endl;
    
    //Estimate the Yield and rates for missing momentum
@@ -584,7 +645,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    data << "  " << endl;
 
      
-   data << "P_miss " << "     " <<  "content " << "     " << "pm_err " << "     " << "content_cut " << "     " <<  "cut_pm_err " << endl;
+   data << "Missing Momentum " << "     " <<  "Counts " << "     " << "Rel_err(%) " << "     " << "Counts w/cuts " << "     " <<  "Rel_err w/cuts (%) " << endl;
 
 
    //Calculate Statistical Uncertainties of missing momentum,
@@ -609,7 +670,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
        err = 1. / sqrt(content)*100.;
        cut_err = 1. / sqrt(cut_content)*100.;
        
-       data << miss_p*1000. << "     " << content << "     " << err << "    " <<  cut_content << "     " << cut_err << "    " << endl;
+       data << miss_p*1000. << "               " << content << "     " << err << "    " <<  cut_content << "     " << cut_err << "    " << endl;
        
      }
    data.close();

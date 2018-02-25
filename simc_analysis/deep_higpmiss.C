@@ -51,6 +51,60 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    //create output root file
    TFile *outfile = new TFile(ofile_name.Data(), "recreate");
 
+   //-------spectrometer resolution calculation----------
+
+   if (time == 20.)
+     {
+       Double_t hP0_580 = 2.2622;       //proton arm central momentum in GeV/c --for pmiss = 580 MeV setting
+     }
+   else if (time == 42.)
+     {
+       Double_t hP0_750 = 2.1557;       //proton arm central momentum in GeV/c --for pmiss = 750 MeV setting
+     }
+   
+   Double_t eP0 = 8.7000;       //electron arm central momentum
+   
+   
+   //define variables to hold standard deviatons 
+   Double_t h_sigma;         //h_sigma = (h_deltai - h_delta) 'delta resolution'
+   Double_t h_Psigma;         //hadron arm momentum resolution
+   Double_t e_sigma;          //e_sigma = (e_deltai - e_delta) 'delta resolution'
+   Double_t e_Psigma;         //electron arm momentum resolution
+   Double_t Pm_sigma;
+   Double_t Em_sigma;
+   
+   //variables to be filled
+   Double_t h_Pf_thrown;   //thrown final hadron momentum
+   Double_t e_kf_thrown;   //thrown final electron momentum
+   Double_t Pm_thrown;
+   Double_t Em_thrown;
+   Double_t nu_thrown;      //thrown energy transfer
+   Double_t Ep_thrown;      //final proton energy, thrown
+   Double_t En_thrown;      //final neutron energy, thrown
+   Double_t Kp_thrown;      //thrown proton kinetic energy
+   Double_t Kn_thrown;      //thrown neutron kinetic energy
+   
+   Double_t h_dP;          //hms momentum resolution
+   Double_t h_d_delta;    //hms delta resolution
+
+
+   Double_t dPmiss;        //missing momentum resolution
+   Double_t dEmiss;        //missing energy resolution
+   
+   Double_t e_dP;         //electron arm momentum resolution
+   Double_t e_d_delta;    //electron arm delta resolution
+   
+   //histograms to store filled variables
+   TH1F * res_hdelta = new TH1F("res_hdelta", hadron_arm + " #delta_{i} - #delta", 100,  -2., 2.);   //HISTO to store (hdelta_i - hdelta)
+   TH1F * res_hP = new TH1F("res_hP", "HMS Momentum Resolution", 200, -0.1, 0.1);
+   TH1F * res_pmiss = new TH1F("res_pmiss", "Missing Momentum Resolution", 100,  -0.2, 0.2);
+   TH1F * res_emiss = new TH1F("res_Emiss", "Missing Energy Resolution", 100,  -0.2, 0.2);
+   
+   TH1F * res_edelta = new TH1F("res_edelta", electron_arm + " #delta_{i} - #delta", 100,  -2., 2.);   //HISTO to store (hdelta_i - hdelta)
+   TH1F * res_ekf = new TH1F("res_ekf", "SHMS Momentum Resolution", 200, -0.1, 0.1);
+
+
+   //----------------------------------------------------
    
    
    //********* Create 1D Histograms **************
@@ -74,7 +128,6 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH1F *E_n = new TH1F("En", "Neutron Final Energy", bins, 0., 2.);
    TH1F *theta_nq = new TH1F("theta_nq", "Neutron Angle, #theta_{nq}", bins, 0., 80.);
    TH1F *theta_q = new TH1F("theta_q", "q-vector Angle, #theta_{q}", bins, 40, 100.);
-      pm->Sumw2();
 
    //Target Reconstruction Variables
    TH1F *x_tar = new TH1F("x_tar", "x_Target", bins, -0.25, 0.25);
@@ -209,7 +262,9 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t Pf;             //Final Proton Momentum 
    Double_t ki;             //Incident e- momentum
    Double_t kf;             //Final electron momentum
+   Double_t Ee;              //Electron final energy
    Double_t En;             //Neutron Energy
+   Double_t Ep;             //proton Energy
    Double_t th_nq;       //Angle betweenq-vector and neutron
    Double_t th_q;        //Angle between q-vector and beamline (+z axis --lab)
 
@@ -291,10 +346,58 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       X = Q2 / (2.*MP*nu);
       En = sqrt(MN*MN + Pm*Pm);
       Pf = sqrt(pow(nu+MD-En,2) - MP*MP);
+      Ep = sqrt(MP*MP + Pf*Pf);
       ki = sqrt(Ein*Ein - me*me);
       kf = Q2 / (4.*ki*pow(sin(theta_e/2.), 2));
+      Ee = sqrt(me*me + kf*kf);
       th_nq = acos((q - Pf*cos(theta_pq))/Pm);
       th_q = theta_pq + theta_p;
+
+      
+ //-------Spectrometer resolution variables-----------
+      h_d_delta = h_deltai - h_delta;
+      e_d_delta = e_deltai - e_delta;
+
+      
+      if (time == 20.)
+	{
+	  h_dP = h_d_delta*hP0_580/100.;         //hadron arm momentum resolution
+	  e_dP = e_d_delta*eP0/100.;         //electron arm momentum resolution
+	  
+	  h_Pf_thrown = h_deltai*hP0_580/100. + hP0_580;             //thrown final hadron momentum
+	  e_kf_thrown = e_deltai*eP0/100. + eP0;             //thrown final electron momentum
+	}
+      else if (time == 42.)
+	{
+	  h_dP = h_d_delta*hP0_750/100.;         //hadron arm momentum resolution
+	  e_dP = e_d_delta*eP0/100.;         //electron arm momentum resolution
+	  
+	  h_Pf_thrown = h_deltai*hP0_750/100. + hP0_750;             //thrown final hadron momentum
+	  e_kf_thrown = e_deltai*eP0/100. + eP0;             //thrown final electron momentum
+
+	}
+
+      nu_thrown = Ein - e_kf_thrown;                     //thown energy transfer
+      Ep_thrown = sqrt(MP*MP + h_Pf_thrown*h_Pf_thrown);   //thrown proton final energy
+
+      Pm_thrown = sqrt( pow(nu_thrown + MD - Ep_thrown, 2) - MN*MN  );  //thrown missing momentum
+      En_thrown = sqrt( MN*MN + Pm_thrown*Pm_thrown);
+      Kp_thrown = Ep_thrown - MP;
+      Kn_thrown = En_thrown - MN;
+      Em_thrown = nu_thrown - Kp_thrown - Kn_thrown;
+
+      dPmiss = Pm_thrown - Pm;  //missing momentum resolution
+      dEmiss = (Em_thrown - Em);  //missing energy resolution
+
+      //Fill variables
+      res_hdelta->Fill(h_d_delta);
+      res_hP->Fill(h_dP);
+
+      res_edelta->Fill(e_d_delta);
+      res_ekf->Fill(e_dP);
+      res_pmiss->Fill(dPmiss);
+      res_emiss->Fill(dEmiss);
+      
       //---------------------------------------------------
 
 
@@ -346,7 +449,11 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 	{
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
+	  cut_Emiss->Sumw2(kFALSE);
+		  
 	  cut_pm->Fill(Pm, FullWeight);
+	  cut_pm->Sumw2(kFALSE);
+	  
 	  cut_Q_2->Fill(Q2, FullWeight);
 	  cut_omega->Fill(nu, FullWeight);
 	  cut_W_inv->Fill(W, FullWeight);
@@ -418,7 +525,11 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
       //Kinematics
       Emiss->Fill(Em, FullWeight);
+      Emiss->Sumw2(kFALSE);         //Set error calculated by weight false (use sqrt(bin_content) by default.)
+
       pm->Fill(Pm, FullWeight);
+      pm->Sumw2(kFALSE);
+
       Q_2->Fill(Q2, FullWeight);
       omega->Fill(nu, FullWeight);
       W_inv->Fill(W, FullWeight);
@@ -488,13 +599,90 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       // if (Cut(ientry) < 0) continue;
    }
 
-   Double_t Yield = pm->Integral();
-   cout << "Missing Momentum Integral (NO CUTS): " << Yield << endl;
-   cout << "Estimated RATE: " << Yield /( time )<< " events/hr " << endl;
-   cout << "*******************" << endl;
-   Double_t Yield_cut = cut_pm->Integral();
-   cout << "Missing Momentum Integral (Em CUTS): " << Yield_cut << endl;
-   cout << "Estimated RATE: " << Yield_cut /( time  )<< " events/hr " << endl;
+ //----Spectrometer resolution calculation-----
+
+   //hDdelta->Fit(hfit, "R");
+   //h_sigma = hfit->GetParameter(2);
+   //h_P =  h_sigma/100. * hP0 * 1000.;
+
+   //Get Standard deviation from histograms
+   h_sigma = res_hdelta->GetStdDev();
+   h_Psigma = res_hP->GetStdDev();
+
+   e_sigma = res_edelta->GetStdDev();
+   e_Psigma = res_ekf->GetStdDev();
+
+   Pm_sigma = res_pmiss->GetStdDev();
+   Em_sigma = res_emiss->GetStdDev();
+
+   //Open a data file to store spec. resolution, estimated yields, rates, and statistical uncertainties
+   simc_file.ReplaceAll(".root", ".report");   // 5 = length( $name )
+ 
+   ofstream data;
+   data.open(simc_file); 
+
+   
+   
+   data << "HMS Delta Resolution: " << h_sigma << " %" << endl;
+   data << "HMS Momentum Resolution: " << h_Psigma*1000. << " MeV" << endl;
+   data << "  " << endl;
+   data << "SHMS Delta Resolution: " << e_sigma << " %" << endl;
+   data << "SHMS Momentum Resolution: " << e_Psigma*1000. << " MeV" << endl;
+
+
+   data << "Missing Momentum Resolution: " << Pm_sigma*1000. << " MeV" << endl;
+   data << "Missing Energy Resolution: " << Em_sigma*1000. << " MeV" << endl;
+   data << "  " << endl;
+   //data << "HMS Momentum Resolution " << h_dP << " MeV" << endl;
+   
+   //Estimate the Yield and rates for missing momentum
+   Double_t Yield;
+   Double_t Yield_cut;
+   Double_t Rates;
+   Double_t Rates_cut;
+
+   Yield = pm->Integral();
+   Yield_cut = cut_pm->Integral();
+   Rates = Yield /( time );
+   Rates_cut = Yield_cut /( time  );
+
+   data << "Yield:     " << Yield << endl;
+   data << "Yield w/ Cuts: " << Yield_cut << endl;
+   data << "   " << endl;
+   data << "Rate: " << Rates << " / hr" << endl;
+   data << "Rate /w Cuts: " << Rates_cut << " / hr" << endl;
+   data << "  " << endl;
+
+     
+   data << "Missing Momentum " << "               " <<  "Counts " << "     " << "Rel_err(%) " << "     " << "Counts w/cuts " << "     " <<  "Rel_err w/cuts (%) " << endl;
+
+
+   //Calculate Statistical Uncertainties of missing momentum,
+
+
+   Double_t miss_p;   //missing momentum
+   Int_t bin;   //bin to store bin corresponding to x-value of histo
+   Int_t content;    //store bin content
+   Int_t cut_content;     //store bin content for histos with a cut
+   Double_t err;    //store statistical error (relative error 1/sqrt(N)) of bin
+   Double_t cut_err;    // store error of histogram with a cut
+
+   
+   for(miss_p = 0.01; miss_p < 0.210; miss_p = miss_p + 0.01)
+     {
+
+       bin = pm->GetXaxis()->FindBin(miss_p);
+
+       content = pm->GetBinContent(bin);
+       cut_content = cut_pm->GetBinContent(bin);
+       
+       err = 1. / sqrt(content)*100.;
+       cut_err = 1. / sqrt(cut_content)*100.;
+       
+       data << miss_p*1000. << "     " << content << "     " << err << "    " <<  cut_content << "     " << cut_err << "    " << endl;
+       
+     }
+   data.close();
 
    outfile->Write();
 
