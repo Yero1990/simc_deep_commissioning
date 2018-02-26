@@ -1,4 +1,4 @@
-//Analysis for HMS/SHMS coincidence D(e,e'p)n, High Missing Momentum Setting (580, 750) MeV
+//Analysis for HMS/SHMS coincidence D(e,e'p)n --Low Missing Momentum Setting (80 MeV)
 
 
 #define deep_cxx
@@ -6,6 +6,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
+
 void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 {
 //   In a ROOT session, you can do:
@@ -50,12 +51,10 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    //create output root file
    TFile *outfile = new TFile(ofile_name.Data(), "recreate");
 
+
    //-------spectrometer resolution calculation----------
 
-
-   Double_t hP0_580 = 2.2622;       //proton arm central momentum in GeV/c --for pmiss = 580 MeV setting
-   Double_t hP0_750 = 2.1557;       //proton arm central momentum in GeV/c --for pmiss = 750 MeV setting
-   
+   Double_t hP0 = 2.93223;       //proton arm central momentum  in GeV/c
    Double_t eP0 = 8.7000;       //electron arm central momentum
    
    
@@ -93,6 +92,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH1F * res_hP = new TH1F("res_hP", "HMS Momentum Resolution", 200, -0.1, 0.1);
    TH1F * res_pmiss = new TH1F("res_pmiss", "Missing Momentum Resolution", 100,  -0.2, 0.2);
    TH1F * res_emiss = new TH1F("res_Emiss", "Missing Energy Resolution", 100,  -0.2, 0.2);
+
+
    
    TH1F * res_edelta = new TH1F("res_edelta", electron_arm + " #delta_{i} - #delta", 100,  -2., 2.);   //HISTO to store (hdelta_i - hdelta)
    TH1F * res_ekf = new TH1F("res_ekf", "SHMS Momentum Resolution", 200, -0.1, 0.1);
@@ -101,28 +102,31 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    //----------------------------------------------------
    
    
+   
    //********* Create 1D Histograms **************
-   Int_t bins = 65;
+   Int_t bins = 60;
 
    //Kinematics Quantities
-   TH1F *Emiss = new TH1F("Emiss","missing energy", 30, -0.1, 0.5);  //MIN binwidth = 0.010 GeV  --Set to 20 MeV
-   TH1F *pm = new TH1F("pm","missing momentum", 104, 0.0, 2.6);      //MIN binwidth = 0.020 GeV --Set to 25 MeV
-   TH1F *Q_2 = new TH1F("Q_2","Q2", bins, 2., 5.5);
-   TH1F *omega = new TH1F("omega","Energy Transfer, #omega", bins, 0., 4.);
-   TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", bins, -1.5, 2.3);
+   TH1F *Emiss = new TH1F("Emiss","missing energy", 32, -0.1, 0.7);    //min. bin width = 22.29 MeV  ---Set to Counts/25 MeV
+   TH1F *pm = new TH1F("pm","missing momentum", 24, -0.1, 0.5);     //min. bin width = 14.27 MeV     --Set to Counts/25 MeV
+   // TH1F *pm_the = new TH1F("pm_the","missing momentumn theta_e weight", 30, -0.1, 0.5);     //20 MeV binwidth
+   //TH1F *pm_mc = new TH1F("pm_mc","missing momentum (weight=1)", 30, -0.1, 0.5);     //20 MeV binwidth
+   TH1F *Q_2 = new TH1F("Q_2","Q2", bins, 1.5, 5.5);
+   TH1F *omega = new TH1F("omega","Energy Transfer, #omega", bins, 1.5, 3.3);
+   TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", bins, 0, 2.3);
    TH1F *theta_elec = new TH1F("theta_elec", "Electron Scatt. Angle", bins, 8., 15.);
-   TH1F *theta_prot = new TH1F("theta_prot", "Proton Scatt. Angle", bins, 35., 65.);
+   TH1F *theta_prot = new TH1F("theta_prot", "Proton Scatt. Angle", bins, 35., 45.);
 
    //Additional Kinematics Variables
    TH1F *W_2 = new TH1F("W2", "Invariant Mass W2", bins, 0, 2.3);
-   TH1F *xbj = new TH1F("xbj", "x-Bjorken", bins, 0.0, 2.0);
-   TH1F *P_f = new TH1F("P_f", "Final Proton Momentum", bins, 0., 3.);
+   TH1F *xbj = new TH1F("xbj", "x-Bjorken", bins, 0.5, 1.5);
+   TH1F *P_f = new TH1F("P_f", "Final Proton Momentum", bins, 2., 3.5);
    TH1F *k_i = new TH1F("ki", "Initial e^{-} Momentum", bins, 8., 12.);
    TH1F *k_f = new TH1F("kf", "Final e^{-} Momentum", bins, 7., 9.5);
    TH1F *E_n = new TH1F("En", "Neutron Final Energy", bins, 0., 2.);
-   TH1F *theta_nq = new TH1F("theta_nq", "Neutron Angle, #theta_{nq}", bins, 0., 80.);
-   TH1F *theta_q = new TH1F("theta_q", "q-vector Angle, #theta_{q}", bins, 40, 100.);
-
+   TH1F *theta_nq = new TH1F("theta_nq", "Neutron Angle, #theta_{nq}", bins, 0., 180.);
+   TH1F *theta_q = new TH1F("theta_q", "q-vector Angle, #theta_{q}", bins, 0, 120.);
+   
    //Target Reconstruction Variables
    TH1F *x_tar = new TH1F("x_tar", "x_Target", bins, -0.25, 0.25);
    TH1F *y_tar = new TH1F("y_tar", "y_Target", bins, -0.25, 0.25);
@@ -135,67 +139,67 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH1F *hdelta = new TH1F("hdelta", hadron_arm + " Momentum Acceptance, #delta", bins, -15., 15. );
 
    //Hadron arm Focal Plane Quantities
-   TH1F *hxfp = new TH1F("hxfp", hadron_arm + " X_{fp}", bins, -60., 60.);
-   TH1F *hyfp = new TH1F("hyfp", hadron_arm + " Y_{fp}", bins, -40., 40.);
-   TH1F *hxpfp = new TH1F("hxpfp", hadron_arm + " X'_{fp}", bins, -0.08, 0.08 );
-   TH1F *hypfp = new TH1F("hypfp", hadron_arm + " Y'_{fp}", bins, -0.04, 0.04);
+   TH1F *hxfp = new TH1F("hxfp", hadron_arm + " X_{fp}", bins, -60., 50.);
+   TH1F *hyfp = new TH1F("hyfp", hadron_arm + " Y_{fp}", bins, -25., 25.);
+   TH1F *hxpfp = new TH1F("hxpfp", hadron_arm + " X'_{fp}", bins, -0.07, 0.06 );
+   TH1F *hypfp = new TH1F("hypfp", hadron_arm + " Y'_{fp}", bins, -0.03, 0.03);
 
       
    //Electron Arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
-   TH1F *eytar = new TH1F("eytar", electron_arm + " Y_{tar}", bins, -3., 3.);
-   TH1F *exptar = new TH1F("exptar", electron_arm + " X'_{tar}", bins, -0.06, 0.06);
-   TH1F *eyptar = new TH1F("eyptar", electron_arm + " Y'_{tar}", bins, -0.04, 0.04);
-   TH1F *edelta = new TH1F("edelta", electron_arm + " Momentum Acceptance, #delta", bins, -15., 8. );
+   TH1F *eytar = new TH1F("eytar", electron_arm + " Y_{tar}", bins, -2., 2.);
+   TH1F *exptar = new TH1F("exptar", electron_arm + " X'_{tar}", bins, -0.05, 0.05);
+   TH1F *eyptar = new TH1F("eyptar", electron_arm + " Y'_{tar}", bins, -0.04, 0.03);
+   TH1F *edelta = new TH1F("edelta", electron_arm + " Momentum Acceptance, #delta", bins, -15., 3. );
 
    //Electron Arm Focal Plane Quantities
-   TH1F *exfp = new TH1F("exfp", electron_arm + " X_{fp}", bins, -40., 20.);
-   TH1F *eyfp = new TH1F("eyfp", electron_arm + " Y_{fp}", bins, -20., 30.);
-   TH1F *expfp = new TH1F("expfp", electron_arm + " X'_{fp}", bins, -0.1, 0.06);
-   TH1F *eypfp = new TH1F("eypfp", electron_arm + " Y'_{fp}", bins, -0.04, 0.06);
+   TH1F *exfp = new TH1F("exfp", electron_arm + " X_{fp}", bins, -35., 5.);
+   TH1F *eyfp = new TH1F("eyfp", electron_arm + " Y_{fp}", bins, -20., 20.);
+   TH1F *expfp = new TH1F("expfp", electron_arm + " X'_{fp}", bins, -0.08, 0.04);
+   TH1F *eypfp = new TH1F("eypfp", electron_arm + " Y'_{fp}", bins, -0.04, 0.04);
 
-   TH2F *emiss_vs_pmiss = new TH2F("emiss_vs_pmiss", " E_{miss} vs. P_{miss}", 104, 0.0, 2.6, 100, -0.1, 0.5);
 
 
    //2D Focal Plane Quantities
-   TH2F *h_xfp_vs_yfp = new TH2F("h_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -40., 40., bins, -60., 60.);
-   TH2F *e_xfp_vs_yfp = new TH2F("e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -20., 30., bins, -40., 20.);
+   TH2F *h_xfp_vs_yfp = new TH2F("h_xfp_vs_yfp", hadron_arm + " X_{fp} vs Y_{fp}", bins, -25., 25., bins, -60., 50.);
+   TH2F *e_xfp_vs_yfp = new TH2F("e_xfp_vs_yfp", electron_arm + " X_{fp} vs Y_{fp}", bins, -30., 20., bins, -35., 5.);
+
+   TH2F *emiss_vs_pmiss = new TH2F("emiss_vs_pmiss", hadron_arm + " E_{miss} vs. P_{miss}", 24, -0.1, 0.5, 32, -0.1, 0.7);
 
    //2D theta_nq correlations with other kinematics
-   TH2F *Q2_vs_thnq = new TH2F("Q2_vs_thnq", "", bins, 0., 80., bins, 2., 5.5);
-   TH2F *xbj_vs_thnq = new TH2F("xbj_vs_thnq", "", bins, 0., 80., bins, 0., 2.0);
-   TH2F *pm_vs_thnq = new TH2F("pm_vs_thnq", "", bins, 0., 80., 104, 0., 2.6);
-   TH2F *Em_vs_thnq = new TH2F("Em_vs_thnq", "", bins, 0., 80., 60, -0.1, 0.5);
+   TH2F *Q2_vs_thnq = new TH2F("Q2_vs_thnq", "", bins, 0., 180., bins, 1.5, 5.5);
+   TH2F *xbj_vs_thnq = new TH2F("xbj_vs_thnq", "", bins, 0., 180., bins, 0.5, 1.5);
+   TH2F *pm_vs_thnq = new TH2F("pm_vs_thnq", "", bins, 0., 180., 24, -0.1, 0.5);
+   TH2F *Em_vs_thnq = new TH2F("Em_vs_thnq", "", bins, 0., 180., 32, -0.1, 0.7);
 
    //2D HMS v. SHMS Acceptance Correlations
-   TH2F *hxptar_vs_exptar = new TH2F("hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.06, 0.06, bins, -0.1, 0.1);
-   TH2F *hyptar_vs_eyptar = new TH2F("hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", bins, -0.04, 0.04, bins, -0.05, 0.05);
-   TH2F *hdelta_vs_edelta = new TH2F("hdelta_vs_edelta", "HMS vs. SHMS, #delta", bins, -15., 8, bins, -15., 15.);
+   TH2F *hxptar_vs_exptar = new TH2F("hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.05, 0.05, bins, -0.1, 0.1);
+   TH2F *hyptar_vs_eyptar = new TH2F("hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", bins, -0.04, 0.03, bins, -0.05, 0.05);
+   TH2F *hdelta_vs_edelta = new TH2F("hdelta_vs_edelta", "HMS vs. SHMS, #delta", bins, -15., 3, bins, -15., 15.);
 
-   TH2F *hdelta_vs_thnq = new TH2F("hdelta_vs_thnq", "", bins, 0, 80., bins, -15., 15.);
-   TH2F *edelta_vs_thnq = new TH2F("edelta_vs_thnq", "", bins, 0, 80., bins, -15., 8.);
+   TH2F *hdelta_vs_thnq = new TH2F("hdelta_vs_thnq", hadron_arm + " #delta vs. #theta_{nq} ", bins, 0, 180., bins, -15., 15.);
+   TH2F *edelta_vs_thnq = new TH2F("edelta_vs_thnq", electron_arm + " #delta vs. #theta_{nq}", bins, 0, 180., bins, -15., 3.);
    
    
    /************Define Histos to APPLY CUTS*********************************/
  
      //Kinematics Quantities
-   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", 30, -0.1, 0.5);  //binwidth = 0.0025
-   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", 104, 0.0, 2.6);
-   TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", bins, 2., 5.5);
-   TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", bins, 0., 4.);
-   TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", bins, -1.5, 2.3);
+   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", 32, -0.1, 0.7);  //binwidth = 0.0025
+   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", 24, -0.1, 0.5);
+   TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", bins, 1.5, 5.5);
+   TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", bins, 1.5, 3.3);
+   TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", bins, 0, 2.3);
    TH1F *cut_theta_elec = new TH1F("cut_theta_elec", "Electron Scatt. Angle", bins, 8, 15);
-   TH1F *cut_theta_prot = new TH1F("cut_theta_prot", "Proton Scatt. Angle", bins, 35, 65);
-
-
+   TH1F *cut_theta_prot = new TH1F("cut_theta_prot", "Proton Scatt. Angle", bins, 35, 45);
+   
    //Additional Kinematics Variables
    TH1F *cut_W_2 = new TH1F("cut_W2", "Invariant Mass W2", bins, 0, 2.3);
-   TH1F *cut_xbj = new TH1F("cut_xbj", "x-Bjorken", bins, 0.0, 2.0);
-   TH1F *cut_P_f = new TH1F("cut_P_f", "Final Proton Momentum", bins, 0., 3.);
+   TH1F *cut_xbj = new TH1F("cut_xbj", "x-Bjorken", bins, 0.5, 1.5);
+   TH1F *cut_P_f = new TH1F("cut_P_f", "Final Proton Momentum", bins, 2., 3.5);
    TH1F *cut_k_i = new TH1F("cut_ki", "Initial e^{-} Momentum", bins, 8., 12.);
    TH1F *cut_k_f = new TH1F("cut_kf", "Final e^{-} Momentum", bins, 7., 9.5);
-   TH1F *cut_E_n = new TH1F("cut_En", "Neutron Final Energy", bins, 0., 2.);
-   TH1F *cut_theta_nq = new TH1F("cut_theta_nq", "Neutron Angle, #theta_{nq}", bins, 0., 80.);
-   TH1F *cut_theta_q = new TH1F("cut_theta_q", "q-vector Angle, #theta_{q}", bins, 40, 100.);
+   TH1F *cut_E_n = new TH1F("cut)_En", "Neutron Final Energy", bins, 0., 2.);
+   TH1F *cut_theta_nq = new TH1F("cut_theta_nq", "Neutron Angle, #theta_{nq}", bins, 0., 180.);
+   TH1F *cut_theta_q = new TH1F("cut_theta_q", "q-vector Angle, #theta_{q}", bins, 0, 120.);
    
    
    //Target Reconstruction Variables
@@ -210,41 +214,41 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH1F *cut_hdelta = new TH1F("cut_hdelta", hadron_arm + " Momentum Acceptance, #delta", bins, -15., 15.);
 
    //Hadron arm Focal Plane Quantities
-   TH1F *cut_hxfp = new TH1F("cut_hxfp", hadron_arm + " X_{fp}", bins, -60., 60.);
-   TH1F *cut_hyfp = new TH1F("cut_hyfp", hadron_arm + " Y_{fp}", bins, -40., 40.);
-   TH1F *cut_hxpfp = new TH1F("cut_hxpfp", hadron_arm + " X'_{fp}", bins, -0.08, 0.08 );
-   TH1F *cut_hypfp = new TH1F("cut_hypfp", hadron_arm + " Y'_{fp}", bins, -0.04, 0.04);
+   TH1F *cut_hxfp = new TH1F("cut_hxfp", hadron_arm + " X_{fp}", bins, -60., 50.);
+   TH1F *cut_hyfp = new TH1F("cut_hyfp", hadron_arm + " Y_{fp}", bins, -25., 25.);
+   TH1F *cut_hxpfp = new TH1F("cut_hxpfp", hadron_arm + " X'_{fp}", bins, -0.07, 0.06 );
+   TH1F *cut_hypfp = new TH1F("cut_hypfp", hadron_arm + " Y'_{fp}", bins, -0.03, 0.03);
 
       
    //Electron Arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
-   TH1F *cut_eytar = new TH1F("cut_eytar", electron_arm + " Y_{tar}", bins, -3., 3.);
-   TH1F *cut_exptar = new TH1F("cut_exptar", electron_arm + " X'_{tar}", bins, -0.06, 0.06);
-   TH1F *cut_eyptar = new TH1F("cut_eyptar", electron_arm + " Y'_{tar}", bins, -0.04, 0.04);
-   TH1F *cut_edelta = new TH1F("cut_edelta", electron_arm + " Momentum Acceptance, #delta", bins, -15., 8.);
+   TH1F *cut_eytar = new TH1F("cut_eytar", electron_arm + " Y_{tar}", bins, -2., 2.);
+   TH1F *cut_exptar = new TH1F("cut_exptar", electron_arm + " X'_{tar}", bins, -0.05, 0.05);
+   TH1F *cut_eyptar = new TH1F("cut_eyptar", electron_arm + " Y'_{tar}", bins, -0.04, 0.03);
+   TH1F *cut_edelta = new TH1F("cut_edelta", electron_arm + " Momentum Acceptance, #delta", bins, -15., 3.);
 
    //Electron Arm Focal Plane Quantities
-   TH1F *cut_exfp = new TH1F("cut_exfp", electron_arm + " X_{fp}", bins, -40., 20.);
-   TH1F *cut_eyfp = new TH1F("cut_eyfp", electron_arm + " Y_{fp}", bins, -20., 30.);
-   TH1F *cut_expfp = new TH1F("cut_expfp", electron_arm + " X'_{fp}", bins, -0.1, 0.06);
-   TH1F *cut_eypfp = new TH1F("cut_eypfp", electron_arm + " Y'_{fp}", bins, -0.04, 0.06);
+   TH1F *cut_exfp = new TH1F("cut_exfp", electron_arm + " X_{fp}", bins, -35., 5.);
+   TH1F *cut_eyfp = new TH1F("cut_eyfp", electron_arm + " Y_{fp}", bins, -20., 20.);
+   TH1F *cut_expfp = new TH1F("cut_expfp", electron_arm + " X'_{fp}", bins, -0.08, 0.04);
+   TH1F *cut_eypfp = new TH1F("cut_eypfp", electron_arm + " Y'_{fp}", bins, -0.04, 0.04);
 
 
-   TH2F *cut_h_xfp_vs_yfp = new TH2F("cut_h_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -40., 40., bins, -60., 60.);
-   TH2F *cut_e_xfp_vs_yfp = new TH2F("cut_e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -20., 30., bins, -40., 20.);
-
-   TH2F *cut_emiss_vs_pmiss = new TH2F("cut_emiss_vs_pmiss", " E_{miss} vs. P_{miss}", 104, 0.0, 2.6, 100, -0.1, 0.5);
+   TH2F *cut_h_xfp_vs_yfp = new TH2F("cut_h_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -25., 25., bins, -60., 50.);
+   TH2F *cut_e_xfp_vs_yfp = new TH2F("cut_e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", bins, -30., 20., bins, -35., 5.);
+   TH2F *cut_emiss_vs_pmiss = new TH2F("cut_emiss_vs_pmiss", " E_{miss} vs. P_{miss}", 24, -0.1, 0.5, 32, -0.1, 0.7);
 
    //2D theta_nq correlations with other kinematics
-   TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "", bins, 0., 80., bins, 2.0, 5.5);
-   TH2F *cut_xbj_vs_thnq = new TH2F("cut_xbj_vs_thnq", "", bins, 0., 80., bins, 0.5, 1.5);
-   TH2F *cut_pm_vs_thnq = new TH2F("cut_pm_vs_thnq", "", bins, 0., 80., 104, 0.0, 2.6);
-   TH2F *cut_Em_vs_thnq = new TH2F("cut_Em_vs_thnq", "", bins, 0., 80., 60, -0.1, 0.5);
+   TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "", bins, 0., 180., bins, 1.5, 5.5);
+   TH2F *cut_xbj_vs_thnq = new TH2F("cut_xbj_vs_thnq", "", bins, 0., 180., bins, 0.5, 1.5);
+   TH2F *cut_pm_vs_thnq = new TH2F("cut_pm_vs_thnq", "", bins, 0., 180., 24, -0.1, 0.5);
+   TH2F *cut_Em_vs_thnq = new TH2F("cut_Em_vs_thnq", "", bins, 0., 180., 32, -0.1, 0.7);
 
    //2D HMS v. SHMS Acceptance Correlations
-   TH2F *cut_hxptar_vs_exptar = new TH2F("cut_hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.06, 0.06, bins, -0.1, 0.1);
-   TH2F *cut_hyptar_vs_eyptar = new TH2F("cut_hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", bins, -0.04, 0.04, bins, -0.05, 0.05);
-   TH2F *cut_hdelta_vs_edelta = new TH2F("cut_hdelta_vs_edelta", "HMS vs. SHMS, #delta", bins, -15., 8, bins, -15., 15.);
+   TH2F *cut_hxptar_vs_exptar = new TH2F("cut_hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", bins, -0.05, 0.05, bins, -0.1, 0.1);
+   TH2F *cut_hyptar_vs_eyptar = new TH2F("cut_hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", bins, -0.04, 0.03, bins, -0.05, 0.05);
+   TH2F *cut_hdelta_vs_edelta = new TH2F("cut_hdelta_vs_edelta", "HMS vs. SHMS, #delta", bins, -15., 3, bins, -15., 15.);
 
+   
    
    //---------------------------------------------------------
 
@@ -270,17 +274,17 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t thnq_min = thnq_cent - dth;
    Double_t thnq_max = thnq_cent + dth;
 
-   //Q2_cent = 4.25 +/- 0.25 limits
-   Double_t Q2_min = 4.0;
-   Double_t Q2_max = 5.0; //4.5;
+   //Q2_cent = 4.00 +/- 0.25 limits
+   Double_t Q2_min = 3.75;
+   Double_t Q2_max = 4.25; //4.5;
 
-   //x-Bjorken Limits x = 1.35 +/- 0.05
-   Double_t xbj_min = 1.30;
-   Double_t xbj_max = 1.70; //1.40;
+   //x-Bjorken Limits x = 1 +/- 0.05
+   Double_t xbj_min = 0.95;
+   Double_t xbj_max = 1.05; //1.40;
 
-   //Missing Energy, Em = 2.2 MeV (-10 MeV, 25 MeV)
-   Double_t Em_min = -0.04;
-   Double_t Em_max = 0.08;
+   //Missing Energy, Em = 2.2 MeV (-60 MeV, 80 MeV)
+   Double_t Em_min = -0.06;//-0.06;
+   Double_t Em_max = 0.08; //0.08;
    
 
 
@@ -346,30 +350,16 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       th_nq = acos((q - Pf*cos(theta_pq))/Pm);
       th_q = theta_pq + theta_p;
 
-      
- //-------Spectrometer resolution variables-----------
+
+      //-------Spectrometer resolution variables-----------
       h_d_delta = h_deltai - h_delta;
+      h_dP = h_d_delta*hP0/100.;         //hadron arm momentum resolution
+
       e_d_delta = e_deltai - e_delta;
+      e_dP = e_d_delta*eP0/100.;         //electron arm momentum resolution
 
-      
-      if (time == 20.)
-	{
-	  h_dP = h_d_delta*hP0_580/100.;         //hadron arm momentum resolution
-	  e_dP = e_d_delta*eP0/100.;         //electron arm momentum resolution
-	  
-	  h_Pf_thrown = h_deltai*hP0_580/100. + hP0_580;             //thrown final hadron momentum
-	  e_kf_thrown = e_deltai*eP0/100. + eP0;             //thrown final electron momentum
-	}
-      else if (time == 42.)
-	{
-	  h_dP = h_d_delta*hP0_750/100.;         //hadron arm momentum resolution
-	  e_dP = e_d_delta*eP0/100.;         //electron arm momentum resolution
-	  
-	  h_Pf_thrown = h_deltai*hP0_750/100. + hP0_750;             //thrown final hadron momentum
-	  e_kf_thrown = e_deltai*eP0/100. + eP0;             //thrown final electron momentum
-
-	}
-
+      h_Pf_thrown = h_deltai*hP0/100. + hP0;             //thrown final hadron momentum
+      e_kf_thrown = e_deltai*eP0/100. + eP0;             //thrown final electron momentum
       nu_thrown = Ein - e_kf_thrown;                     //thown energy transfer
       Ep_thrown = sqrt(MP*MP + h_Pf_thrown*h_Pf_thrown);   //thrown proton final energy
 
@@ -390,7 +380,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       res_ekf->Fill(e_dP);
       res_pmiss->Fill(dPmiss);
       res_emiss->Fill(dEmiss);
-      
+ 
       //---------------------------------------------------
 
 
@@ -403,18 +393,18 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //-----------Define Acceptance Limit Cuts------------
       
       // e-arm
-      Bool_t c_e_xptar = fabs(e_xptar) <= 0.05;
-      Bool_t c_e_yptar = fabs(e_yptar) <= 0.025;
+      Bool_t c_e_xptar = fabs(e_xptar) <= 0.03;
+      Bool_t c_e_yptar = e_yptar>=-0.028&&e_yptar<=0.015;
       Bool_t c_e_solid = c_e_xptar * c_e_yptar;
       
       // p-arm
-      Bool_t c_p_xptar = fabs(h_xptar) <= 0.06;
-      Bool_t c_p_yptar = fabs(h_yptar) <= 0.035;
+      Bool_t c_p_xptar = fabs(h_xptar) <= 0.07;
+      Bool_t c_p_yptar = fabs(h_yptar) <= 0.032;
       Bool_t c_p_solid = c_p_xptar * c_p_yptar;
       
       // momentum acceptance
-      Bool_t c_e_delta = (-8 <= e_delta) && ( e_delta <= 4);
-      Bool_t c_p_delta = (-10 <= h_delta) && ( h_delta <= 12);
+      Bool_t c_e_delta = (-5 <= e_delta) && ( e_delta <= 1);
+      Bool_t c_p_delta = (-13 <= h_delta) && ( h_delta <=5 );
       
       // acceptance
       Bool_t c_accept = c_e_solid * c_p_solid * c_e_delta * c_p_delta;
@@ -426,6 +416,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //The events must be weighted properly, so that they represent true Yield, and
       //can be compare to actual data
       FullWeight = (Normfac*Weight*charge_factor*e_trk_eff*h_trk_eff)/nentries;
+
 
       //-----------DEBUGGING------------------
       //cout << "Normfac: " << Normfac << endl;
@@ -440,10 +431,12 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //APPLY CUTS: BEGIN CUTS LOOP
       if (c_Em)
 	{
+
+	 
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
 	  cut_Emiss->Sumw2(kFALSE);
-		  
+	  
 	  cut_pm->Fill(Pm, FullWeight);
 	  cut_pm->Sumw2(kFALSE);
 	  
@@ -453,9 +446,6 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 	  cut_theta_elec->Fill(theta_e/dtr, FullWeight);
 	  cut_theta_prot->Fill(theta_p/dtr, FullWeight);
 
-	  cut_Q_2->Sumw2(kFALSE);
-	  cut_omega->Sumw2(kFALSE);
-	  
 
 	  //Additional Kinematics Variables
 	  cut_W_2->Fill(W2, FullWeight);
@@ -466,9 +456,6 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 	  cut_E_n->Fill(En, FullWeight); 
 	  cut_theta_nq->Fill(th_nq/dtr, FullWeight);
 	  cut_theta_q->Fill(th_q/dtr, FullWeight);
-
-	  cut_xbj->Sumw2(kFALSE);
-	  cut_theta_nq->Sumw2(kFALSE);
 	  
 	  //Reconstructed Target Quantities (Lab Frame)
 	  cut_x_tar->Fill(tar_x, FullWeight);
@@ -506,7 +493,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 	  cut_e_xfp_vs_yfp->Fill(e_yfp, e_xfp, FullWeight);
 
 	  cut_emiss_vs_pmiss->Fill(Pm, Em, FullWeight);
-
+	  
 	  //2D theta_nq correlations with other kinematics
 	  cut_Q2_vs_thnq->Fill(th_nq/dtr, Q2, FullWeight); 
 	  cut_xbj_vs_thnq->Fill(th_nq/dtr, X, FullWeight);  
@@ -518,6 +505,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 	  cut_hyptar_vs_eyptar->Fill(e_yptar, h_yptar, FullWeight); 
 	  cut_hdelta_vs_edelta->Fill(e_delta, h_delta, FullWeight);
 
+
+	  
 	}//End CUTS LOOP
          
 
@@ -525,19 +514,19 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //Kinematics
       Emiss->Fill(Em, FullWeight);
       Emiss->Sumw2(kFALSE);         //Set error calculated by weight false (use sqrt(bin_content) by default.)
-
-      pm->Fill(Pm, FullWeight);
+      
+      pm->Fill(Pm, FullWeight);      
       pm->Sumw2(kFALSE);
-
+      
+      //pm_the->Fill(Pm, theta_e * FullWeight);
+      //pm_mc->Fill(Pm);
+      
       Q_2->Fill(Q2, FullWeight);
       omega->Fill(nu, FullWeight);
       W_inv->Fill(W, FullWeight);
       theta_elec->Fill(theta_e/dtr, FullWeight);
       theta_prot->Fill(theta_p/dtr, FullWeight);
 
-      Q_2->Sumw2(kFALSE);
-      omega->Sumw2(kFALSE);
-      
       //Additinal Kinematics
       W_2->Fill(W2, FullWeight);
       xbj->Fill(X, FullWeight);
@@ -547,9 +536,6 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       E_n->Fill(En, FullWeight);
       theta_nq->Fill(th_nq/dtr, FullWeight);
       theta_q->Fill(th_q/dtr, FullWeight);
-
-      xbj->Sumw2(kFALSE);
-      theta_nq->Sumw2(kFALSE);
 
       
       //Reconstructed Target Quantities (Lab Frame)
@@ -604,7 +590,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       // if (Cut(ientry) < 0) continue;
    }
 
- //----Spectrometer resolution calculation-----
+   //----Spectrometer resolution calculation-----
 
    //hDdelta->Fit(hfit, "R");
    //h_sigma = hfit->GetParameter(2);
@@ -648,18 +634,18 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
    Yield = pm->Integral();
    Yield_cut = cut_pm->Integral();
-   Rates = Yield /( time );
-   Rates_cut = Yield_cut /( time  );
+   Rates = Yield /( time*3600. );
+   Rates_cut = Yield_cut /( time*3600.  );
 
    data << "Yield:     " << Yield << endl;
    data << "Yield w/ Cuts: " << Yield_cut << endl;
    data << "   " << endl;
-   data << "Rate: " << Rates << " / hr" << endl;
-   data << "Rate /w Cuts: " << Rates_cut << " / hr" << endl;
+   data << "Rate: " << Rates << " Hz" << endl;
+   data << "Rate /w Cuts: " << Rates_cut << " Hz" << endl;
    data << "  " << endl;
 
      
-   data << "Missing Momentum " << "               " <<  "Counts " << "     " << "Rel_err(%) " << "     " << "Counts w/cuts " << "     " <<  "Rel_err w/cuts (%) " << endl;
+   data << "Missing Momentum " << "     " <<  "Counts " << "     " << "Rel_err(%) " << "     " << "Counts w/cuts " << "     " <<  "Rel_err w/cuts (%) " << endl;
 
 
    //Calculate Statistical Uncertainties of missing momentum,
@@ -673,7 +659,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t cut_err;    // store error of histogram with a cut
 
    
-   for(miss_p = 0.3; miss_p < 1.2; miss_p = miss_p + 0.01)
+   for(miss_p = 0.01; miss_p < 0.210; miss_p = miss_p + 0.01)
      {
 
        bin = pm->GetXaxis()->FindBin(miss_p);
@@ -684,11 +670,11 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
        err = 1. / sqrt(content)*100.;
        cut_err = 1. / sqrt(cut_content)*100.;
        
-       data << miss_p*1000. << "     " << content << "     " << err << "    " <<  cut_content << "     " << cut_err << "    " << endl;
+       data << miss_p*1000. << "               " << content << "     " << err << "    " <<  cut_content << "     " << cut_err << "    " << endl;
        
      }
    data.close();
-
+   
    outfile->Write();
 
 }

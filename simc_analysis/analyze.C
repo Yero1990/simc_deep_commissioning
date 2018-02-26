@@ -27,21 +27,10 @@ void analyze()
 
   TString simc_file;
 
-  /*
-  //pmiss = 500 MeV
-  Ib = 70.;
-  time = 8.;
-  simc_file = "d2_pm500_pwia_rad.root";
-  cout << "Analyzing: " << simc_file << endl;
-  chain.Add("../worksim/"+simc_file);
-  simc->Init(&chain);
-  simc->Loop(simc_file, Ib, time);
-  chain.Reset();
-  */
 
-  
+  /*
   //----LOW MISSING MOMENTUM ( 80MeV ) calibration-------
-  //PWIA = FSI
+  //PWIA ~ FSI
   
   //pmiss = 80 MeV  -- PWIA
   Ib = 40.;
@@ -53,6 +42,7 @@ void analyze()
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
 
+  
   //pmiss = 80 MeV  --  FSI
   Ib = 40.;
   time = 1.;
@@ -64,10 +54,35 @@ void analyze()
   chain.Reset();
   
   //--------------------------------------------------------
+  */
 
   
   //-------------HIGH MISSING MOMENTUM SETTINGS-------------
 
+  /*
+  //----------- Spectrometer Resolution Studies --------------
+  //pmiss = 580 MeV  -- PWIA    --NO radiative effects
+  Ib = 40.;
+  time = 20.;
+  simc_file = "d2_pm580_lagetpwia_norad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
+
+  //pmiss = 750 MeV  -- PWIA     --NO radiative effects
+  Ib = 40.;
+  time = 42.;
+  simc_file = "d2_pm750_lagetpwia_norad.root";
+  cout << "Analyzing: " << simc_file << endl;
+  chain.Add("../worksim/"+simc_file);
+  simc->Init(&chain);
+  simc->Loop(simc_file, Ib, time);
+  chain.Reset();
+  */
+  //----------------------------------------------------------
+  
   /*
   //pmiss = 580 MeV  -- PWIA
   Ib = 40.;
@@ -91,7 +106,7 @@ void analyze()
   chain.Reset();
   */
   
-  /*
+  
   //pmiss = 750 MeV  -- PWIA
   Ib = 40.;
   time = 42.;
@@ -111,7 +126,7 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-  */
+  
   /*
   //---------------------------------------------------
 
