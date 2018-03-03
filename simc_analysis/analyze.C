@@ -28,10 +28,10 @@ void analyze()
   TString simc_file;
 
 
-  /*
+  
   //----LOW MISSING MOMENTUM ( 80MeV ) calibration-------
   //PWIA ~ FSI
-  
+  /*
   //pmiss = 80 MeV  -- PWIA
   Ib = 40.;
   time = 1.;
@@ -52,9 +52,9 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-  
-  //--------------------------------------------------------
   */
+  //--------------------------------------------------------
+  
 
   
   //-------------HIGH MISSING MOMENTUM SETTINGS-------------
@@ -93,7 +93,7 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-
+  
   
   //pmiss = 580 MeV  --  FSI
   Ib = 40.;
@@ -104,8 +104,8 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-  */
   
+  */
   
   //pmiss = 750 MeV  -- PWIA
   Ib = 40.;
@@ -116,7 +116,7 @@ void analyze()
   simc->Init(&chain);
   simc->Loop(simc_file, Ib, time);
   chain.Reset();
-
+  
   //pmiss = 750 MeV  --  FSI
   Ib = 40.;
   time = 42.;

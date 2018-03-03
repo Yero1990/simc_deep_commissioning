@@ -106,6 +106,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
 
    //Kinematics Quantities
    TH1F *Emiss = new TH1F("Emiss","missing energy", 30, -0.1, 0.5);  //MIN binwidth = 0.010 GeV  --Set to 20 MeV
+   TH1F *Emiss_v2 = new TH1F("Emiss_v2","missing energy", 30, -0.1, 0.5);
    TH1F *pm = new TH1F("pm","missing momentum", 104, 0.0, 2.6);      //MIN binwidth = 0.020 GeV --Set to 25 MeV
    TH1F *Q_2 = new TH1F("Q_2","Q2", bins, 2., 5.5);
    TH1F *omega = new TH1F("omega","Energy Transfer, #omega", bins, 0., 4.);
@@ -153,6 +154,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    TH1F *expfp = new TH1F("expfp", electron_arm + " X'_{fp}", bins, -0.1, 0.06);
    TH1F *eypfp = new TH1F("eypfp", electron_arm + " Y'_{fp}", bins, -0.04, 0.06);
 
+   //Cross-Check correlations (emiss v. pmiss should be flat)
    TH2F *emiss_vs_pmiss = new TH2F("emiss_vs_pmiss", " E_{miss} vs. P_{miss}", 104, 0.0, 2.6, 100, -0.1, 0.5);
 
 
@@ -178,8 +180,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    /************Define Histos to APPLY CUTS*********************************/
  
      //Kinematics Quantities
-   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", 30, -0.1, 0.5);  //binwidth = 0.0025
-   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", 104, 0.0, 2.6);
+   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", 30, -0.1, 0.5);  //binwidth = 0.0020
+   TH1F *cut_pm = new TH1F("cut_pm","missing momentum",  104, 0.0, 2.6);
    TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", bins, 2., 5.5);
    TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", bins, 0., 4.);
    TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", bins, -1.5, 2.3);
@@ -258,9 +260,11 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t Ee;              //Electron final energy
    Double_t En;             //Neutron Energy
    Double_t Ep;             //proton Energy
+   Double_t Kp;             //proton kinetic energy
+   Double_t Kn;            //neutron kinetic energy
    Double_t th_nq;       //Angle betweenq-vector and neutron
    Double_t th_q;        //Angle between q-vector and beamline (+z axis --lab)
-
+   Double_t Em_v2;      //missing energy v.2
    
    //DEFINE KINEMATICS Limits
 
@@ -343,9 +347,12 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       ki = sqrt(Ein*Ein - me*me);
       kf = Q2 / (4.*ki*pow(sin(theta_e/2.), 2));
       Ee = sqrt(me*me + kf*kf);
+      Kp = Ep - MP;
+      Kn = En - MN;
       th_nq = acos((q - Pf*cos(theta_pq))/Pm);
       th_q = theta_pq + theta_p;
 
+      Em_v2 = Kp + Kn - nu;
       
  //-------Spectrometer resolution variables-----------
       h_d_delta = h_deltai - h_delta;
@@ -377,10 +384,10 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       En_thrown = sqrt( MN*MN + Pm_thrown*Pm_thrown);
       Kp_thrown = Ep_thrown - MP;
       Kn_thrown = En_thrown - MN;
-      Em_thrown = nu_thrown - Kp_thrown - Kn_thrown;
+      Em_thrown = Kp_thrown + Kn_thrown - nu_thrown;
 
       dPmiss = Pm_thrown - Pm;  //missing momentum resolution
-      dEmiss = (Em_thrown - Em);  //missing energy resolution
+      dEmiss = Em_thrown - Em;  //missing energy resolution
 
       //Fill variables
       res_hdelta->Fill(h_d_delta);
@@ -390,7 +397,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       res_ekf->Fill(e_dP);
       res_pmiss->Fill(dPmiss);
       res_emiss->Fill(dEmiss);
-      
+      Emiss_v2->Fill(Em_v2);
       //---------------------------------------------------
 
 
@@ -438,7 +445,7 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
       //ANALYSIS OF EVENT-BY-EVENT GOES HERE!!!!!!
       
       //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em)
+      if (c_Em&&c_Xbj)
 	{
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
@@ -645,7 +652,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    Double_t Yield_cut;
    Double_t Rates;
    Double_t Rates_cut;
-
+   Double_t counts_per_charge;
+   
    Yield = pm->Integral();
    Yield_cut = cut_pm->Integral();
    Rates = Yield /( time );
@@ -657,8 +665,8 @@ void deep::Loop(TString simc_file, Double_t Ib, Double_t time)
    data << "Rate: " << Rates << " / hr" << endl;
    data << "Rate /w Cuts: " << Rates_cut << " / hr" << endl;
    data << "  " << endl;
-
-     
+   data << "Counts / Charge: " << Yield / (Ib*time*3600./1000.) << " Counts/mC" << endl;
+   data << "   " << endl;
    data << "Missing Momentum " << "               " <<  "Counts " << "     " << "Rel_err(%) " << "     " << "Counts w/cuts " << "     " <<  "Rel_err w/cuts (%) " << endl;
 
 
