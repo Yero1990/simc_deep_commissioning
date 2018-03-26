@@ -1,0 +1,13 @@
+# setup links to include this moduel for analysis
+#
+# this creates the necessary symbolic links
+
+# library
+for i in /data/boeglin.1/HallA/TFcut.so/*.so; do ln -s $i; done
+
+# pcm files
+for i in /data/boeglin.1/HallA/TFcut.so/*.pcm; do ln -s $i; done
+
+# include files
+for i in /data/boeglin.1/HallA/TFcut.so/*.h; do ln -s $i; done
+

@@ -1,0 +1,210 @@
+head	1.6;
+access;
+symbols;
+locks
+	mdn:1.6; strict;
+comment	@ * @;
+
+
+1.6
+date	2003.06.08.21.28.58;	author mdn;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.06.08.20.32.07;	author mdn;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.05.31.21.47.18;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.19.59.17;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.19.18.02;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.08.39;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+
+    THistogrator1.h - 1D histogrator class
+
+    begin                : Sun Jun 08 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+
+    Copyright (C) 2003 Micha D. Niskin
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+ ***************************************************************************/
+
+#ifndef FIU_THISTOGRATOR1
+#define FIU_THISTOGRATOR1
+
+#include <iostream.h>
+#include <stdlib.h>
+#include <snprintf.h>
+#include <TCanvas.h>
+#include <TPad.h>
+#include <TPaveStats.h>
+
+#include "THistogrator.h"
+
+class THistogrator1:public THistogrator {
+ public:
+   //public methods
+   THistogrator1();
+   THistogrator1(const char *name, const char *title, TH1 * h, TH1 *ah);
+   virtual void Delete() { delete this; }
+   virtual void ExecuteButton1Up(double padx, double pady);
+   virtual void ExecuteClosed() { fCanvas=0; fState=kZOMBIE; }
+   virtual void ExecuteMotion(double padx, double pady);
+   virtual void Paint();
+   virtual void SetFillColor(Color_t fcolor);
+   virtual void SetFillStyle(Style_t fstyle);
+   virtual void SetLineColor(Color_t lcolor);
+   virtual void SetLineStyle(Style_t lstyle);
+ private:
+   //private methods
+   void CreateStats();
+   void Init();
+   void SelectBins(int bin1, int bin2);
+   void UnselectAll() { if (fHist) fHist->Reset("ICE"); }
+   void UpdateStats(Stat_t sum, double integral, double left,
+                    double right);
+   //private data members
+   int ffirst_bin;
+
+   ClassDef(THistogrator1, 1)
+};
+
+#endif
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d2 4
+a5 3
+    THistogrator1.C - 1D histogram graphical integration class
+                             -------------------
+    begin                : Fri Jun 06 2003
+d9 17
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d1 9
+d15 1
+d31 5
+d41 1
+a41 1
+   void UnselectAll() { fHist->Reset("ICE"); }
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d16 1
+a16 1
+   THistogrator1(const char *name, const char *title, TH1 * h);
+d19 1
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d16 1
+a16 1
+   THistogrator1(const char *name, const char *title, TH1 * h, TH1 * ah);
+d23 1
+a23 1
+   void Init(const char *name, const char *title);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+#ifndef THISTOGRATOR1_H
+#define THISTOGRATOR1_H
+d12 18
+a29 19
+class THistogrator1 : public THistogrator {
+public:
+	//public methods
+	THistogrator1();
+	THistogrator1(const char *name, const char *title, TH1 *h, TH1 *ah);
+	virtual void Delete()				{ delete this; }
+	virtual void ExecuteButton1Up(double padx, double pady);
+	virtual void ExecuteClosed()		{ THistogrator::fCanvas=0; 
+										  THistogrator::fState=kZOMBIE; }
+	virtual void ExecuteMotion(double padx, double pady);
+private:
+	//private methods
+	void		 CreateStats();
+	void		 Init(const char *name, const char *title);
+	void		 SelectBins(int bin1, int bin2);
+	void		 UnselectAll()			{ THistogrator::fHist->Reset("ICE"); }
+	void		 UpdateStats(Stat_t sum,double integral,double left,double right);
+	//private data members
+	int			 ffirst_bin;
+d31 1
+a31 1
+	ClassDef(THistogrator1,1)
+a34 1
+
+@

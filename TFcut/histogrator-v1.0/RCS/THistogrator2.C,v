@@ -1,0 +1,979 @@
+head	1.9;
+access;
+symbols;
+locks
+	mdn:1.9; strict;
+comment	@ * @;
+
+
+1.9
+date	2003.06.12.01.20.55;	author mdn;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.06.08.21.29.07;	author mdn;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.06.08.20.32.15;	author mdn;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.06.03.02.13.18;	author mdn;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.05.31.22.44.32;	author mdn;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.05.31.21.47.28;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.19.59.23;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.19.18.07;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.09.03;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+
+    THistogrator2.C - 2D histogrator class
+
+    begin                : Sun Jun 08 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+
+    Copyright (C) 2003 Micha D. Niskin
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+ ***************************************************************************/
+
+#include "THistogrator2.h"
+
+ClassImp(THistogrator2)
+
+THistogrator2::THistogrator2():THistogrator()
+{
+   fBinShadeList = 0;
+   fCut = 0;
+   fLastIntegral = 0;
+   fLastPoint = 0;
+   fLastSum = 0;
+   fLine = 0;
+}
+
+//-----------------------------------------------------------------------------
+
+THistogrator2::THistogrator2(const char *name, const char *title, TH1 * h, TH1 *ah):THistogrator(name, title, h, ah)
+{
+   fCut = 0;
+   fBinShadeList = new TList;
+   fLastIntegral = 0;
+   fLastPoint = 0;
+   fLastSum = 0;
+   fLine = 0;
+   if (fState==kZOMBIE)
+      return;
+   Init();
+}
+
+//-----------------------------------------------------------------------------
+
+THistogrator2::~THistogrator2()
+{
+   if (fHist)
+      fHist->Reset("Ice");
+   UnselectAll();
+   if (fCut) {
+      gROOT->RecursiveRemove(fCut);
+      delete fCut;
+   }
+   if (fLine)
+      delete fLine;
+   if (fBinShadeList)
+      delete fBinShadeList;
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::Init()
+{
+   fPad->cd();
+   fHist->Reset("Ice");
+
+   SetFillColor(grootutil::GetContrastingColor(fAssocHist->GetMarkerColor()));
+   SetFillStyle(3001);
+   SetLineColor(kRed);
+
+   TString opts = fAssocHist->GetDrawOption();
+   opts += " SAME";
+   fHist->Draw((const char*) opts);
+   fAssocHist->Pop();
+   
+   CreateStats();
+   fStats->Draw();
+
+   UpdateStats(0, 0);
+   fPad->RedrawAxis();
+   Paint();
+
+   fState = kREADY;
+}
+
+//-----------------------------------------------------------------------------
+
+TPolyLine* THistogrator2::GetPoly(TObject *p)
+{
+   TPolyLine *retval = 0;
+   
+   TIter next(fBinShadeList);
+   while (TObject * obj = next()) {
+      if (obj == p)
+         retval = (TPolyLine *) obj;
+   }
+   return retval;
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SetFillColor(Color_t fcolor) 
+{
+   fFillColor = fcolor;
+
+   TIter next(fBinShadeList);
+   while (TObject * obj = next()) {
+      ((TPolyLine *)obj)->SetFillColor(fcolor);
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SetFillStyle(Style_t fstyle) 
+{
+   fFillStyle = fstyle;
+
+   TIter next(fBinShadeList);
+   while (TObject * obj = next()) {
+      ((TPolyLine *) obj)->SetFillStyle(fstyle);
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SetLineColor(Color_t fcolor) 
+{
+   fLineColor = fcolor;
+
+   if (fCut)
+      fCut->SetLineColor(fcolor);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SetLineStyle(Style_t fstyle) 
+{
+   fLineStyle = fstyle;
+
+   if (fCut)
+      fCut->SetLineStyle(fstyle);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SetCut(const TCutG& cut) {
+   char cutname[64];
+   if (CheckIfZombie())
+      return;
+
+   fHist->Reset("ICE");
+   UnselectAll();
+   
+   snprintf(cutname,sizeof(cutname),"%scut",fHist->GetName());
+   fCut = new TCutG(cut);
+   fCut->SetNameTitle(cutname,fHist->GetTitle());
+   fCut->SetLineColor(GetLineColor());
+   fCut->SetLineStyle(GetLineStyle());
+   fCut->Draw();
+
+   fState = kDISPLAY;
+   SelectBins();
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::DelCut() {
+   fState = kREADY;
+   fHist->Reset("Ice");
+   UnselectAll();
+   
+   if (fCut) {
+      gROOT->RecursiveRemove(fCut);
+      delete fCut;
+      fCut = 0;
+   }
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::Paint()
+{
+   if (!fPad)
+      return;
+
+   fPad->cd();
+
+   if (fAssocHist)
+      fAssocHist->Pop();
+   if (fStats)
+      fStats->Pop();
+   
+   TIter next(fBinShadeList);
+   while (TObject * obj = next()) {
+      obj->Pop();
+      obj->Paint();
+   }
+      
+   if (fCut) {
+      fCut->Pop();
+      fCut->Paint();
+   }
+   if (fStats) {
+      fStats->Pop();
+      fStats->Paint();
+   }
+      
+   fPad->Modified();
+   fPad->Update();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::CreateStats()
+{
+   double textx1, textx2, texty1, texty2, width, height;
+   TPaveStats *s1 =
+       (TPaveStats *) fAssocHist->GetListOfFunctions()->
+       FindObject("stats");
+   if (s1) {
+      TObject & statsref = *fStats;
+      ((TPave *) s1)->Copy(statsref);
+
+      textx1 = s1->GetX1NDC();
+      textx2 = s1->GetX2NDC();
+      texty1 = s1->GetY1NDC();
+      texty2 = s1->GetY2NDC();
+
+      width = textx2 - textx1;
+      height = texty2 - texty1;
+      height -= height / 2;
+
+      textx1 -= 1.12 * width;
+      textx2 -= 1.12 * width;
+      texty1 = texty2 - height;
+
+      fStats->SetTextSize(s1->GetTextSize());
+      fStats->SetMargin(s1->GetMargin());
+      fStats->SetBorderSize(s1->GetBorderSize());
+      fStats->SetTextColor(s1->GetTextColor());
+   } else {
+      textx1 = 1 - 0.25;
+      textx2 = 1;
+      texty1 = 1 - 0.15;
+      texty2 = 1;
+
+      fStats->SetTextSize(0);
+      fStats->SetMargin(0.05);
+      fStats->SetBorderSize(2);
+      fStats->SetTextColor(1);
+   }
+
+   fStats->SetX1NDC(textx1);
+   fStats->SetX2NDC(textx2);
+   fStats->SetY1NDC(texty1);
+   fStats->SetY2NDC(texty2);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::UnselectAll()
+{
+   if (fLine) {
+      delete fLine;
+      fLine = 0;
+   }
+   TIter next(fBinShadeList);
+   while (TObject * obj = next()) {
+      fBinShadeList->Remove(obj);
+      delete obj;
+   }
+   if (fStats) {
+      UpdateStats(0, 0);
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SelectBins()
+{
+   if (!fHist || !fAssocHist)
+      return;
+
+   fHist->Reset("Ice");
+   UnselectAll();
+   TAxis *xaxis = fAssocHist->GetXaxis();
+   TAxis *yaxis = fAssocHist->GetYaxis();
+   for (int binx = 1; binx <= fHist->GetNbinsX(); binx++) {
+      double x = xaxis->GetBinCenter(binx);
+      for (int biny = 1; biny <= fHist->GetNbinsY(); biny++) {
+         double y = yaxis->GetBinCenter(biny);
+         if (fCut->IsInside(x, y)) {
+            fHist->SetBinContent(binx, biny,
+                                 fAssocHist->GetBinContent(binx, biny));
+            CreateBinShade(binx, biny);
+         }
+      }
+   }
+   fCut->Pop();
+   
+   Stat_t sum = fHist->Integral();
+   double integral = fHist->Integral("WIDTH");
+   UpdateStats(sum, integral);
+
+   if ( (sum != fLastSum) || (integral != fLastIntegral) ) {
+      fLastSum = sum;
+      fLastIntegral = integral;
+      cout << endl;
+      cout << fAssocHist->GetName() << ": SUM = " << sum << endl;
+      cout << fAssocHist->GetName() << ": INT = " << integral << endl;
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::CreateBinShade(int binx, int biny)
+{
+   if (fAssocHist) {
+      TAxis *xaxis = fAssocHist->GetXaxis();
+      TAxis *yaxis = fAssocHist->GetYaxis();
+      double lowx = xaxis->GetBinLowEdge(binx);
+      double hix = lowx + xaxis->GetBinWidth(binx);
+      double lowy = yaxis->GetBinLowEdge(biny);
+      double hiy = lowy + yaxis->GetBinWidth(biny);
+
+      TPolyLine *binbox = new TPolyLine;
+      binbox->SetPoint(0, lowx, lowy);
+      binbox->SetPoint(1, hix, lowy);
+      binbox->SetPoint(2, hix, hiy);
+      binbox->SetPoint(3, lowx, hiy);
+      binbox->SetPoint(4, lowx, lowy);
+      binbox->SetLineColor(GetFillColor());
+      binbox->SetFillColor(GetFillColor());
+      binbox->SetFillStyle(GetFillStyle());
+      binbox->Draw("f");
+      fBinShadeList->AddLast(binbox);
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::UpdateStats(Stat_t sum, double integral)
+{
+   char line0[27], line1[27], line2[27];
+   double sum_dbl = sum;
+
+   if (fStats) {
+      fStats->Clear();
+      snprintf(line0, sizeof(line0), "Histogrator");
+      snprintf(line1, sizeof(line1), "%7s %-6.4g", "Sum:", sum_dbl);
+      snprintf(line2, sizeof(line2), "%7s %-6.4g", "Int:", integral);
+
+      fStats->Clear();
+      fStats->AddText(line0);
+      fStats->AddText(line1);
+      fStats->AddText(line2);
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::ExecuteButton1Up(double padx, double pady)
+{
+   char cutname[64];
+   if (CheckIfZombie())
+      return;
+   fPad->cd();
+   if (fState == kREADY) {
+      fState = kSELECT;
+      fLastPoint = 0;
+      
+      fLine = new TLine(padx, pady, padx, pady);
+      fLine->SetLineColor(GetLineColor());
+      fLine->SetLineStyle(GetLineStyle());
+      fLine->Draw();
+      
+      snprintf(cutname,sizeof(cutname),"%scut",fHist->GetName());
+
+      fCut = new TCutG;
+      fCut->SetNameTitle(cutname,fHist->GetTitle());
+      fCut->SetLineColor(GetLineColor());
+      fCut->SetLineStyle(GetLineStyle());
+      fCut->SetPoint(0, padx, pady);
+      fCut->Draw();
+      gROOT->Add(fCut);
+   } else if (fState == kSELECT) {
+      fCut->SetPoint(++fLastPoint, padx, pady);
+      fCut->Paint();
+      
+      fPad->Modified();
+      fPad->Update();
+      
+      fLine->SetX1(padx);
+      fLine->SetY1(pady);
+   } else if (fState == kDISPLAY) {
+      SelectBins();
+      Paint();
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::ExecuteKey()
+{
+   double x, y;
+   if (CheckIfZombie())
+      return;
+   if ( (!fCut) || (fCut->GetN() <= 0) ) {
+      grootutil::WarnMsgBox("Illegal number of points (0) in TCutG!");
+      fState = kDISPLAY;
+      ExecuteButton1Up(0, 0);
+   } else {
+      fPad->cd();
+      fState = kDISPLAY;
+      fCut->GetPoint(0, x, y);
+      fCut->SetPoint(++fLastPoint, x, y);
+      SelectBins();
+      Paint();
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::ExecuteMotion(double padx, double pady)
+{
+   if ( (fState == kSELECT) && (fLine) && (!CheckIfZombie()) ) {
+      fPad->cd();
+      fLine->SetX2(padx);
+      fLine->SetY2(pady);
+      fLine->Paint();
+      fPad->Modified();
+      fPad->Update();
+   }
+}
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d199 3
+d224 2
+a225 2
+   fCanvas->Modified();
+   fCanvas->Update();
+d406 2
+a407 2
+      fCanvas->Modified();
+      fCanvas->Update();
+d447 2
+a448 2
+      fCanvas->Modified();
+      fCanvas->Update();
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d2 4
+a5 3
+    THistogrator2.C - 2D histogram graphical integration class
+                             -------------------
+    begin                : Fri Jun 06 2003
+d9 17
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d1 9
+d18 1
+d20 1
+d30 1
+d32 1
+d43 2
+d46 2
+a47 2
+   if (fCut)
+      gDirectory->RecursiveRemove(fCut);
+d49 1
+d61 1
+d63 9
+a71 3
+   UnselectAll();
+   fHist->Draw("SAME");
+
+d76 83
+d160 3
+d164 1
+d166 39
+a257 1
+   fHist->Reset("Ice");
+d265 4
+a268 1
+      obj->Delete();
+a269 1
+   UpdateStats(0, 0);
+d276 4
+d295 1
+d299 8
+a306 3
+   cout << endl;
+   cout << fAssocHist->GetName() << ": SUM = " << sum << endl;
+   cout << fAssocHist->GetName() << ": INT = " << integral << endl;
+d313 20
+a332 20
+   TAxis *xaxis = fAssocHist->GetXaxis();
+   TAxis *yaxis = fAssocHist->GetYaxis();
+   double lowx = xaxis->GetBinLowEdge(binx);
+   double hix = lowx + xaxis->GetBinWidth(binx);
+   double lowy = yaxis->GetBinLowEdge(biny);
+   double hiy = lowy + yaxis->GetBinWidth(biny);
+
+   TPolyLine *binbox = new TPolyLine;
+   binbox->SetPoint(0, lowx, lowy);
+   binbox->SetPoint(1, hix, lowy);
+   binbox->SetPoint(2, hix, hiy);
+   binbox->SetPoint(3, lowx, hiy);
+   binbox->SetPoint(4, lowx, lowy);
+   int color =
+       grootutil::GetContrastingColor(fAssocHist->GetMarkerColor());
+   binbox->SetLineColor(color);
+   binbox->SetFillColor(color);
+   binbox->SetFillStyle(3001);
+   binbox->Draw("f");
+   fBinShadeList->AddLast(binbox);
+d342 11
+a352 9
+   fStats->Clear();
+   sprintf(line0, "Histogrator");
+   sprintf(line1, "%7s %-6.4g", "Sum:", sum_dbl);
+   sprintf(line2, "%7s %-6.4g", "Int:", integral);
+
+   fStats->Clear();
+   fStats->AddText(line0);
+   fStats->AddText(line1);
+   fStats->AddText(line2);
+a358 1
+   //FIXME
+d368 2
+d372 2
+a373 1
+      sprintf(cutname,"%scut",fHist->GetName());
+d376 2
+a377 1
+      gDirectory->Add(fCut);
+d380 1
+d391 1
+a391 9
+      fState = kREADY;
+      UnselectAll();
+      
+      if (fCut) {
+         gDirectory->RecursiveRemove(fCut);
+         delete fCut;
+         fCut = 0;
+      }
+      fHist->Reset("ICE");
+d401 4
+a404 1
+   if (fCut->GetN() < 3) {
+d407 7
+a413 1
+      return;
+a414 7
+   fPad->cd();
+   fState = kDISPLAY;
+   fCut->GetPoint(0, x, y);
+   fCut->SetPoint(++fLastPoint, x, y);
+   SelectBins();
+   fHist->Reset("ICE");
+   Paint();
+d421 8
+a428 8
+   if (fState != kSELECT)
+      return;
+   fPad->cd();
+   fLine->SetX2(padx);
+   fLine->SetY2(pady);
+   fLine->Paint();
+   fCanvas->Modified();
+   fCanvas->Update();
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d21 2
+d145 2
+a146 2
+   cout << fHist->GetName() << ": SUM = " << sum << endl;
+   cout << fHist->GetName() << ": INT = " << integral << endl;
+d233 1
+d253 1
+a254 1
+   fPad->RedrawAxis();
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d30 1
+d139 6
+a144 1
+   UpdateStats(fHist->Integral(), fHist->Integral("WIDTH"));
+d195 2
+d202 2
+a203 1
+      fCut = new TCutG;
+d206 4
+a210 2
+      fCut->SetName("cut");
+      fLastPoint = 0;
+d216 1
+d219 1
+d225 1
+d227 1
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d15 1
+a15 1
+THistogrator2::THistogrator2(const char *name, const char *title, TH1 * h):THistogrator(name, title, h)
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d15 1
+a15 2
+THistogrator2::THistogrator2(const char *name, const char *title, TH1 * h,
+                             TH1 * ah):THistogrator(h, ah)
+d21 1
+a21 1
+   Init(name, title);
+d39 1
+a39 1
+void THistogrator2::Init(const char *name, const char *title)
+a43 2
+   fHist->SetNameTitle(name, title);
+   fHist->SetStats(kFALSE);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 249
+a253 2
+THistogrator2::THistogrator2() : THistogrator() {
+	fCut = 0;
+a254 222
+
+//-----------------------------------------------------------------------------
+
+THistogrator2::THistogrator2(const char *name, const char *title, TH1 *h, TH1 *ah) : THistogrator(h, ah) {
+	fCut = 0;
+	fBinShadeList = new TList;
+	fLastPoint = 0;
+	fLine = 0;
+	Init(name, title);
+}
+
+//-----------------------------------------------------------------------------
+
+THistogrator2::~THistogrator2() {
+	UnselectAll();
+	if (fCut) delete fCut;
+	if (fLine) delete fLine;
+	if (fBinShadeList) delete fBinShadeList;
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::Init(const char *name, const char *title) {
+	fPad->cd();
+
+	UnselectAll();
+    fHist->SetNameTitle(name,title);
+	fHist->SetStats(kFALSE);
+	fHist->Draw("SAME");
+	
+	CreateStats();
+	fStats->Draw();
+
+	UpdateStats(0,0);
+	Paint();
+
+	fState = kREADY;
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::CreateStats() {
+	double textx1,textx2,texty1,texty2,width,height;
+	TPaveStats *s1 =
+			(TPaveStats *)fAssocHist->GetListOfFunctions()->FindObject("stats");
+	if (s1) {
+		TObject& statsref = *fStats;
+		((TPave *)s1)->Copy(statsref);
+
+		textx1 = s1->GetX1NDC();
+		textx2 = s1->GetX2NDC();
+		texty1 = s1->GetY1NDC();
+		texty2 = s1->GetY2NDC();
+		
+		width = textx2 - textx1;
+		height = texty2 - texty1;
+		height -= height/2;
+
+		textx1 -= 1.12*width;
+		textx2 -= 1.12*width;
+		texty1 = texty2 - height;
+		
+		fStats->SetTextSize(s1->GetTextSize());
+		fStats->SetMargin(s1->GetMargin());
+		fStats->SetBorderSize(s1->GetBorderSize());
+		fStats->SetTextColor(s1->GetTextColor());
+	} else {
+		textx1 = 1 - 0.25;
+		textx2 = 1;
+		texty1 = 1 - 0.15;
+		texty2 = 1;
+
+		fStats->SetTextSize(0);
+		fStats->SetMargin(0.05);
+		fStats->SetBorderSize(2);
+		fStats->SetTextColor(1);
+	}
+
+	fStats->SetX1NDC(textx1);
+	fStats->SetX2NDC(textx2);
+	fStats->SetY1NDC(texty1);
+	fStats->SetY2NDC(texty2);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::UnselectAll() {
+	fHist->Reset("Ice");
+	if (fLine) { delete fLine; fLine=0; }
+	TIter next(fBinShadeList);
+	while (TObject *obj = next()) {
+		fBinShadeList->Remove(obj);
+		obj->Delete();
+	}
+	UpdateStats(0,0);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::SelectBins() {
+	UnselectAll();
+	TAxis *xaxis = fAssocHist->GetXaxis();
+	TAxis *yaxis = fAssocHist->GetYaxis();
+	for (int binx=1; binx <= fHist->GetNbinsX(); binx++) {
+		double x = xaxis->GetBinCenter(binx);
+		for (int biny=1; biny <= fHist->GetNbinsY(); biny++) {
+			double y = yaxis->GetBinCenter(biny);
+			if (fCut->IsInside(x,y)) {
+				fHist->SetBinContent(binx,biny,fAssocHist->GetBinContent(binx,biny));
+				CreateBinShade(binx,biny);
+			}
+		}
+	}
+	fCut->Pop();
+	UpdateStats(fHist->Integral(),fHist->Integral("WIDTH"));
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::CreateBinShade(int binx, int biny) {
+	TAxis *xaxis = fAssocHist->GetXaxis();
+	TAxis *yaxis = fAssocHist->GetYaxis();
+	double lowx = xaxis->GetBinLowEdge(binx);
+	double hix  = lowx + xaxis->GetBinWidth(binx);
+	double lowy = yaxis->GetBinLowEdge(biny);
+	double hiy  = lowy + yaxis->GetBinWidth(biny);
+
+	TPolyLine *binbox = new TPolyLine;
+	binbox->SetPoint(0,lowx,lowy);
+	binbox->SetPoint(1,hix,lowy);
+	binbox->SetPoint(2,hix,hiy);
+	binbox->SetPoint(3,lowx,hiy);
+	binbox->SetPoint(4,lowx,lowy);
+	int color = grootutil::GetContrastingColor(
+			fAssocHist->GetMarkerColor());
+	binbox->SetLineColor(color);
+	binbox->SetFillColor(color);
+	binbox->SetFillStyle(3001);
+	binbox->Draw("f");
+	fBinShadeList->AddLast(binbox);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::UpdateStats(Stat_t sum, double integral) {
+	char line0[27], line1[27], line2[27];
+	double sum_dbl = sum;
+
+	fStats->Clear();
+	sprintf(line0,"Histogrator");
+	sprintf(line1,"%7s %-6.4g","Sum:",sum_dbl);
+	sprintf(line2,"%7s %-6.4g","Int:",integral);
+
+	fStats->Clear();
+	fStats->AddText(line0);
+	fStats->AddText(line1);
+	fStats->AddText(line2);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::ExecuteButton1Up(double padx, double pady) {
+	if (CheckIfZombie()) return;
+	fPad->cd();
+	if (fState == kREADY) {
+		fState = kSELECT;
+		fCut = new TCutG;
+		fLine = new TLine(padx,pady,padx,pady);
+		fLine->Draw();
+		gDirectory->Add(fCut);
+		fCut->SetName("cut");
+		fLastPoint = 0;
+		fCut->SetPoint(0, padx, pady);
+		fCut->Draw();
+	} else if (fState == kSELECT) {
+		fCut->SetPoint(++fLastPoint, padx, pady);
+		fCut->Paint();
+		fCanvas->Modified();
+		fCanvas->Update();
+		fLine->SetX1(padx);
+		fLine->SetY1(pady);
+	} else if (fState == kDISPLAY) {
+		fState = kREADY;
+		UnselectAll();
+		if (fCut) { delete fCut; fCut = 0; }
+		Paint();
+	}
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::ExecuteKey() {
+	double x,y;
+	if (fCut->GetN() < 3) { fState=kDISPLAY; ExecuteButton1Up(0,0); return; }
+	fPad->cd();
+	fState = kDISPLAY;
+	fCut->GetPoint(0,x,y);
+	fCut->SetPoint(++fLastPoint,x,y);
+	SelectBins();
+	Paint();
+	fPad->RedrawAxis();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator2::ExecuteMotion(double padx, double pady) {
+	if (fState != kSELECT) return;
+	fPad->cd();
+	fLine->SetX2(padx);
+	fLine->SetY2(pady);
+	fLine->Paint();
+	fCanvas->Modified();
+	fCanvas->Update();
+}
+
+
+
+
+
+
+
+	
+@

@@ -1,0 +1,4 @@
+/data/boeglin.1/HallA/analysis/TFcut.so/build/CMakeFiles/TFcut.dir
+/data/boeglin.1/HallA/analysis/TFcut.so/build/CMakeFiles/rebuild_cache.dir
+/data/boeglin.1/HallA/analysis/TFcut.so/build/CMakeFiles/edit_cache.dir
+/data/boeglin.1/HallA/analysis/TFcut.so/build/CMakeFiles/TFcutDict.dir

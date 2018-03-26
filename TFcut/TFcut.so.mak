@@ -1,0 +1,95 @@
+
+
+# Makefile for the ROOT test programs.
+# This Makefile shows nicely how to compile and link applications
+# using the ROOT libraries on all supported platforms.
+#
+# Copyright (c) 2000 Rene Brun and Fons Rademakers
+#
+# Author: Fons Rademakers, 29/2/2000
+
+include $(ROOTSYS)/etc/Makefile.arch
+
+#------------------------------------------------------------------------------
+# sources
+TFCUTS          = TFWcut.C TFLcut.C ddict.C
+TFCUTO          = TFWcut.o TFLcut.o ddict.o
+
+MAINDROOTS      = main.C
+MAINDROOTO      = main.o
+
+
+SRCS		= $(MAINDROOTS) $(TFCUTS)
+OBJS		= $(MAINDROOTO) $(TFCUTO)
+
+# TFCUTSO       = libTFcut.so
+TFCUTSO       = libTFcut.$(DllSuf)
+
+DROOT         = droot
+
+ifeq ($(PLATFORM),win32)
+TFCUTLIB      = libTFcut.lib
+else
+TFCUTLIB      = $(TFCUTSO)
+endif
+
+PROGRAMS      = $(DROOT) 
+
+#------------------------------------------------------------------------------
+
+.SUFFIXES: .$(SrcSuf) .$(ObjSuf) .$(DllSuf)
+.PHONY:    Aclock Hello Tetris
+
+all:            $(PROGRAMS)
+
+# shared libraries
+
+$(TFCUTSO):     $(TFCUTO)
+ifeq ($(ARCH),aix)
+		/usr/ibmcxx/bin/makeC++SharedLib $(OutPutOpt) $@ $(LIBS) -p 0 $^
+else
+ifeq ($(ARCH),aix5)
+		/usr/vacpp/bin/makeC++SharedLib $(OutPutOpt) $@ $(LIBS) -p 0 $^
+else
+
+	$(LD) $(SOFLAGS) $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
+endif
+endif
+
+
+		@echo "$@ done"
+
+$(DROOT):       $(TFCUTSO) $(MAINDROOTO)
+		$(LD) $(LDFLAGS) $(MAINDROOTO) $(TFCUTLIB) $(LIBS) \
+		   $(OutPutOpt)$(DROOT)
+		@echo "$@ done"
+
+ifeq ($(PLATFORM),win32)
+		$(LD) $(LDFLAGS) $^ $(LIBS) ../lib/libThread.lib $(OutPutOpt)$@
+else
+		$(LD) $(LDFLAGS) $^ $(LIBS) -lThread $(OutPutOpt)$@
+endif
+		@echo "$@ done"
+
+
+clean:
+		@rm -f $(OBJS) core
+
+distclean:      clean
+		@rm -f $(PROGRAMS) $(TFCUTSO) $(TFCUTLIB) *Dict.* ddict* *.def *.exp \
+
+		   *.root *.ps *.so *.lib *.dll *.d .def so_locations
+		@rm -rf cxx_repository
+		-@cd RootShower && $(MAKE) distclean
+
+.SUFFIXES: .$(SrcSuf)
+
+###
+TFWcut.o:	TFWcut.h
+TFLcut.o:	TFLcut.h
+ddict.C:	TFWcut.h TFLcut.h
+	@echo "Generating Dictionary ..."
+	@rootcint -f $@ -c $^
+
+.$(SrcSuf).$(ObjSuf):
+	$(CXX) $(CXXFLAGS) -c $<

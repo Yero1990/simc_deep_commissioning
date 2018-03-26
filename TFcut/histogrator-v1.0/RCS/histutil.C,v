@@ -1,0 +1,83 @@
+head	1.1;
+access;
+symbols;
+locks
+	mdn:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.31.17.09.03;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include "histutil.h"
+
+void histutil::AddMenu() {
+	gROOT->GetClass("TH1C")->MakeCustomMenuList();
+	gROOT->GetClass("TH1D")->MakeCustomMenuList();
+	gROOT->GetClass("TH1F")->MakeCustomMenuList();
+	gROOT->GetClass("TH1S")->MakeCustomMenuList();
+	gROOT->GetClass("TH2C")->MakeCustomMenuList();
+	gROOT->GetClass("TH2D")->MakeCustomMenuList();
+	gROOT->GetClass("TH2F")->MakeCustomMenuList();
+	gROOT->GetClass("TH2S")->MakeCustomMenuList();
+	gROOT->GetClass("TPaveStats")->MakeCustomMenuList();
+	
+	grootutil::AddMenuItem("TH1C",histutil::StartMenuItem("TH1C"));
+	grootutil::AddMenuItem("TH1C",histutil::DelMenuItem("TH1C"));
+	grootutil::AddMenuItem("TH1D",histutil::StartMenuItem("TH1D"));
+	grootutil::AddMenuItem("TH1D",histutil::DelMenuItem("TH1D"));
+	grootutil::AddMenuItem("TH1F",histutil::StartMenuItem("TH1F"));
+	grootutil::AddMenuItem("TH1F",histutil::DelMenuItem("TH1F"));
+	grootutil::AddMenuItem("TH1S",histutil::StartMenuItem("TH1S"));
+	grootutil::AddMenuItem("TH1S",histutil::DelMenuItem("TH1S"));
+
+	grootutil::AddMenuItem("TH2C",histutil::StartMenuItem("TH2C"));
+	grootutil::AddMenuItem("TH2C",histutil::DelMenuItem("TH2C"));
+	grootutil::AddMenuItem("TH2D",histutil::StartMenuItem("TH2D"));
+	grootutil::AddMenuItem("TH2D",histutil::DelMenuItem("TH2D"));
+	grootutil::AddMenuItem("TH2F",histutil::StartMenuItem("TH2F"));
+	grootutil::AddMenuItem("TH2F",histutil::DelMenuItem("TH2F"));
+	grootutil::AddMenuItem("TH2S",histutil::StartMenuItem("TH2S"));
+	grootutil::AddMenuItem("TH2S",histutil::DelMenuItem("TH2S"));
+
+	grootutil::AddMenuItem("TPaveStats",
+						histutil::UnimplMenuItem("TPaveStats","Delete"));
+}
+
+//-----------------------------------------------------------------------------
+
+TClassMenuItem* histutil::StartMenuItem(const char *classname) {
+	TClass *cl = gROOT->GetClass(classname);
+	TClassMenuItem *item = new TClassMenuItem(0,cl,"Start/Stop Integrating","fgHistograte",0,"TObject*",2);
+	return item;
+}
+
+//-----------------------------------------------------------------------------
+	
+TClassMenuItem* histutil::DelMenuItem(const char *classname) {
+	TClass *cl = gROOT->GetClass(classname);
+	TClassMenuItem *item = new TClassMenuItem(0,cl,"Delete","fgHistDelete",0,"TObject*",2);
+	return item;
+}
+
+//-----------------------------------------------------------------------------
+	
+TClassMenuItem* histutil::UnimplMenuItem(const char *classname, const char *title) {
+	TClass *cl = gROOT->GetClass(classname);
+	TClassMenuItem *item = new TClassMenuItem(0,cl,title,"fgUnimplemented",0,"TObject*",2);
+	return item;
+}
+@

@@ -1,0 +1,692 @@
+head	1.9;
+access;
+symbols;
+locks
+	mdn:1.9; strict;
+comment	@ * @;
+
+
+1.9
+date	2003.06.12.01.20.55;	author mdn;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.06.08.21.29.07;	author mdn;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.06.08.20.32.15;	author mdn;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.06.03.02.13.18;	author mdn;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.05.31.22.44.32;	author mdn;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.05.31.21.47.28;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.19.59.23;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.19.18.07;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.09.03;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+
+    THistogrator1.C - 1D histogrator class
+
+    begin                : Sun Jun 08 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+
+    Copyright (C) 2003 Micha D. Niskin
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+ ***************************************************************************/
+
+#include "THistogrator1.h"
+
+ClassImp(THistogrator1)
+
+THistogrator1::THistogrator1():THistogrator()
+{
+   ffirst_bin = 0;
+}
+
+//-----------------------------------------------------------------------------
+
+THistogrator1::THistogrator1(const char *name, const char *title, TH1 * h, 
+                             TH1 *ah):THistogrator(name, title, h, ah)
+{
+   ffirst_bin = 0;
+   if (fState==kZOMBIE) {
+      return;
+   }
+   Init();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::Init()
+{
+   fPad->cd();
+
+   SetFillColor(grootutil::
+                GetContrastingColor(fAssocHist->GetFillColor()));
+   SetFillStyle(3004);
+   fHist->SetLineColor(kRed);
+   UnselectAll();
+
+   fPad->cd();
+   fHist->Draw("SAME");
+   fStats->Draw();
+   fPad->RedrawAxis();
+
+   CreateStats();
+   UpdateStats(0, 0, 0, 0);
+   Paint();
+
+   fState = kREADY;
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::Paint()
+{
+   if (fPad)
+      fPad->cd();
+   if (fStats) {
+      fStats->Pop();
+      fStats->Paint();
+   }
+   if (fHist)
+      fHist->Paint();
+   if (fPad) {
+      fPad->Modified();
+      fPad->Update();
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::SetLineColor(Color_t lcolor) {
+   fLineColor = lcolor;
+   if (fHist)
+      fHist->SetLineColor(lcolor);
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::SetLineStyle(Style_t lstyle) {
+   fLineStyle = lstyle;
+   if (fHist)
+      fHist->SetLineStyle(lstyle);
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::SetFillColor(Color_t fcolor) {
+   fFillColor = fcolor;
+   if (fHist)
+      fHist->SetFillColor(fcolor);
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::SetFillStyle(Style_t fstyle) {
+   fFillStyle = fstyle;
+   if (fHist)
+      fHist->SetFillStyle(fstyle);
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::CreateStats()
+{
+   double textx1, texty1, textx2, texty2, width, height;
+   TPaveStats *s1 =
+       (TPaveStats *) fAssocHist->GetListOfFunctions()->
+       FindObject("stats");
+   if (s1) {
+      //existing hist stats box corner points
+      textx1 = s1->GetX1NDC();
+      textx2 = s1->GetX2NDC();
+      texty1 = s1->GetY1NDC();
+      texty2 = s1->GetY2NDC();
+      width = textx2 - textx1;
+      height = texty2 - texty1;
+      //add a little for an extra line of text
+      height += height / 4;
+      //set corner points so that the new stats box is drawn just to
+      //the left of the existing one
+      textx1 -= 1.12 * width;
+      textx2 -= 1.12 * width;
+
+      fStats->SetMargin(s1->GetMargin());
+      fStats->SetBorderSize(s1->GetBorderSize());
+      fStats->SetTextSize(s1->GetTextSize());
+      fStats->SetTextColor(s1->GetTextColor());
+   } else {
+      width = height = 0.2;
+      textx1 = 1 - width;
+      textx2 = 1;
+      texty1 = 1 - height;
+      texty2 = 1;
+
+      fStats->SetMargin(0.05);
+      fStats->SetBorderSize(2);
+      fStats->SetTextSize(0);
+      fStats->SetTextColor(1);
+   }
+   fStats->SetX1NDC(textx1);
+   fStats->SetX2NDC(textx2);
+   fStats->SetY1NDC(texty1);
+   fStats->SetY2NDC(texty2);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::SelectBins(int bin1, int bin2)
+{
+   double left, right, integral;
+   Stat_t sum;
+
+   if (bin1 > bin2) {
+      int temp = bin1;
+      bin1 = bin2;
+      bin2 = temp;
+   }
+
+   UnselectAll();
+
+   if (fHist) {
+      for (int i = bin1; i <= bin2; i++) {
+         fHist->SetBinContent(i, fAssocHist->GetBinContent(i));
+      }
+      left     = fHist->GetBinLowEdge(bin1);
+      right    = fHist->GetBinLowEdge(bin2) + fHist->GetBinWidth(bin2);
+      integral = fHist->Integral(bin1, bin2, "WIDTH");
+      sum      = fHist->Integral(bin1, bin2);
+      UpdateStats(sum, integral, left, right);
+
+      if (fState==kDISPLAY) {
+         cout << endl;
+         cout << fAssocHist->GetName() << ": SUM   = " << sum << endl;
+         cout << fAssocHist->GetName() << ": INT   = " << integral << endl;
+         cout << fAssocHist->GetName() << ": LEFT  = " << left << endl;
+         cout << fAssocHist->GetName() << ": RIGHT = " << right << endl;
+      }
+   }
+
+   Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::UpdateStats(Stat_t sum, double integral, double left,
+                                double right)
+{
+   char s1[27], s2[27], s3[27], s4[27], s5[27];
+   double sum_dbl = sum;
+
+   if (!fStats)
+      return;
+
+   fStats->Clear();
+
+   snprintf(s1, sizeof(s1), "Histogrator");
+   snprintf(s2, sizeof(s2), " %-7s % 6.4g ", "Sum:", sum_dbl);
+   snprintf(s3, sizeof(s3), " %-7s % 6.4g ", "Int:", integral);
+   snprintf(s4, sizeof(s4), " %-7s % 6.4g ", "Left:", left);
+   snprintf(s5, sizeof(s5), " %-7s % 6.4g ", "Right:", right);
+
+   fStats->Clear();
+   fStats->AddText(s1);
+   fStats->AddText(s2);
+   fStats->AddText(s3);
+   fStats->AddText(s4);
+   fStats->AddText(s5);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::ExecuteButton1Up(double padx, double pady)
+{
+   int bin = 0;
+
+   if (CheckIfZombie())
+      return;
+   
+   if (fHist) {
+      bin = fHist->FindBin(padx);
+   
+      if (fState==kREADY) {
+         fState = kSELECT;
+         ffirst_bin = bin;
+      } else if (fState==kSELECT) {
+         fState = kDISPLAY;
+      } else if (fState==kDISPLAY) {
+         fState = kREADY;
+         ffirst_bin = bin;
+      }
+   
+      SelectBins(ffirst_bin, bin);
+   }
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::ExecuteMotion(double padx, double pady)
+{
+   int bin = 0;
+
+   if (CheckIfZombie())
+      return;
+   
+   if (fHist) {
+      bin = fHist->FindBin(padx);
+   
+      if (fState == kDISPLAY) {
+         return;
+      } else if (fState == kREADY) {
+         ffirst_bin = bin;
+      }
+   
+      SelectBins(ffirst_bin, bin);
+   }
+}
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d85 3
+a87 3
+   if (fCanvas) {
+      fCanvas->Modified();
+      fCanvas->Update();
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d2 4
+a5 3
+    THistogrator1.C - 1D histogram graphical integration class
+                             -------------------
+    begin                : Fri Jun 06 2003
+d9 17
+d39 2
+a40 1
+THistogrator1::THistogrator1(const char *name, const char *title, TH1 * h, TH1 *ah):THistogrator(name, title, h, ah)
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d1 9
+d24 1
+a24 1
+   if (fState==kZOMBIE)
+d26 1
+d34 5
+a38 4
+   fHist->
+       SetFillColor(grootutil::
+                    GetContrastingColor(fAssocHist->GetFillColor()));
+   fHist->SetFillStyle(3001);
+d56 54
+d157 3
+d166 1
+a166 2
+   double left = fHist->GetBinLowEdge(bin1);
+   double right = fHist->GetBinLowEdge(bin2) + fHist->GetBinWidth(bin2);
+d168 17
+a184 3
+   UnselectAll();
+   for (int i = bin1; i <= bin2; i++) {
+      fHist->SetBinContent(i, fAssocHist->GetBinContent(i));
+a186 10
+   double integral = fHist->Integral(bin1, bin2, "WIDTH");
+   Stat_t sum = fHist->Integral(bin1, bin2);
+   UpdateStats(sum, integral, left, right);
+   if (fState==kDISPLAY) {
+      cout << endl;
+      cout << fAssocHist->GetName() << ": SUM   = " << sum << endl;
+      cout << fAssocHist->GetName() << ": INT   = " << integral << endl;
+      cout << fAssocHist->GetName() << ": LEFT  = " << left << endl;
+      cout << fAssocHist->GetName() << ": RIGHT = " << right << endl;
+   }
+a194 1
+   //FIXME get rid of char[] things
+d196 4
+d203 5
+a207 7
+   double sum_dbl = sum;
+
+   sprintf(s1, "Histogrator");
+   sprintf(s2, " %-7s % 6.4g ", "Sum:", sum_dbl);
+   sprintf(s3, " %-7s % 6.4g ", "Int:", integral);
+   sprintf(s4, " %-7s % 6.4g ", "Left:", left);
+   sprintf(s5, " %-7s % 6.4g ", "Right:", right);
+d221 2
+d226 12
+a237 1
+   int bin = fHist->FindBin(padx);
+d239 1
+a239 8
+   if (fState==kREADY) {
+      fState = kSELECT;
+      ffirst_bin = bin;
+   } else if (fState==kSELECT) {
+      fState = kDISPLAY;
+   } else if (fState==kDISPLAY) {
+      fState = kREADY;
+      ffirst_bin = bin;
+a240 2
+   
+   SelectBins(ffirst_bin, bin);
+d247 2
+d252 8
+a259 1
+   int bin = fHist->FindBin(padx);
+d261 1
+a261 4
+   if (fState == kDISPLAY) {
+      return;
+   } else if (fState == kREADY) {
+      ffirst_bin = bin;
+a262 2
+   
+   SelectBins(ffirst_bin, bin);
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d15 2
+a32 1
+   //fHist->SetDrawOption("HIST");
+d34 1
+d109 7
+a115 5
+   cout << endl;
+   cout << fHist->GetName() << ": SUM   = " << sum << endl;
+   cout << fHist->GetName() << ": INT   = " << integral << endl;
+   cout << fHist->GetName() << ": LEFT  = " << left << endl;
+   cout << fHist->GetName() << ": RIGHT = " << right << endl;
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d107 5
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d12 1
+a12 1
+THistogrator1::THistogrator1(const char *name, const char *title, TH1 * h):THistogrator(name, title, h)
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d12 1
+a12 2
+THistogrator1::THistogrator1(const char *name, const char *title, TH1 * h,
+                             TH1 * ah):THistogrator(h, ah)
+d15 1
+a15 1
+   Init(name, title);
+d20 1
+a20 1
+void THistogrator1::Init(const char *name, const char *title)
+a21 1
+   fHist->SetNameTitle(name, title);
+a26 1
+   fHist->SetStats(kFALSE);
+d31 1
+a31 1
+   fHist->SetDrawOption("HIST");
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 172
+a176 2
+THistogrator1::THistogrator1() : THistogrator() {
+	ffirst_bin = 0;
+a177 155
+
+//-----------------------------------------------------------------------------
+
+THistogrator1::THistogrator1(const char *name, const char *title, TH1 *h, TH1 *ah) : THistogrator(h, ah) {
+	ffirst_bin = 0;
+	Init(name, title);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::Init(const char *name, const char *title) {
+	fHist->SetNameTitle(name,title);
+	fHist->SetFillColor(
+			grootutil::GetContrastingColor(fAssocHist->GetFillColor()));
+	fHist->SetFillStyle(3001);
+	fHist->SetLineColor(kRed);
+	fHist->SetStats(kFALSE);
+	UnselectAll();
+
+	fPad->cd();
+	fHist->Draw("SAME");
+	fStats->Draw();
+
+	CreateStats();
+	UpdateStats(0,0,0,0);
+	Paint();
+
+	fState = kREADY;
+}
+	
+//-----------------------------------------------------------------------------
+
+void THistogrator1::CreateStats() {
+	double textx1,texty1,textx2,texty2,width,height;
+	TPaveStats *s1 =
+			(TPaveStats *)fAssocHist->GetListOfFunctions()->FindObject("stats");
+	if (s1) {
+		//existing hist stats box corner points
+		textx1 = s1->GetX1NDC();
+		textx2 = s1->GetX2NDC();
+		texty1 = s1->GetY1NDC();
+		texty2 = s1->GetY2NDC();
+		width = textx2 - textx1;
+		height = texty2 - texty1;
+		//add a little for an extra line of text
+		height += height/4;
+		//set corner points so that the new stats box is drawn just to
+		//the left of the existing one
+		textx1 -= 1.12*width;
+		textx2 -= 1.12*width;
+
+		fStats->SetMargin(s1->GetMargin());
+		fStats->SetBorderSize(s1->GetBorderSize());
+		fStats->SetTextSize(s1->GetTextSize());
+		fStats->SetTextColor(s1->GetTextColor());
+	} else {
+		width = height = 0.2;
+		textx1 = 1 - width;
+		textx2 = 1; 
+		texty1 = 1 - height;
+		texty2 = 1;
+
+		fStats->SetMargin(0.05);
+		fStats->SetBorderSize(2);
+		fStats->SetTextSize(0);
+		fStats->SetTextColor(1);
+	}
+	fStats->SetX1NDC(textx1);
+	fStats->SetX2NDC(textx2);
+	fStats->SetY1NDC(texty1);
+	fStats->SetY2NDC(texty2);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::SelectBins(int bin1, int bin2) {
+	if (bin1 > bin2) {
+		int temp = bin1;
+		bin1 = bin2;
+		bin2 = temp;
+	}
+
+	double left = fHist->GetBinLowEdge(bin1);
+	double right = fHist->GetBinLowEdge(bin2) + fHist->GetBinWidth(bin2);
+
+	UnselectAll();
+	for (int i = bin1; i <= bin2; i++) {
+		fHist->SetBinContent(i,fAssocHist->GetBinContent(i));
+	}
+	
+	double integral = fHist->Integral(bin1, bin2, "WIDTH");
+	Stat_t      sum	= fHist->Integral(bin1, bin2);
+	UpdateStats(sum, integral, left, right);
+	Paint();
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::UpdateStats(Stat_t sum, double integral, double left, double right) {
+	char s1[27], s2[27], s3[27], s4[27], s5[27];
+
+	fStats->Clear();
+
+	double sum_dbl = sum;
+
+	sprintf(s1,"Histogrator");
+	sprintf(s2," %-7s % 6.4g ","Sum:",sum_dbl);
+	sprintf(s3," %-7s % 6.4g ","Int:",integral);
+	sprintf(s4," %-7s % 6.4g ","Left:",left);
+	sprintf(s5," %-7s % 6.4g ","Right:",right);
+
+	fStats->Clear();
+	fStats->AddText(s1);
+	fStats->AddText(s2);
+	fStats->AddText(s3);
+	fStats->AddText(s4);
+	fStats->AddText(s5);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::ExecuteButton1Up(double padx, double pady) {
+	if (CheckIfZombie()) return;
+	int bin = fHist->FindBin(padx);
+	switch (fState) {
+		case kREADY:
+			fState = kSELECT;
+			ffirst_bin = bin;
+			break;
+		case kSELECT:
+			fState = kDISPLAY;
+			break;
+		case kDISPLAY:
+			fState = kREADY;
+			ffirst_bin = bin;
+			break;
+		default:
+			break;
+	}
+	SelectBins(ffirst_bin, bin);
+}
+
+//-----------------------------------------------------------------------------
+
+void THistogrator1::ExecuteMotion(double padx, double pady) {
+	if (CheckIfZombie()) { return; }
+	int bin = fHist->FindBin(padx);
+	if (fState == kDISPLAY) {
+		return;
+	} else if (fState == kREADY) {
+		ffirst_bin = bin;
+	}
+	SelectBins(ffirst_bin, bin);
+}
+	
+@

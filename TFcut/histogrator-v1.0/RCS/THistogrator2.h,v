@@ -1,0 +1,256 @@
+head	1.7;
+access;
+symbols;
+locks
+	mdn:1.7; strict;
+comment	@ * @;
+
+
+1.7
+date	2003.06.08.21.28.58;	author mdn;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.06.08.20.32.07;	author mdn;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.05.31.22.44.31;	author mdn;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.05.31.21.47.18;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.19.59.17;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.19.18.02;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.08.39;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+
+    THistogrator2.h - 2D histogrator class
+
+    begin                : Sun Jun 08 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+
+    Copyright (C) 2003 Micha D. Niskin
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+ ***************************************************************************/
+
+#ifndef FIU_THISTOGRATOR2
+#define FIU_THISTOGRATOR2
+
+#include <TCanvas.h>
+#include <TPolyLine.h>
+#include <TPad.h>
+#include <TH1.h>
+#include <TAxis.h>
+#include <TPoints.h>
+#include <TList.h>
+#include <TCutG.h>
+#include <stdio.h>
+#include <snprintf.h>
+
+#include "THistogrator.h"
+
+class THistogrator2:public THistogrator {
+ public:
+   THistogrator2();
+   THistogrator2(const char *name, const char *title, TH1 * h, TH1 *ah);
+   ~THistogrator2();
+   virtual void DelCut();
+   virtual void Delete()         { delete this; }
+   virtual void ExecuteButton1Up(double padx, double pady);
+   virtual void ExecuteClosed()  { fCanvas=0; fState=kZOMBIE; }
+   virtual void ExecuteKey();
+   virtual void ExecuteMotion(double padx, double pady);
+   virtual TPolyLine* GetPoly(TObject *p);
+   virtual void Paint();
+   virtual void SetCut(const TCutG& cut);
+   virtual void SetFillColor(Color_t fcolor);
+   virtual void SetFillStyle(Style_t fstyle);
+   virtual void SetLineColor(Color_t fcolor);
+   virtual void SetLineStyle(Style_t fstyle);
+ private:
+   //private methods
+   void         CreateBinShade(int binx, int biny);
+   void         CreateStats();
+   void         Init();
+   void         SelectBins();
+   void         UnselectAll();
+   void         UpdateStats(Stat_t sum, double integral);
+   //private members
+   TList*       fBinShadeList;   // List of shaded bin polylines
+   double       fLastIntegral;
+   int          fLastPoint;      // Point number of last point added to fCut
+   Stat_t       fLastSum;
+   TLine*       fLine;           // Line from last point in fCut to mouse position
+
+   ClassDef(THistogrator2, 1)
+};
+
+#endif
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d2 4
+a5 3
+    THistogrator2.C - 2D histogram graphical integration class
+                             -------------------
+    begin                : Fri Jun 06 2003
+d9 17
+d28 2
+a29 2
+#ifndef __THistogrator2__
+#define __THistogrator2__
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d1 9
+d22 1
+d31 2
+a32 1
+   virtual void Delete() { delete this; }
+d34 1
+a34 1
+   virtual void ExecuteClosed() { fCanvas=0; fState=kZOMBIE; }
+d37 7
+d46 6
+a51 6
+   void CreateBinShade(int binx, int biny);
+   void CreateStats();
+   void Init();
+   void SelectBins();
+   void UnselectAll();
+   void UpdateStats(Stat_t sum, double integral);
+d53 5
+a57 4
+   TCutG *fCut;            // Graphical cut in associated histogram
+   TList *fBinShadeList;   // List of filled polylines used to shade hist bins
+   int    fLastPoint;      // Point number of last point added to fCut
+   TLine *fLine;           // Line from last point in fCut to mouse position
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d12 1
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d18 1
+a18 1
+   THistogrator2(const char *name, const char *title, TH1 * h);
+d22 1
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d18 1
+a18 1
+   THistogrator2(const char *name, const char *title, TH1 * h, TH1 * ah);
+d28 1
+a28 1
+   void Init(const char *name, const char *title);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d15 22
+a36 24
+class THistogrator2 : public THistogrator {
+public:	
+	THistogrator2();
+	THistogrator2(const char *name, const char *title, TH1 *h, TH1 *ah);
+	~THistogrator2();
+	virtual void Delete()			{ delete this; }
+	virtual void ExecuteButton1Up(double padx, double pady);
+	virtual void ExecuteClosed()	{ THistogrator::fCanvas=0;
+	   								  THistogrator::fState=kZOMBIE; }	
+	virtual void ExecuteKey();
+	virtual void ExecuteMotion(double padx, double pady);	
+private:
+	//private methods
+	void		 CreateBinShade(int binx, int biny);
+	void		 CreateStats();
+	void		 Init(const char *name, const char *title);
+	void		 SelectBins();
+	void		 UnselectAll();
+	void		 UpdateStats(Stat_t sum, double integral);
+	//private members
+	TCutG		*fCut;
+	TList		*fBinShadeList;
+	int			fLastPoint;
+	TLine		*fLine;
+d38 1
+a38 1
+	ClassDef(THistogrator2,1)
+@

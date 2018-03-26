@@ -1,0 +1,99 @@
+head	1.4;
+access;
+symbols;
+locks
+	mdn:1.4; strict;
+comment	@# @;
+
+
+1.4
+date	2003.06.17.00.59.00;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.17.20.36;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.17.11.50;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.09.58;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@INSTALL INSTRUCTIONS:
+
+1. Edit Makefile to reflect correct values for PREFIX, etc.
+2. make
+3. make install
+4. Add the command 'gSystem->ProcessLine(".x Histograte.C");' to your
+   rootlogin.C file.
+
+Please report any problems, bugs, etc. to Micha D. Niskin <mniskin@@yahoo.com>.
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d1 7
+a7 2
+Installation instructions: From the directory containing the source files
+simply type 'make'. The executable will be called 'myroot'.
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d3 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 19
+Install: type 'make'. The binary will be called 'myroot'. I've put a pre-
+compiled one in the 'bin' directory in case you have trouble compiling it.
+
+To use the hist integrator, at the rint prompt do the following (you must have 
+a pad displayed for this to work):
+
+root[0] grootutil::GetPad(ptr_to_pad)
+root[1] .L histutil.C
+root[2] add_menu()
+
+This strange thing you have to do with the pad is due to some finicky behavior
+of cint, I think. If you don't run the first line and you try to load the script
+you won't be able to access any of the functions in the 'grootutil' namespace. 
+I don't know exactly why yet.
+
+There are a couple of scripts here (1Hist.C and 4Hists.C) which will generate
+an example of all of the different kinds of 1D histograms. The integrator
+should work on all of them. In those scripts the pointers to the pads are
+p1, p2, ..., etc.
+@

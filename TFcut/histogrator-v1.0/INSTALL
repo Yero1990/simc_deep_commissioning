@@ -1,0 +1,9 @@
+INSTALL INSTRUCTIONS:
+
+1. Edit Makefile to reflect correct values for PREFIX, etc.
+2. make
+3. make install
+4. Add the command 'gROOT->ProcessLine(".x Histograte.C");' to your
+   rootlogin.C file.
+
+Please report any problems, bugs, etc. to Micha D. Niskin <mniskin@yahoo.com>.

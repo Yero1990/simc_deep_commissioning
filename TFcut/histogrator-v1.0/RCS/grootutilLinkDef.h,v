@@ -1,0 +1,67 @@
+head	1.2;
+access;
+symbols;
+locks
+	mdn:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2003.06.08.20.32.20;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.09.26;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+    grootutilLinkDef.C - linking rules for makecint
+                             -------------------
+    begin                : Fri Jun 06 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+ ***************************************************************************/
+
+#ifdef __MAKECINT__
+
+#pragma link off all functions;
+#pragma link off all globals;
+#pragma link off all classes;
+
+#pragma link C++ nestedclass;
+#pragma link C++ nestedtypedef;
+
+#pragma link C++ namespace grootutil;
+#pragma link C++ function grootutil::WarnMsgBox;
+#pragma link C++ function grootutil::AddMenuItem;
+#pragma link C++ function grootutil::FindObject;
+#pragma link C++ function grootutil::GetPad;
+#pragma link C++ function grootutil::PaintAllCanvases;
+
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 9
+d20 1
+d22 1
+@

@@ -1,0 +1,26 @@
+head	1.1;
+access;
+symbols;
+locks
+	mdn:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2003.05.31.17.20.36;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Micha D. Niskin <mniskin@@yahoo.com>
+@

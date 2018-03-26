@@ -1,0 +1,337 @@
+head	1.8;
+access;
+symbols;
+locks
+	mdn:1.8; strict;
+comment	@ * @;
+
+
+1.8
+date	2003.06.08.21.28.58;	author mdn;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.06.08.20.32.07;	author mdn;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.06.03.02.13.15;	author mdn;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.05.31.21.47.18;	author mdn;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.05.31.20.43.57;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.19.59.17;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.19.18.02;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.08.39;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+
+    THistogrator.h - Histogrator base class
+
+    begin                : Sun Jun 08 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+
+    Copyright (C) 2003 Micha D. Niskin
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+ ***************************************************************************/
+
+#ifndef FIU_THISTOGRATOR
+#define FIU_THISTOGRATOR
+
+#include <TObject.h>
+#include <TAttFill.h>
+#include <TAttLine.h>
+#include <RQ_OBJECT.h>
+#include <stdio.h>
+#include <iostream.h>
+#include <TCanvas.h>
+#include <TDialogCanvas.h>
+#include <TSeqCollection.h>
+#include <TH1.h>
+#include <TPad.h>
+#include <TCutG.h>
+#include <TPaveStats.h>
+#include <TPolyLine.h>
+
+#include "grootutil.h"
+
+enum State_t { kNEW, kREADY, kSELECT, kDISPLAY, kEDIT, kZOMBIE };
+
+class THistogrator:public TObject, public TAttFill, public TAttLine {
+   RQ_OBJECT("THistogrator")
+ public:
+   //public methods
+   THistogrator();
+   THistogrator(const char *name, const char *title, TH1 *h, TH1 *ah);
+   ~THistogrator();
+   virtual bool CheckIfZombie();
+   virtual void DelAssocHist()     { if (fAssocHist) delete fAssocHist; 
+                                     fAssocHist = 0; }
+   virtual void DelCut();
+   virtual void Delete() {};
+   virtual void DelHist()          { if (fHist) delete fHist; fHist = 0; }
+   virtual void DelPave()          { if (fStats) delete fStats; fStats = 0; }
+   virtual void ExecuteButton1Up(double padx, double pady) {};
+   virtual void ExecuteClosed() {};
+   virtual void ExecuteKey() {};
+   virtual void ExecuteMotion(double padx, double pady) {};
+   virtual TH1* GetAssocHist()     { return fAssocHist; }
+   virtual TCutG*      GetCut()    { return fCut; }
+   virtual TH1*        GetHist()   { return fHist; }
+   virtual TPaveStats* GetPave()   { return fStats; }
+   virtual TPolyLine*  GetPoly(TObject *p) { return 0; }
+   void         GotClosed()        { ExecuteClosed(); }
+   void GotMouseEvent(Int_t evt, Int_t x, Int_t y, TObject * sel);
+   virtual void Paint() {};
+   virtual void SetCut(const TCutG& cut) {};
+   virtual void SetFillColor(Color_t fcolor) { fFillColor = fcolor; }
+   virtual void SetFillStyle(Style_t fstyle) { fFillStyle = fstyle; }
+   virtual void SetLineColor(Color_t lcolor) { fLineColor = lcolor; }
+   virtual void SetLineStyle(Style_t lstyle) { fLineStyle = lstyle; }
+ protected:
+   //protected data members
+   TH1*         fAssocHist;   // Histogram which is to be integrated
+   TCanvas*     fCanvas;      // Canvas containing associated histogram
+   TCutG*       fCut;         // Graphical cut
+   TH1*         fHist;        // Histogram used to draw the shaded area
+   TPad*        fPad;         // Pad containing associated histogram
+   State_t      fState;       // Internal state of histogrator
+   TPaveStats*  fStats;       // Stats box for displaying integral and sum
+
+   ClassDef(THistogrator, 1)  // Graphical histogram integrator base class
+};
+
+#endif // ifndef FIU_THISTOGRATOR
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d2 4
+a5 3
+    THistogrator.C - histogrator base class
+                             -------------------
+    begin                : Fri Jun 06 2003
+d9 17
+d28 2
+a29 2
+#ifndef FIU_THISTOGRATOR_H
+#define FIU_THISTOGRATOR_H
+d94 1
+a94 1
+#endif
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d1 9
+d13 3
+a18 1
+#include <TObject.h>
+d20 2
+d24 1
+d26 1
+d30 1
+a30 1
+enum State_t { kNEW, kREADY, kSELECT, kDISPLAY, kZOMBIE };
+d32 1
+a32 1
+class THistogrator:public TObject {
+d39 4
+a42 1
+   bool CheckIfZombie();
+d44 2
+d50 6
+a55 4
+   TH1 *GetAssocHist()     { return fAssocHist; }
+   TH1 *GetHist()          { return fHist; }
+   TPaveStats *GetPave()   { return fStats; }
+   void GotClosed()        { ExecuteClosed(); }
+d57 6
+a62 1
+   void Paint();
+d65 7
+a71 7
+   TString fOrigDrawOption;
+   TH1 *fAssocHist;             // Histogram which is to be integrated
+   TCanvas *fCanvas;            // Canvas containing associated histogram
+   TH1 *fHist;                  // Histogram used to draw the shaded area
+   TPad *fPad;                  // Pad containing associated histogram
+   State_t fState;              // Internal state of histogrator
+   TPaveStats *fStats;          // Stats box for displaying integral and sum
+d73 1
+a73 1
+   ClassDef(THistogrator, 1)    // Graphical histogram integrator base class
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d38 2
+a39 1
+   TH1 * fAssocHist;            // Histogram which is to be integrated
+d44 1
+a44 1
+   TPaveStats *fStats;          // Stats box for displaying integral and sum info
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d22 1
+a22 1
+   THistogrator(const char *name, const char *title, TH1 * h);
+d27 1
+d33 1
+a33 1
+   void GotClosed()        { cout << "asd\n"; fCanvas = 0; fState = kZOMBIE; }
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d32 1
+a32 1
+   void GotClosed()        { fCanvas = 0; fState = kZOMBIE; }
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d21 2
+a22 2
+   THistogrator(); 
+   THistogrator(TH1 * h, TH1 * ah);
+d25 1
+a25 1
+   virtual void Delete()   {};
+d28 1
+a28 1
+   virtual void ExecuteMotion(double padx, double pady) {}; 
+d32 1
+a32 1
+   void GotClosed()        { fCanvas=0; fState=kZOMBIE; }
+d37 6
+a42 6
+   TH1 * fAssocHist;       // Histogram which is to be integrated
+   TCanvas *fCanvas;       // Canvas containing associated histogram
+   TH1 *fHist;             // Histogram used to draw the shaded area
+   TPad *fPad;             // Pad containing associated histogram
+   State_t fState;         // Internal state of histogrator
+   TPaveStats *fStats;     // Stats box for displaying integral and sum info
+d44 1
+a44 1
+   ClassDef(THistogrator, 1) // Graphical histogram integrator base class
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 2
+#ifndef THISTOGRATOR_H
+#define THISTOGRATOR_H
+d17 28
+a44 30
+class THistogrator : public TObject {
+RQ_OBJECT("THistogrator")
+public:
+	//public methods
+	THistogrator()						{ fStats=0; fHist=0; 
+										  fAssocHist=0; fState=kNEW; }
+	THistogrator(TH1 *h, TH1 *ah);
+	~THistogrator();	
+	bool			CheckIfZombie();
+	virtual void	Delete()			{};
+	virtual void	ExecuteClosed()		{};
+	virtual void	ExecuteButton1Up(double padx, double pady) {};
+	virtual void	ExecuteKey()		{};
+	virtual void	ExecuteMotion(double padx, double pady) {};
+	TH1*			GetAssocHist()		{ return fAssocHist; }
+	TH1*			GetHist()			{ return fHist; }
+	TPaveStats*		GetPave()			{ return fStats; }
+	void			GotClosed()			{ ExecuteClosed(); }
+	void			GotMouseEvent(Int_t evt, Int_t x, Int_t y, TObject *sel);
+	void			Paint();
+protected:
+	//protected data members
+	TH1*			fAssocHist;
+	TCanvas*		fCanvas;
+	TH1*			fHist;
+	TPad*			fPad;
+	State_t			fState;
+	TPaveStats*		fStats;
+	
+	ClassDef(THistogrator,1)
+@

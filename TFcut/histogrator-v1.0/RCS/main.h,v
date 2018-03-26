@@ -1,0 +1,54 @@
+head	1.2;
+access;
+symbols;
+locks
+	mdn:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2003.05.31.19.18.02;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.08.39;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@#ifndef FIU_MAIN
+#define FIU_MAIN
+
+#include <TROOT.h>
+#include <TRint.h>
+#include <iostream.h>
+#include "THistList.h"
+#include "histutil.h"
+
+void fgUnimplemented(TObject *obj);
+void fgHistDelete(TObject *hist);
+void fgHistograte(TObject *hist);
+
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 3
+d13 2
+@

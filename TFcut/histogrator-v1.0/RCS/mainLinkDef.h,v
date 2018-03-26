@@ -1,0 +1,38 @@
+head	1.1;
+access;
+symbols;
+locks
+	mdn:1.1; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.31.17.09.26;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifdef __MAKECINT__
+
+#pragma link off all functions;
+#pragma link off all globals;
+#pragma link off all classes;
+
+#pragma link C++ global theApp;
+#pragma link C++ global gHistogrators;
+#pragma link C++ function fgUnimplemented;
+#pragma link C++ function fgHistDelete;
+#pragma link C++ function fgHistograte;
+
+#endif
+@

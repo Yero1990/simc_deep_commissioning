@@ -1,0 +1,105 @@
+head	1.2;
+access;
+symbols;
+locks
+	mdn:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2003.06.08.20.32.15;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.09.03;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+    main.C
+                             -------------------
+    begin                : Fri Jun 06 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+ ***************************************************************************/
+
+#include <Rtypes.h>
+#include <TRint.h>
+#include "THistograteUtil.h"
+
+THistList *gHistogrators;
+
+int main(int argc, char **argv)
+{
+	// Create interactive interface
+	TRint *theApp = new TRint("ROOT example", &argc, argv, NULL, 0);
+
+   // Set up histogrator menus, etc.
+   THistograteUtil *histutil = new THistograteUtil;
+   histutil->AddMenu();
+
+	// Run interactive interface
+	theApp->Run();
+
+	return(0);
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 12
+a12 1
+#include "main.h"
+a13 1
+TRint *theApp;
+a17 2
+	gHistogrators = new THistList;
+
+d19 1
+a19 1
+	theApp = new TRint("ROOT example", &argc, argv, NULL, 0);
+d21 3
+a23 2
+	// Add histogrator to histogram context menus
+	histutil::AddMenu();
+a29 22
+
+//-----------------------------------------------------------------------------
+	
+void fgUnimplemented(TObject *obj) {
+	theApp->Warning("UNSPECIFIED_METHOD","Not yet implemented.");
+}
+
+//-----------------------------------------------------------------------------
+	
+void fgHistDelete(TObject *hist) {
+	if ( !gHistogrators->Remove((TH1 *)hist) ) {
+		delete hist;
+	}
+	grootutil::PaintAllCanvases();
+}
+
+//-----------------------------------------------------------------------------
+	
+void fgHistograte(TObject *hist) {
+	if ( !gHistogrators->Remove((TH1 *)hist) ) gHistogrators->Add((TH1 *)hist);
+	grootutil::PaintAllCanvases();
+}
+@

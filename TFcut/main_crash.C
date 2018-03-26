@@ -1,0 +1,27 @@
+//----------------------------------------------------------------------
+// this creates a segmentation violation on Mac Os X 10.3.1 
+//
+#include "TROOT.h"
+#include "TRint.h"
+
+int Error; // left undefined by Motif
+
+extern void InitGui() ; // initializer for GUI needed for interactive interface
+
+VoidFuncPtr_t initfuncs[] = {InitGui, 0};
+
+// initialize the ROOT system
+TROOT root("Rint", "The ROOT interactive Interface", initfuncs );
+
+
+int main(int argc, char **argv)
+{
+  // create the interactive interface
+
+  TRint *theApp = new TRint("ROOT example", &argc, argv, NULL, 0);
+
+  // Run the interactive interface
+  theApp->Run();
+  return(0);
+}
+

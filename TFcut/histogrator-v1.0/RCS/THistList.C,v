@@ -1,0 +1,396 @@
+head	1.6;
+access;
+symbols;
+locks
+	mdn:1.6; strict;
+comment	@ * @;
+
+
+1.6
+date	2003.06.08.21.29.07;	author mdn;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.06.08.20.32.15;	author mdn;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.05.31.21.47.28;	author mdn;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.05.31.19.59.23;	author mdn;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.05.31.19.18.07;	author mdn;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.05.31.17.09.03;	author mdn;	state Exp;
+branches;
+next	;
+
+
+desc
+@Start
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@/***************************************************************************
+
+    THistList.C - Histogrator container class
+
+    begin                : Sun Jun 08 2003
+    version              : 1
+    author               : Micha D. Niskin
+    email                : mniskin@@yahoo.com
+
+    Copyright (C) 2003 Micha D. Niskin
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+ ***************************************************************************/
+
+#include "THistList.h"
+
+bool THistList::Add(TObject * hist)
+{
+   if (!gROOT->FindObject(hist->GetName()))
+      return kFALSE;
+ 
+   char name[16], title[32];
+
+   THistogrator *hg = 0;
+   TH1 *newhist = 0;
+
+   int id = fMaxID++;
+   
+   snprintf(name, sizeof(name), "histogrator%d", id);
+   snprintf(title, sizeof(title), "in %s %s", hist->IsA()->GetName(), hist->GetName());
+
+   if (hist->InheritsFrom("TH3")) {
+      cout << "3D histogram integration not implemented" << endl;
+   } else if (hist->InheritsFrom("TH2")) {
+      if (hist->InheritsFrom("TH2C")) {
+         const TH2C& histref = *((TH2C*) hist);
+         newhist = new TH2C(histref);
+      } else if (hist->InheritsFrom("TH2D")) {
+         const TH2D& histref = *((TH2D*) hist);
+         newhist = new TH2D(histref);
+      } else if (hist->InheritsFrom("TH2F")) {
+         const TH2F& histref = *((TH2F*) hist);
+         newhist = new TH2F(histref);
+      } else if (hist->InheritsFrom("TH2S")) {
+         const TH2S& histref = *((TH2S*) hist);
+         newhist = new TH2S(histref);
+      }
+      hg = new THistogrator2(name, title, (TH1 *) newhist, (TH1 *) hist);
+   } else if (hist->InheritsFrom("TH1")) {
+      if (hist->InheritsFrom("TH1C")) {
+         const TH1C& histref = *((TH1C*) hist);
+         newhist = new TH1C(histref);
+      } else if (hist->InheritsFrom("TH1D")) {
+         const TH1D& histref = *((TH1D*) hist);
+         newhist = new TH1D(histref);
+      } else if (hist->InheritsFrom("TH1F")) {
+         const TH1F& histref = *((TH1F*) hist);
+         newhist = new TH1F(histref);
+      } else if (hist->InheritsFrom("TH1S")) {
+         const TH1S& histref = *((TH1S*) hist);
+         newhist = new TH1S(histref);
+      }
+      hg = new THistogrator1((const char*) name, (const char*) title, (TH1 *) newhist, (TH1 *) hist);
+   }
+   if (!hg)
+      return kFALSE;
+   fList.AddLast((TObject *) hg);
+   CheckForZombies();
+   return kTRUE;
+}
+
+//-----------------------------------------------------------------------------
+
+bool THistList::CheckForZombies()
+{
+   bool retval = kFALSE;
+   TIter next(&fList);
+   while (THistogrator * obj = (THistogrator *) next()) {
+      if (obj->CheckIfZombie()) {
+         Remove((TObject *) obj);
+         retval = kTRUE;
+      }
+   }
+   return retval;
+}
+
+//-----------------------------------------------------------------------------
+
+THistogrator *THistList::Find(TObject * hist)
+{
+   TIter next(&fList);
+   while (THistogrator * obj = (THistogrator *) next()) {
+      if ( (obj->GetHist() == hist) || (obj->GetAssocHist() == hist)
+           || (obj->GetPave() == hist) || (obj->GetCut() == hist)
+           || (obj->GetPoly(hist) == hist) || (obj == hist) ) {
+         return obj;
+      }
+   }
+   return 0;
+}
+
+//-----------------------------------------------------------------------------
+
+bool THistList::Remove(TObject * hist)
+{
+   bool retval = kFALSE;
+   THistogrator *hg;
+   if ( (hg = Find(hist)) ) {
+      fList.Remove((TObject *) hg);
+      hg->Delete();
+      retval = kTRUE;
+   }
+   return retval;
+}
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d2 4
+a5 3
+    THistList.C - histogrator container class
+                             -------------------
+    begin                : Fri Jun 06 2003
+d9 17
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d1 9
+d12 1
+a12 1
+bool THistList::Add(TH1 * hist)
+d16 2
+a18 4
+   //FIXME: possible stack corruption but snprintf not available
+   char name[36], title[64];
+
+   int id = fMaxID++;
+d22 4
+a25 2
+   sprintf(name, "histogrator%d", id);
+   sprintf(title, " in %s %s", hist->IsA()->GetName(), hist->GetName());
+d28 1
+a28 1
+      cout << "3D histogram integration not implemented yet" << endl;
+d58 1
+a58 1
+      hg = new THistogrator1(name, title, (TH1 *) newhist, (TH1 *) hist);
+d69 1
+a69 1
+void THistList::CheckForZombies()
+d71 1
+d74 4
+a77 2
+      if (obj->CheckIfZombie())
+         Remove((TH1 *) (obj->GetHist()));
+d79 1
+d84 1
+a84 1
+THistogrator *THistList::Find(TH1 * hist)
+d88 3
+a90 1
+      if ((obj->GetHist() == hist) || (obj->GetAssocHist() == hist))
+d92 1
+d99 1
+a99 1
+bool THistList::Remove(TH1 * hist)
+d101 1
+d103 6
+a108 5
+   if (!(hg = Find(hist)))
+      return kFALSE;
+   fList.Remove((TObject *) hg);
+   hg->Delete();
+   return kTRUE;
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d13 1
+d21 14
+a34 1
+      hg = new THistogrator2(name, title, (TH1 *) hist);
+d36 14
+a49 1
+      hg = new THistogrator1(name, title, (TH1 *) hist);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@a12 1
+   TH1 *newhist = 0;
+d17 6
+a22 32
+   if (hist->InheritsFrom("TH2")) {
+      if (hist->InheritsFrom("TH2C")) {
+         const TH2C & histref = *((TH2C *) hist);
+         newhist = new TH2C(histref);
+      } else if (hist->InheritsFrom("TH2D")) {
+         const TH2D & histref = *((TH2D *) hist);
+         newhist = new TH2D(histref);
+      } else if (hist->InheritsFrom("TH2F")) {
+         const TH2F & histref = *((TH2F *) hist);
+         newhist = new TH2F(histref);
+      } else if (hist->InheritsFrom("TH2S")) {
+         const TH2S & histref = *((TH2S *) hist);
+         newhist = new TH2S(histref);
+      }
+      hg = new THistogrator2((const char *) name, (const char *) title,
+                             (TH1 *) newhist, (TH1 *) hist);
+   } else {
+      if (hist->InheritsFrom("TH1C")) {
+         const TH1C & histref = *((TH1C *) hist);
+         newhist = new TH1C(histref);
+      } else if (hist->InheritsFrom("TH1D")) {
+         const TH1D & histref = *((TH1D *) hist);
+         newhist = new TH1D(histref);
+      } else if (hist->InheritsFrom("TH1F")) {
+         const TH1F & histref = *((TH1F *) hist);
+         newhist = new TH1F(histref);
+      } else if (hist->InheritsFrom("TH1S")) {
+         const TH1S & histref = *((TH1S *) hist);
+         newhist = new TH1S(histref);
+      }
+      hg = new THistogrator1((const char *) name, (const char *) title,
+                             (TH1 *) newhist, (TH1 *) hist);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d3 53
+a55 48
+bool THistList::Add(TH1 *hist) {
+	if (!gROOT->FindObject(hist->GetName())) return kFALSE;
+
+	//FIXME: possible stack corruption but snprintf not available
+	char name[36], title[64];
+
+	int id = fMaxID++;
+	THistogrator *hg=0;
+	TH1 *newhist=0;
+	
+	sprintf(name,"histogrator%d",id);
+	sprintf(title," in %s %s",hist->IsA()->GetName(),hist->GetName());
+	
+	if (hist->InheritsFrom("TH2")) {
+		if (hist->InheritsFrom("TH2C")) {
+			const TH2C& histref = *((TH2C *)hist);
+			newhist = new TH2C(histref);
+		} else if (hist->InheritsFrom("TH2D")) {
+			const TH2D& histref = *((TH2D *)hist);
+			newhist = new TH2D(histref);
+		} else if (hist->InheritsFrom("TH2F")) {
+			const TH2F& histref = *((TH2F *)hist);
+			newhist = new TH2F(histref);
+		} else if (hist->InheritsFrom("TH2S")) {
+			const TH2S& histref = *((TH2S *)hist);
+			newhist = new TH2S(histref);
+		}
+		hg = new THistogrator2((const char*)name,(const char*)title,(TH1 *)newhist,(TH1 *)hist);
+	} else {
+	   if (hist->InheritsFrom("TH1C")) {
+			const TH1C& histref = *((TH1C *)hist);
+			newhist = new TH1C(histref);
+		} else if (hist->InheritsFrom("TH1D")) {
+			const TH1D& histref = *((TH1D *)hist);
+			newhist = new TH1D(histref);
+		} else if (hist->InheritsFrom("TH1F")) {
+			const TH1F& histref = *((TH1F *)hist);
+			newhist = new TH1F(histref);
+		} else if (hist->InheritsFrom("TH1S")) {
+			const TH1S& histref = *((TH1S *)hist);
+			newhist = new TH1S(histref);
+		}
+		hg = new THistogrator1((const char*)name,(const char*)title,(TH1 *)newhist,(TH1 *)hist);
+	}
+	if (!hg) return kFALSE;
+	fList.AddLast((TObject *)hg);
+	CheckForZombies();
+	return kTRUE;
+d60 7
+a66 8
+void THistList::CheckForZombies() {
+	THistogrator *a, *b;
+	a = (THistogrator *)fList.First();
+	while (a) {
+		b = (THistogrator *)fList.After((TObject *)a);
+		if ( a->CheckIfZombie() ) Remove((TH1 *)(a->GetHist()));
+		a = b;
+	}
+d71 8
+a78 11
+THistogrator* THistList::Find(TH1 *hist) {
+	THistogrator *o1, *o2;
+	o1 = (THistogrator *) fList.First();
+	while ((int)o1) {
+		if ((o1->GetHist() == hist) || (o1->GetAssocHist() == hist)) {
+			return o1;
+		}
+		o2 = (THistogrator *) fList.After((TObject *)o1);
+		o1 = o2;
+	}
+	return 0;
+d83 8
+a90 6
+bool THistList::Remove(TH1 *hist) {
+	THistogrator *hg;
+	if ( !(hg = Find(hist)) ) return kFALSE;
+	fList.Remove((TObject *)hg);
+	hg->Delete();
+	return kTRUE;
+a91 1
+
+@
