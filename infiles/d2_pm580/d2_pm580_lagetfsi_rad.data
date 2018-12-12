@@ -1,12 +1,14 @@
-! e120-10-003: pmiss = 80 MeV  --NO Eloss corrections were applied
-! Simulated radiative corrections and Energy Loss
+! e120-10-003: pmiss = 580 MeV  --NO Eloss corrections were applied
+! of radiative corrections
+! kinematics from mceep input q3_d20_mp.inp
+! 5008.550,0.,0.,2750.659,29.235050,-0.060390,3031.415,-30.590997,0.082506
 !
 ! 'TF' stands for 'this field'
 ! ONE equals TRUE unless specified otherwise
 
  =?
  &EXPERIMENT
-     ngen  =  100000			!  POS: # of successes
+     ngen  =  1000000			!  POS: # of successe
      EXPER%charge  =   1.0		!  total charge (mC)
      doing_phsp  =  F		!  (T = TRUE)	- If all of the doing_* are
      doing_kaon  =  F		!  (T = TRUE)   false, then doing (e,e'p).
@@ -17,14 +19,14 @@
 / 
  =?
  &KINEMATICS_MAIN
-     Ebeam  =  10600.5                       !  (MeV)
+     Ebeam  =  10600.0                       !  (MeV)
      dEbeam  =  0.05                                   !  beam energy variation (%)
      electron_arm  =  5                                !  1=hms,2=sos,3=hrsr,4=hrsl,5 = shms
      hadron_arm  =  1                                  !  1=hms,2=sos,3=hrsr,4=hrsl,5 = shms
      spec%e%P  =   8700.0                   !  e arm central momentum (MeV/c)
      spec%e%theta  =   12.169                !  e arm angle setting (degrees)
-     spec%p%P  =   2932.23                  !  p arm central momentum (MeV/c)
-     spec%p%theta  =   38.896                  !  p arm angle setting (degrees)
+     spec%p%P  =   2262.22                  !  p arm central momentum (MeV/c)
+     spec%p%theta  =   54.9613                  !  p arm angle setting (degrees)
 / 
 
  ?=
@@ -51,20 +53,20 @@
 
  &E_ARM_ACCEPT
      SPedge%e%delta%min  =   -15.0	!  delta min (SPECTROMETER ACCEPTANC
-     SPedge%e%delta%max  =   25.0	!  delta max
-     SPedge%e%yptar%min  =   -90.0	!  yptar min = {TF} / 1000 (mrad)
-     SPedge%e%yptar%max  =   90.0	!  yptar max = {TF} / 1000
-     SPedge%e%xptar%min  =   -100.0	!  xptar min = {TF} / 1000 (mrad)
-     SPedge%e%xptar%max  =   100.0	!  xptar max = {TF} / 1000
+     SPedge%e%delta%max  =   8.0	!  delta max
+     SPedge%e%yptar%min  =   -35.0	!  yptar min = {TF} / 1000 (mrad)
+     SPedge%e%yptar%max  =   35.0	!  yptar max = {TF} / 1000
+     SPedge%e%xptar%min  =   -60.0	!  xptar min = {TF} / 1000 (mrad)
+     SPedge%e%xptar%max  =   60.0	!  xptar max = {TF} / 1000
 / 
 
  &P_ARM_ACCEPT
      SPedge%p%delta%min  =   -15.0	!  delta min (SPECTROMETER ACCEPTANC
      SPedge%p%delta%max  =   15.0	!  delta max
-     SPedge%p%yptar%min  =   -90.0	!  yptar min = {TF} / 1000 (mrad)
-     SPedge%p%yptar%max  =   90.0	!  yptar max = {TF} / 1000
+     SPedge%p%yptar%min  =   -45.0	!  yptar min = {TF} / 1000 (mrad)
+     SPedge%p%yptar%max  =   45.0	!  yptar max = {TF} / 1000
      SPedge%p%xptar%min  =   -100.0	!  xptar min = {TF} / 1000 (mrad)
-     SPedge%p%xptar%max  =   100.0	!  xptar max = {TF} / 1000
+     SPedge%p%xptar%max  =   85.0	!  xptar max = {TF} / 1000
 / 
 
  &BEAM_AND_TARGET_INFO
