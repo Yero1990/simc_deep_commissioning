@@ -1,6 +1,6 @@
 #include "../simc_analysis/set_deep_histos.h"
 
-void analyze_deepData(int run, int pm)
+void analyze_deepData(int run, int Pmiss)
 {
 
 //PREVENT DISPLAY 
@@ -13,12 +13,15 @@ void analyze_deepData(int run, int pm)
   TTree *T = (TTree*)data_file->Get("T");
  
   //Create output root file where histograms will be stored
-  TFile *outROOT = new TFile(Form("D2data_pm%d_%d.root", pm, run), "recreate");
+  TFile *outROOT = new TFile(Form("D2data_pm%d_%d.root", Pmiss, run), "recreate");
   
 
   //********* Create 1D Histograms **************
- 
+  
+  TH1F *epCT = new TH1F("epCT","e-Proton Coincidence Time", 100, 0, 20);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
+
   //Kinematics Quantities
+
   TH1F *Emiss = new TH1F("Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
   TH1F *pm = new TH1F("pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
   TH1F *Q_2 = new TH1F("Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
@@ -36,9 +39,22 @@ void analyze_deepData(int run, int pm)
   TH1F *q_vec = new TH1F("q", "q-vector, |q|", q_nbins, q_xmin, q_xmax);
   TH1F *thet_pq = new TH1F("theta_pq", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
   TH1F *E_n = new TH1F("En", "Neutron Final Energy", En_nbins, En_xmin, En_xmax);
-  TH1F *theta_nq = new TH1F("theta_nq", "(q-vector,Neutron) Angle, #theta_{nq}", thnq_bins, thnq_xmin, thnq_xmax);
+  TH1F *theta_nq = new TH1F("theta_nq", "(q-vector,Neutron) Angle, #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax);
   TH1F *thet_pq_v2 = new TH1F("theta_pq_v2", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
-  
+    
+  TH1F *Mmiss = new TH1F("Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);      
+  TH1F *Mmissv2 = new TH1F("Mmissv2","Missing Mass Version 2", Mm_nbins, Mm_xmin, Mm_xmax);      
+  TH1F *Emiss_nuc = new TH1F("Emiss_nuc","Nuclear Missing Energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
+  TH1F *Erecoil = new TH1F("Erecoil","Recoil Neutron Energy", En_nbins, En_xmin, En_xmax);
+  TH1F *pmx = new TH1F("pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);
+  TH1F *pmy = new TH1F("pmy","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);
+  TH1F *pmz = new TH1F("pmz","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);
+  TH1F *KinN = new TH1F("Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);
+  TH1F *KinP = new TH1F("Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);
+  TH1F *E_p = new TH1F("Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
+
+
+
   //Target Reconstruction Variables
   TH1F *x_tar = new TH1F("x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
   TH1F *y_tar = new TH1F("y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
@@ -130,6 +146,8 @@ void analyze_deepData(int run, int pm)
 
 
   /************Define Histos to APPLY CUTS*********************************/
+ 
+  TH1F *cut_epCT = new TH1F("cut_epCT","e-Proton Coincidence Time", 100, 0, 20);
   
   //Kinematics Quantities
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
@@ -149,10 +167,22 @@ void analyze_deepData(int run, int pm)
   TH1F *cut_theta_q = new TH1F("cut_theta_q", "q-vector Angle, #theta_{q}", thq_nbins, thq_xmin, thq_xmax);
   TH1F *cut_thet_pq = new TH1F("cut_theta_pq", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
   TH1F *cut_thet_pq_v2 = new TH1F("cut_theta_pq_v2", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
-  TH1F *cut_E_n = new TH1F("cut_En", "Neutron Final Energy", En_bins, En_xmin, En_xmax);
+  TH1F *cut_E_n = new TH1F("cut_En", "Neutron Final Energy", En_nbins, En_xmin, En_xmax);
   TH1F *cut_theta_nq = new TH1F("cut_theta_nq", "(q-vector, Neutron) Angle, #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax);
   
-  
+  TH1F *cut_Mmiss = new TH1F("cut_Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);      
+  TH1F *cut_Mmissv2 = new TH1F("cut_Mmissv2","Missing Mass Version 2", Mm_nbins, Mm_xmin, Mm_xmax);      
+  TH1F *cut_Emiss_nuc = new TH1F("cut_Emiss_nuc","Nuclear Missing Energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
+  TH1F *cut_Erecoil = new TH1F("cut_Erecoil","Recoil Neutron Energy", En_nbins, En_xmin, En_xmax);
+  TH1F *cut_pmx = new TH1F("cut_pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);
+  TH1F *cut_pmy = new TH1F("cut_pmy","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);
+  TH1F *cut_pmz = new TH1F("cut_pmz","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);
+    
+  TH1F *cut_KinN = new TH1F("cut_Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);
+  TH1F *cut_KinP = new TH1F("cut_Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);
+  TH1F *cut_E_p = new TH1F("cut_Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
+
+
   //Target Reconstruction Variables
   TH1F *cut_x_tar = new TH1F("cut_x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
   TH1F *cut_y_tar = new TH1F("cut_y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
@@ -243,6 +273,7 @@ void analyze_deepData(int run, int pm)
   //Set Variable Names and Branches
  
   //------Kinematics
+  Double_t  epCoinTime;
   Double_t  theta_e;
   Double_t  W;
   Double_t  Q2;
@@ -252,14 +283,32 @@ void analyze_deepData(int run, int pm)
   Double_t  th_q;
   Double_t  kf;
   Double_t  Pf;
+  Double_t  Ep;
+  Double_t  Kp;
+  Double_t  Kn;
   Double_t  Em;
+  Double_t  Em_nuc;
+  Double_t  M_recoil;  //invariant mass of recoiling system (should be equivalent to missing mass of neutron)
+  Double_t  E_recoil;   //recoil system energy (should be equivalent to neutron energy)
   Double_t  Pm;
+  Double_t  Pmx;
+  Double_t  Pmy;
+  Double_t  Pmz;
   Double_t  thbq;
   Double_t  thxq;
+  Double_t  phbq;
+  Double_t  phxq;
   Double_t  xangle;
+
+  
+  //Additional Kinematics to be defined within loop
+  Double_t  MM;  //Missing Mass of neutron
   Double_t  theta_p;  //to be determined in loop
   Double_t  theta_pq_v2; //to be determined in loop
   Double_t  W2;
+  Double_t  En;
+
+  T->SetBranchAddress("CTime.epCoinTime_ROC2", &epCoinTime);
 
   T->SetBranchAddress("P.kin.primary.scat_ang_rad",&theta_e);
   T->SetBranchAddress("P.kin.primary.W",&W);
@@ -270,13 +319,29 @@ void analyze_deepData(int run, int pm)
   T->SetBranchAddress("P.kin.primary.th_q",&th_q);
   T->SetBranchAddress("P.gtr.p",&kf);
   T->SetBranchAddress("H.gtr.p",&Pf);
-
-  T->SetBranchAddress("H.kin.secondary.emiss",&Em);
-  T->SetBranchAddress("H.kin.secondary.pmiss",&Pm);
-  T->SetBranchAddress("H.kin.secondary.th_bq",&thbq);      //Polar angle of recoil system with q (rad) ----> theta_nq angle between neutron and q-vector
-  T->SetBranchAddress("H.kin.secondary.th_xq",&thxq);     //Polar angle of detected particle with q    ----> theta_pq angle between proton and q-vector
   T->SetBranchAddress("H.kin.secondary.xangle",&xangle);  //Angle of detected particle with scattered electron (Used to determine hadron angle)
   
+
+
+  //Recoil System Variables (Missing Neutron)
+  T->SetBranchAddress("H.kin.secondary.pmiss",&Pm);
+  T->SetBranchAddress("H.kin.secondary.Prec_x",&Pmx);   //x-component of recoil momentum
+  T->SetBranchAddress("H.kin.secondary.Prec_y",&Pmy);   //y
+  T->SetBranchAddress("H.kin.secondary.Prec_z",&Pmz);   //z
+
+  T->SetBranchAddress("H.kin.secondary.tx",&Kp);   //kinetic energy of detected particle (proton)
+  T->SetBranchAddress("H.kin.secondary.tb",&Kn);   //kinetic energy of recoil system (neutron)
+
+  T->SetBranchAddress("H.kin.secondary.emiss",&Em);
+  T->SetBranchAddress("H.kin.secondary.emiss_nuc",&Em_nuc);  //Nuclear definition of Missing Energy
+  T->SetBranchAddress("H.kin.secondary.Mrecoil",&M_recoil);  //Missing Mass
+  T->SetBranchAddress("H.kin.secondary.Erecoil",&E_recoil);  //Recoil Energy of System (Should be neutron Energy)
+
+
+  T->SetBranchAddress("H.kin.secondary.th_xq",&thxq);     //Polar angle of detected particle with q    ----> theta_pq angle between proton and q-vector
+  T->SetBranchAddress("H.kin.secondary.ph_xq",&phxq);     //Azimuth angle of detected particle with q    ----> phi_pq angle between proton and q-vector
+  T->SetBranchAddress("H.kin.secondary.th_bq",&thbq);      //Polar angle of recoil system with q (rad) ----> theta_nq angle between neutron and q-vector
+  T->SetBranchAddress("H.kin.secondary.ph_bq",&thbq);      //Azimuth of recoil system with scattering plane (rad) ----> phi_nq angle between neutron and q-vector
 
 
   //-------SHMS Focal Plane / Target
@@ -339,7 +404,10 @@ void analyze_deepData(int run, int pm)
  
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
-  
+  Bool_t c_ctime;  //coincidence time cut
+  Bool_t c_hdelta;
+  Bool_t c_edelta;
+
   //======================
   // E V E N T   L O O P 
   //======================
@@ -358,15 +426,21 @@ void analyze_deepData(int run, int pm)
     
     //Determine theta_p
     theta_p = xangle - theta_e;
-    W2 = W*2;
+    W2 = W*W;
     theta_pq_v2 = th_q - theta_p;
+    Ep = sqrt(MP*MP + Pf*Pf);
+    En = sqrt(MN*MN + Pm*Pm);
+    MM = sqrt(TMath::Power(nu+MD-Ep,2) - Pm*Pm);
 
-    c_Em = Em < 0.05;
-
-
+    c_Em = Em_nuc>-0.02 && Em_nuc<0.04;
+    c_ctime = epCoinTime>8.6 && epCoinTime<13.6;
+    c_hdelta = h_delta>-8. && h_delta<8.;
+    
     //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em)
+      if (c_Em&&c_ctime&&c_hdelta)
 	{
+	  cut_epCT->Fill(epCoinTime);
+
 	  //Kinematics
 	  cut_Emiss->Fill(Em);
 	  cut_pm->Fill(Pm);
@@ -387,6 +461,18 @@ void analyze_deepData(int run, int pm)
 	  cut_thet_pq->Fill(thxq/dtr);
 	  cut_thet_pq_v2->Fill(theta_pq_v2/dtr);
 	  cut_theta_nq->Fill(thbq/dtr);
+	  cut_E_n->Fill(En);
+
+	  cut_Mmiss->Fill(M_recoil);
+	  cut_Mmissv2->Fill(MM); 
+	  cut_Emiss_nuc->Fill(Em_nuc);
+	  cut_Erecoil->Fill(E_recoil);
+	  cut_pmx->Fill(Pmx);
+	  cut_pmy->Fill(Pmy);
+	  cut_pmz->Fill(Pmz);
+	  cut_KinN->Fill(Kn);
+	  cut_KinP->Fill(Kp);
+	  cut_E_p->Fill(Ep);
 
 	  //Reconstructed Target Quantities (Lab Frame)
 	  cut_x_tar->Fill(tar_x);
@@ -478,7 +564,8 @@ void analyze_deepData(int run, int pm)
 	}//End CUTS LOOP
       
       
-      
+      epCT->Fill(epCoinTime);
+
       //Kinematics
       Emiss->Fill(Em);
       pm->Fill(Pm);
@@ -499,8 +586,19 @@ void analyze_deepData(int run, int pm)
       thet_pq->Fill(thxq/dtr);
       thet_pq_v2->Fill(theta_pq_v2/dtr);
       theta_nq->Fill(thbq/dtr);
+      E_n->Fill(En);
 
-      
+      Mmiss->Fill(M_recoil);                                                                                 
+      Mmissv2->Fill(MM);                                                                                     
+      Emiss_nuc->Fill(Em_nuc);                                                                               
+      Erecoil->Fill(E_recoil);                                                                               
+      pmx->Fill(Pmx);                                                                                        
+      pmy->Fill(Pmy);                                                                                        
+      pmz->Fill(Pmz);                                      
+      KinN->Fill(Kn);                                                                                        
+      KinP->Fill(Kp); 
+      E_p->Fill(Ep);
+
       //Reconstructed Target Quantities (Lab Frame)
       x_tar->Fill(tar_x);
       y_tar->Fill(tar_y);

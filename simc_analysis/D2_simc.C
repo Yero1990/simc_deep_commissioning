@@ -2,13 +2,13 @@
 
 #include "set_deep_histos.h"
 
-void D2_simc(int run, int pm, string model, string rad)
+void D2_simc(int run, int Pmiss, string model, string rad)
 {
 
   /*Code Usage Example:
     >> root -l
     >> .L D2_simc.C
-    >> D2_simc(3289, 80, "pwia", "rad")     // Missing Momentum pm = 80, 580 or 750,  model = "pwia" or "fsi", rad = "rad" or "norad"
+    >> D2_simc(3289, 80, "pwia", "rad")     // Missing Momentum Pmiss = 80, 580 or 750,  model = "pwia" or "fsi", rad = "rad" or "norad"
     where "rad" ---> simulate radiative tail and Eloss,   "norad"---> Does NOT simulate radiative tail or Eloss
    */
   
@@ -23,30 +23,37 @@ void D2_simc(int run, int pm, string model, string rad)
   Double_t e_trkEff;
   Double_t h_trkEff;           
   Double_t c_LT;
- 
+  Double_t t_LT;
+
   if(run==3289){
 
-    hP0 = 2931.170 / 1000.;
+    //Uncorrected Momentum
+    //    hP0 = 2843.8 / 1000.;                  
+    //sP0 = 8700. / 1000.; 
+
+    //Corrected Momentum (from run 3288)
+    hP0 = 2837.188 / 1000.;
     sP0 = 8520.256 / 1000.;
     
-    charge_factor =147.648;   //BCM4A
-    e_trkEff =  0.9856;       //shms e- trk eff
-    h_trkEff = 0.9864;        //hms had trk eff
-    c_LT = 0.9814;
+    charge_factor =137.572;   //BCM4A
+    e_trkEff =0.9849;       //shms e- trk eff
+    h_trkEff = 0.9876;        //hms had trk eff
+    c_LT = 0.979594;          //computer live time
+    t_LT = 0.944154;          //total live time
 
   }
 
   //Read SIMC ROOTfiles
   //TString filename = Form("../../worksim_voli/D2_pCorr/D2_heep_%d.root",run);                                 
   //   TString filename = Form("../../worksim_voli/D2_heep_%d_noOffset.root",run);                                 
-  TString filename = Form("../../worksim_voli/d2_pm%d_laget%s_%s.root", pm, model.c_str(), rad.c_str());                                 
+  TString filename = Form("../worksim_voli/d2_pm%d_laget%s_%s_pCorr.root", Pmiss, model.c_str(), rad.c_str());                                 
   
   
   TFile *data_file = new TFile(filename, "READ"); 
   TTree *SNT = (TTree*)data_file->Get("SNT");
  
   //Create output root file where histograms will be stored
-  TFile *outROOT = new TFile(Form("D2simc_pm%s_laget%s_%s.root", pm, model.c_str(), rad.c_str()), "recreate");
+  TFile *outROOT = new TFile(Form("D2simc_pm%d_laget%s_%s.root", Pmiss, model.c_str(), rad.c_str()), "recreate");
   
   
   //********* Create 1D Histograms **************
@@ -56,7 +63,6 @@ void D2_simc(int run, int pm, string model, string rad)
   TH1F *pm = new TH1F("pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
   TH1F *Q_2 = new TH1F("Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
   TH1F *omega = new TH1F("omega","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
-  TH1F *omega_noEloss = new TH1F("omega_noEloss","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
   TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", W_nbins, W_xmin, W_xmax);     //min width = 19.9 MeV (0.0199) (bin width = 25 MeV)
   TH1F *theta_elec = new TH1F("theta_elec", "Electron Scatt. Angle", the_nbins, the_xmin, the_xmax);
   TH1F *theta_prot = new TH1F("theta_prot", "Proton Scatt. Angle", thp_nbins, thp_xmin, thp_xmax);
@@ -65,15 +71,23 @@ void D2_simc(int run, int pm, string model, string rad)
   TH1F *W_2 = new TH1F("W2", "Invariant Mass W2", W2_nbins, W2_xmin, W2_xmax);
   TH1F *xbj = new TH1F("xbj", "x-Bjorken", xbj_nbins, xbj_xmin, xbj_xmax);
   TH1F *P_f = new TH1F("P_f", "Final Proton Momentum", Pf_nbins, Pf_xmin, Pf_xmax);
-  TH1F *k_i = new TH1F("ki", "Initial e^{-} Momentum", bins, 8., 12.);
+  
   TH1F *k_f = new TH1F("kf", "Final e^{-} Momentum", kf_nbins, kf_xmin, kf_xmax);
   TH1F *theta_q = new TH1F("theta_q", "q-vector Angle, #theta_{q}", thq_nbins, thq_xmin, thq_xmax);
-  TH1F *theta_q_v2 = new TH1F("theta_q_v2", "q-vector Angle, #theta_{q}", thq_nbins, thq_xmin, thq_xmax);
   TH1F *q_vec = new TH1F("q", "q-vector, |q|", q_nbins, q_xmin, q_xmax);
   TH1F *thet_pq = new TH1F("theta_pq", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
   TH1F *thet_pq_v2 = new TH1F("theta_pq_v2", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
   TH1F *E_n = new TH1F("En", "Neutron Final Energy", En_nbins, En_xmin, En_xmax);
-  TH1F *theta_nq = new TH1F("theta_nq", "(q-vector,Neutron) Angle, #theta_{nq}", thnq_bins, thnq_xmin, thnq_xmax);
+  TH1F *theta_nq = new TH1F("theta_nq", "(q-vector,Neutron) Angle, #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax);
+
+  TH1F *Mmiss = new TH1F("Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);                                                                           
+  TH1F *pmx = new TH1F("pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);                                                                                                
+  TH1F *pmy = new TH1F("pmy","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);                                                                                                       
+  TH1F *pmz = new TH1F("pmz","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);                                                         
+  TH1F *KinN = new TH1F("Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);                                                                       
+  TH1F *KinP = new TH1F("Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);  
+  TH1F *E_p = new TH1F("Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
+
   
   //Target Reconstruction Variables
   TH1F *x_tar = new TH1F("x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
@@ -170,7 +184,6 @@ void D2_simc(int run, int pm, string model, string rad)
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
   TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
   TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
-  TH1F *cut_omega_noEloss = new TH1F("cut_omega_noEloss","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
   TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", W_nbins, W_xmin, W_xmax);     //min width = 19.9 MeV (0.0199) (bin width = 25 MeV)
   TH1F *cut_theta_elec = new TH1F("cut_theta_elec", "Electron Scatt. Angle", the_nbins, the_xmin, the_xmax);
   TH1F *cut_theta_prot = new TH1F("cut_theta_prot", "Proton Scatt. Angle", thp_nbins, thp_xmin, thp_xmax);
@@ -179,17 +192,24 @@ void D2_simc(int run, int pm, string model, string rad)
   TH1F *cut_W_2 = new TH1F("cut_W2", "Invariant Mass W2", W2_nbins, W2_xmin, W2_xmax);
   TH1F *cut_xbj = new TH1F("cut_xbj", "x-Bjorken", xbj_nbins, xbj_xmin, xbj_xmax);
   TH1F *cut_P_f = new TH1F("cut_P_f", "Final Proton Momentum", Pf_nbins, Pf_xmin, Pf_xmax);
-  TH1F *cut_k_i = new TH1F("cut_ki", "Initial e^{-} Momentum", bins, 8., 12.);
   TH1F *cut_k_f = new TH1F("cut_kf", "Final e^{-} Momentum", kf_nbins, kf_xmin, kf_xmax);
   TH1F *cut_q_vec = new TH1F("cut_q", "q-vector, |q|", q_nbins, q_xmin, q_xmax);
   TH1F *cut_theta_q = new TH1F("cut_theta_q", "q-vector Angle, #theta_{q}", thq_nbins, thq_xmin, thq_xmax);
-  TH1F *cut_theta_q_v2 = new TH1F("cut_theta_q_v2", "q-vector Angle, #theta_{q}", thq_nbins, thq_xmin, thq_xmax);
   TH1F *cut_thet_pq = new TH1F("cut_theta_pq", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
   TH1F *cut_thet_pq_v2 = new TH1F("cut_theta_pq_v2", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
-  TH1F *cut_E_n = new TH1F("cut_En", "Neutron Final Energy", En_bins, En_xmin, En_xmax);
+  TH1F *cut_E_n = new TH1F("cut_En", "Neutron Final Energy", En_nbins, En_xmin, En_xmax);
   TH1F *cut_theta_nq = new TH1F("cut_theta_nq", "(q-vector, Neutron) Angle, #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax);
-  
-  
+
+  TH1F *cut_Mmiss = new TH1F("cut_Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);         
+  TH1F *cut_Erecoil = new TH1F("cut_Erecoil","Recoil Neutron Energy", En_nbins, En_xmin, En_xmax);   
+  TH1F *cut_pmx = new TH1F("cut_pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);            
+  TH1F *cut_pmy = new TH1F("cut_pmy","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);                                                                             
+  TH1F *cut_pmz = new TH1F("cut_pmz","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);                    
+  TH1F *cut_KinN = new TH1F("cut_Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);                        
+  TH1F *cut_KinP = new TH1F("cut_Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);    
+  TH1F *cut_E_p = new TH1F("cut_Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
+
+
   //Target Reconstruction Variables
   TH1F *cut_x_tar = new TH1F("cut_x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
   TH1F *cut_y_tar = new TH1F("cut_y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
@@ -403,20 +423,19 @@ void D2_simc(int run, int pm, string model, string rad)
   
   //Define Additional Kinematic Variables
   Double_t Eb = 10.6005;  //GeV Beam Energy
-  Double_t nu_noEloss;     //Energy transfer (no Eloss)
   Double_t W2;             //Invarianrt Mass Squared
   Double_t X;              //B-jorken X
   Double_t Pf;             //Final Proton Momentum 
+  Double_t Kp;               //Proton Kinetic Energy
+  Double_t Kn;               //Neutron Kinetic Energy
+  Double_t MM;              //Missing Mass
   Double_t ki;             //Incident e- momentum
   Double_t kf;             //Final electron momentum
   Double_t En;             //Neutron Energy
   Double_t Ep;             //proton final energy
   Double_t Ee;             //electron final energy
-  Double_t Kp;             //proton kinetic energy
-  Double_t Kn;            //neutron kinetic energy
   Double_t th_nq;       //Angle between q-vector and neutron
   Double_t th_q;         //Angle between q-vector and beamline (+z axis --lab)
-  Double_t th_qv2;
   Double_t th_pq;          //version 2 of theta_pq
 
   //Determine Full Weight Quantities (Assume one for heep check)
@@ -426,6 +445,7 @@ void D2_simc(int run, int pm, string model, string rad)
 
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
+  Bool_t c_hdelta;
 
   //=======================
   // E N T R Y    L O O P
@@ -448,23 +468,26 @@ void D2_simc(int run, int pm, string model, string rad)
     ki = sqrt(Ein*Ein - me*me);    //use beam energy without Eloss corrections, as they are NOT done in data as well                       
     kf = sP0*(1. + e_delta/100.);
     Ee = sqrt(me*me + kf*kf);
-    nu_noEloss = Eb - Ee;
     Pf = hP0*(1. + h_delta/100.);
     En = sqrt(MN*MN + Pm*Pm);
     Ep = sqrt(MP*MP + Pf*Pf);                                               
     X = Q2 / (2.*MP*nu);
     th_q = acos( (ki - kf*cos(theta_e))/q ); //th_q = theta_p + theta_pq;
-    th_qv2 = theta_p - theta_pq;
     th_pq =  th_q - theta_p;
     th_nq = acos((q - Pf*cos(th_pq))/Pm);
 
-  
+    MM = TMath::Sqrt( TMath::Power(nu+MD-Ep,2) - Pm*Pm );
+    Kp = Ep - MP;
+    Kn = En - MN;
+    
     //Define cuts
-    c_Em = Em>-0.04 && Em<0.08;
+    c_Em = Em>-0.01 && Em<0.02;
+    c_hdelta = h_delta > -8. && h_delta < 8.;
+
     //Full Weight
-    FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*c_LT)/nentries;
+    FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/nentries;
     
-    
+    /*
     cout << "Full Weight = " << FullWeight << endl;
     cout << "Normfac = " << Normfac << endl;
     cout << "Weight = " << Weight << endl;
@@ -473,17 +496,16 @@ void D2_simc(int run, int pm, string model, string rad)
     cout << "h_trkEff = " << h_trkEff << endl;
     cout << "CLT = " << c_LT << endl;
     cout << "nentries = " << nentries << endl;
-    
+    */
 
     //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em)
+      if (c_Em&&c_hdelta)
 	{
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
 	  cut_pm->Fill(Pm, FullWeight);
 	  cut_Q_2->Fill(Q2, FullWeight);
 	  cut_omega->Fill(nu, FullWeight);
-	  cut_omega_noEloss->Fill(nu_noEloss, FullWeight); 
 	  cut_W_inv->Fill(W, FullWeight);
 	  cut_theta_elec->Fill(theta_e/dtr, FullWeight);
 	  cut_theta_prot->Fill(theta_p/dtr, FullWeight);
@@ -495,13 +517,20 @@ void D2_simc(int run, int pm, string model, string rad)
 	  cut_P_f->Fill(Pf, FullWeight);
 	  cut_k_f->Fill(kf, FullWeight);
 	  cut_E_n->Fill(En, FullWeight);
-	  cut_k_i->Fill(ki, FullWeight);
 	  cut_theta_q->Fill(th_q/dtr, FullWeight);
-	  cut_theta_q_v2->Fill(th_qv2/dtr, FullWeight);
 	  cut_q_vec->Fill(q, FullWeight);
 	  cut_thet_pq->Fill(theta_pq/dtr, FullWeight);
 	  cut_thet_pq_v2->Fill(th_pq/dtr, FullWeight);
 	  cut_theta_nq->Fill(th_nq/dtr, FullWeight);
+
+	  cut_Mmiss->Fill(MM, FullWeight);
+	  cut_KinN->Fill(Kn, FullWeight);
+	  cut_KinP->Fill(Kp, FullWeight);
+	  
+	  cut_pmx->Fill(Pmx, FullWeight);
+	  cut_pmy->Fill(Pmy, FullWeight);
+	  cut_pmz->Fill(Pmz, FullWeight);
+	  cut_E_p->Fill(Ep, FullWeight);
 
 	  //Reconstructed Target Quantities (Lab Frame)
 	  cut_x_tar->Fill(tar_x, FullWeight);
@@ -579,7 +608,6 @@ void D2_simc(int run, int pm, string model, string rad)
       pm->Fill(Pm, FullWeight);
       Q_2->Fill(Q2, FullWeight);
       omega->Fill(nu, FullWeight);
-      omega_noEloss->Fill(nu_noEloss, FullWeight); 
       W_inv->Fill(W, FullWeight);
       theta_elec->Fill(theta_e/dtr, FullWeight);
       theta_prot->Fill(theta_p/dtr, FullWeight);
@@ -591,13 +619,19 @@ void D2_simc(int run, int pm, string model, string rad)
       P_f->Fill(Pf, FullWeight);
       k_f->Fill(kf, FullWeight);
       E_n->Fill(En, FullWeight);
-      k_i->Fill(ki, FullWeight);
       theta_q->Fill(th_q/dtr, FullWeight);
-      theta_q_v2->Fill(th_qv2/dtr, FullWeight);
       q_vec->Fill(q, FullWeight);
       thet_pq->Fill(theta_pq/dtr, FullWeight);
       thet_pq_v2->Fill(th_pq/dtr, FullWeight);
       theta_nq->Fill(th_nq/dtr, FullWeight);
+
+      Mmiss->Fill(MM, FullWeight);                                                                                                                                                 
+      KinN->Fill(Kn, FullWeight);                                                                                                                                                  
+      KinP->Fill(Kp, FullWeight);
+      pmx->Fill(Pmx, FullWeight);
+      pmy->Fill(Pmy, FullWeight);
+      pmz->Fill(Pmz, FullWeight);
+      E_p->Fill(Ep, FullWeight);
 
       //Reconstructed Target Quantities (Lab Frame)
       x_tar->Fill(tar_x, FullWeight);

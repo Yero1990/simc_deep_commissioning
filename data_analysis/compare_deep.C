@@ -9,9 +9,14 @@ void compare_heep(int run, int pm, string model, string rad)
   //TString simc_filename =  "weighted_ep_coin_simc_1854.root"; //"ep_coin_simc_1929.root";
   
   //Pre-defined SIMC/data root file names containing histogram object to comapare
-  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s.root", pm, model.c_str(), rad.c_str());
+  //TString simc_filename =  Form("D2simc_pm%d_laget%s_%s.root", pm, model.c_str(), rad.c_str());
+  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s_usingTLT.root", pm, model.c_str(), rad.c_str());
+
+
   //TString simc_filename =  Form("Weighted_simc_hms_single_%d_gfor.root", runNUM);
-  TString data_filename = Form("./D2data_pm%d_%d.root",pm, run); 
+  //TString data_filename = Form("./D2data_pm%d_%d.root",pm, run); 
+  //TString data_filename = Form("./D2data_pm%d_%d_EmANDCtimeCut.root",pm, run); 
+  TString data_filename = Form("./D2data_pm%d_%d_EmANDCtimeANDhdeltaCut.root",pm, run); 
 
   TString simc_path;
   TString data_path;
@@ -89,7 +94,7 @@ void compare_heep(int run, int pm, string model, string rad)
   //-------------------------KINEMATICS---------------------------
   TH1F *simc_Q2 =  0;
   TH1F *simc_omega =  0;
-  TH1F *simc_W =  0;
+  TH1F *simc_W2 =  0;
   TH1F *simc_thq = 0;
 
   TH1F *simc_xbj = 0;
@@ -104,11 +109,21 @@ void compare_heep(int run, int pm, string model, string rad)
   TH1F *simc_q = 0;    //q-vector magnitude
   TH1F *simc_thpq = 0;
   TH1F *simc_thnq = 0;
-
+  
+  //Kinematics 3
+  TH1F *simc_MM = 0;
+  TH1F *simc_En = 0;
+  TH1F *simc_Ep = 0;
+  TH1F *simc_Kn = 0;
+  TH1F *simc_Kp = 0;
+  TH1F *simc_Pmx = 0;
+  TH1F *simc_Pmy = 0;
+  TH1F *simc_Pmz = 0;
+  
   //Define data histos
   TH1F *data_Q2 =  0;
   TH1F *data_omega =  0;
-  TH1F *data_W =  0;
+  TH1F *data_W2 =  0;
   TH1F *data_thq = 0;
 
   TH1F *data_xbj = 0;
@@ -124,6 +139,15 @@ void compare_heep(int run, int pm, string model, string rad)
   TH1F *data_thpq = 0;
   TH1F *data_thnq = 0;
 
+  //Kinematics 3
+  TH1F *data_MM = 0;
+  TH1F *data_En = 0;
+  TH1F *data_Ep = 0;
+  TH1F *data_Kn = 0;
+  TH1F *data_Kp = 0;
+  TH1F *data_Pmx = 0;
+  TH1F *data_Pmy = 0;
+  TH1F *data_Pmz = 0;
 
   //---------------------------------------------------------------
 
@@ -315,7 +339,7 @@ void compare_heep(int run, int pm, string model, string rad)
   //Get Histogram objects from SIMC rootfile
   simc_file->GetObject("cut_Q_2", simc_Q2);
   simc_file->GetObject("cut_omega", simc_omega);
-  simc_file->GetObject("cut_W_inv", simc_W);
+  simc_file->GetObject("cut_W2", simc_W2);
   simc_file->GetObject("cut_theta_q", simc_thq);
 
   simc_file->GetObject("cut_xbj", simc_xbj);
@@ -329,16 +353,23 @@ void compare_heep(int run, int pm, string model, string rad)
   simc_file->GetObject("cut_q", simc_q);
   simc_file->GetObject("cut_theta_pq", simc_thpq);
   simc_file->GetObject("cut_theta_nq", simc_thnq);
+  
+  simc_file->GetObject("cut_Mmiss", simc_MM);
+  simc_file->GetObject("cut_En", simc_En);
+  simc_file->GetObject("cut_Ep", simc_Ep);
+  simc_file->GetObject("cut_Kn", simc_Kn);
+  simc_file->GetObject("cut_Kp", simc_Kp);
+  simc_file->GetObject("cut_pmx", simc_Pmx);
+  simc_file->GetObject("cut_pmy", simc_Pmy);
+  simc_file->GetObject("cut_pmz", simc_Pmz);
 
-  
-  
   //Set SIMC Histo Aesthetics
   simc_Q2->SetLineColor(kRed);
   simc_Q2->SetLineWidth(2);
   simc_omega->SetLineColor(kRed);
   simc_omega->SetLineWidth(2);
-  simc_W->SetLineColor(kRed);
-  simc_W->SetLineWidth(2);
+  simc_W2->SetLineColor(kRed);
+  simc_W2->SetLineWidth(2);
   simc_thq->SetLineColor(kRed);
   simc_thq->SetLineWidth(2);
   
@@ -363,20 +394,38 @@ void compare_heep(int run, int pm, string model, string rad)
   simc_thpq->SetLineWidth(2);
   simc_thnq->SetLineColor(kRed);
   simc_thnq->SetLineWidth(2);
+
+  simc_MM->SetLineColor(kRed);
+  simc_MM->SetLineWidth(2);
+  simc_En->SetLineColor(kRed);
+  simc_En->SetLineWidth(2);
+  simc_Ep->SetLineColor(kRed);
+  simc_Ep->SetLineWidth(2);
+  simc_Kn->SetLineColor(kRed);
+  simc_Kn->SetLineWidth(2);
+  simc_Kp->SetLineColor(kRed);
+  simc_Kp->SetLineWidth(2);
+  simc_Pmx->SetLineColor(kRed);
+  simc_Pmx->SetLineWidth(2);
+  simc_Pmy->SetLineColor(kRed);
+  simc_Pmy->SetLineWidth(2);
+  simc_Pmz->SetLineColor(kRed);
+  simc_Pmz->SetLineWidth(2);
+
   //change to data_file
   data_file->cd();
   
   //Get Histogram objects from data rootfile
   data_file->GetObject("cut_Q_2", data_Q2);
   data_file->GetObject("cut_omega", data_omega);
-  data_file->GetObject("cut_W_inv", data_W);
+  data_file->GetObject("cut_W2", data_W2);
   data_file->GetObject("cut_theta_q", data_thq);
 
   
   data_file->GetObject("cut_xbj", data_xbj);
   data_file->GetObject("cut_theta_elec", data_th_elec);
   data_file->GetObject("cut_kf", data_kf);
-  data_file->GetObject("Emiss", data_emiss);
+  data_file->GetObject("Emiss_nuc", data_emiss);
 
   data_file->GetObject("cut_pm", data_Pm);
   data_file->GetObject("cut_P_f", data_Pf);
@@ -385,13 +434,22 @@ void compare_heep(int run, int pm, string model, string rad)
   data_file->GetObject("cut_theta_pq", data_thpq);
   data_file->GetObject("cut_theta_nq", data_thnq);
 
+  data_file->GetObject("cut_Mmiss", data_MM);
+  data_file->GetObject("cut_En", data_En);
+  data_file->GetObject("cut_Ep", data_Ep);
+  data_file->GetObject("cut_Kn", data_Kn);
+  data_file->GetObject("cut_Kp", data_Kp);
+  data_file->GetObject("cut_pmx", data_Pmx);
+  data_file->GetObject("cut_pmy", data_Pmy);
+  data_file->GetObject("cut_pmz", data_Pmz);
+
   //Set data Histo Aesthetics
   data_Q2->SetFillColorAlpha(kBlue, 0.35);
   data_Q2->SetFillStyle(3004);
   data_omega->SetFillColorAlpha(kBlue, 0.35);
   data_omega->SetFillStyle(3004);
-  data_W->SetFillColorAlpha(kBlue, 0.35);
-  data_W->SetFillStyle(3004);
+  data_W2->SetFillColorAlpha(kBlue, 0.35);
+  data_W2->SetFillStyle(3004);
   data_thq->SetFillColorAlpha(kBlue, 0.35);
   data_thq->SetFillStyle(3004);
 
@@ -417,6 +475,23 @@ void compare_heep(int run, int pm, string model, string rad)
   data_thnq->SetFillColorAlpha(kBlue,0.35);
   data_thnq->SetFillStyle(3004);
 
+  data_MM->SetFillColorAlpha(kBlue,0.35);
+  data_MM->SetFillStyle(3004);
+  data_En->SetFillColorAlpha(kBlue,0.35);
+  data_En->SetFillStyle(3004);
+  data_Ep->SetFillColorAlpha(kBlue,0.35);
+  data_Ep->SetFillStyle(3004);
+  data_Kn->SetFillColorAlpha(kBlue,0.35);
+  data_Kn->SetFillStyle(3004);
+  data_Kp->SetFillColorAlpha(kBlue,0.35);
+  data_Kp->SetFillStyle(3004);
+  data_Pmx->SetFillColorAlpha(kBlue,0.35);
+  data_Pmx->SetFillStyle(3004);
+  data_Pmy->SetFillColorAlpha(kBlue,0.35);
+  data_Pmy->SetFillStyle(3004);
+  data_Pmz->SetFillColorAlpha(kBlue,0.35);
+  data_Pmz->SetFillStyle(3004);
+
   //Overlay SIMC/data plots (*** VERY IMPORTANT ***: Range and #bins must be same)
 
 
@@ -435,29 +510,29 @@ void compare_heep(int run, int pm, string model, string rad)
    c1->Divide(2,2);
 
    c1->cd(1);
-   simc_eytar->DrawNormalized();
-   data_eytar->DrawNormalized("sameshist");
+   simc_eytar->Draw();
+   data_eytar->Draw("sameshist");
    leg5->AddEntry(data_eytar,"Data","f");
    leg5->AddEntry(simc_eytar,"SIMC");
    leg5->Draw();
 
    c1->cd(2);
-   simc_exptar->DrawNormalized();
-   data_exptar->DrawNormalized("sameshist");
+   simc_exptar->Draw();
+   data_exptar->Draw("sameshist");
    leg5->AddEntry(data_exptar,"Data", "f");
    leg5->AddEntry(simc_exptar,"SIMC");
    leg5->Draw();
 
    c1->cd(3);
-   simc_eyptar->DrawNormalized();
-   data_eyptar->DrawNormalized("sameshist");
+   simc_eyptar->Draw();
+   data_eyptar->Draw("sameshist");
    leg7->AddEntry(data_eyptar,"Data", "f");
    leg7->AddEntry(simc_eyptar,"SIMC");
    leg7->Draw();
      
    c1->cd(4);
-   simc_edelta->DrawNormalized();
-   data_edelta->DrawNormalized("sameshist");
+   simc_edelta->Draw();
+   data_edelta->Draw("sameshist");
    leg8->AddEntry(data_edelta,"Data", "f");
    leg8->AddEntry(simc_edelta,"SIMC");
    leg8->Draw();
@@ -485,29 +560,29 @@ void compare_heep(int run, int pm, string model, string rad)
    c2->Divide(2,2);
 
    c2->cd(1);
-   simc_exfp->DrawNormalized();
-   data_exfp->DrawNormalized("sameshist");
+   simc_exfp->Draw();
+   data_exfp->Draw("sameshist");
    leg13->AddEntry(data_exfp,"Data","f");
    leg13->AddEntry(simc_exfp,"SIMC");
    leg13->Draw();
    
    c2->cd(2);
-   simc_eyfp->DrawNormalized();
-   data_eyfp->DrawNormalized("sameshist");
+   simc_eyfp->Draw();
+   data_eyfp->Draw("sameshist");
    leg14->AddEntry(data_eyfp,"Data", "f");
    leg14->AddEntry(simc_eyfp,"SIMC");
    leg14->Draw();
 
    c2->cd(3);
-   simc_expfp->DrawNormalized();
-   data_expfp->DrawNormalized("sameshist");
+   simc_expfp->Draw();
+   data_expfp->Draw("sameshist");
    leg15->AddEntry(data_expfp,"Data", "f");
    leg15->AddEntry(simc_expfp,"SIMC");
    leg15->Draw();
      
    c2->cd(4);
-   simc_eypfp->DrawNormalized();
-   data_eypfp->DrawNormalized("sameshist");
+   simc_eypfp->Draw();
+   data_eypfp->Draw("sameshist");
    leg16->AddEntry(data_eypfp,"Data", "f");
    leg16->AddEntry(simc_eypfp,"SIMC");
    leg16->Draw();
@@ -534,8 +609,8 @@ void compare_heep(int run, int pm, string model, string rad)
    c3->cd(1);
    data_Q2->GetXaxis()->SetTitle("Q^{2} [GeV^{2}]");
    data_Q2->GetXaxis()->CenterTitle();
-   simc_Q2->DrawNormalized();
-   data_Q2->DrawNormalized("sameshist");
+   simc_Q2->Draw();
+   data_Q2->Draw("sameshist");
    leg19->AddEntry(data_Q2,"Data", "f");
    leg19->AddEntry(simc_Q2,"SIMC");
    leg19->Draw();
@@ -543,33 +618,33 @@ void compare_heep(int run, int pm, string model, string rad)
    c3->cd(2);
    data_omega->GetXaxis()->SetTitle("Energy Transfer, #omega [GeV]");
    data_omega->GetXaxis()->CenterTitle();  
-   simc_omega->DrawNormalized();
-   data_omega->DrawNormalized("sameshist");
+   simc_omega->Draw();
+   data_omega->Draw("sameshist");
    leg20->AddEntry(data_omega,"Data", "f");
    leg20->AddEntry(simc_omega,"SIMC");
    leg20->Draw();
 
    c3->cd(3);
-   data_W->GetXaxis()->SetTitle("Invariant Mass, W [GeV]");
-   data_W->GetXaxis()->CenterTitle();
-   simc_W->DrawNormalized();
-   data_W->DrawNormalized("sameshist");
-   leg21->AddEntry(data_W,"Data", "f");
-   leg21->AddEntry(simc_W,"SIMC");
+   data_W2->GetXaxis()->SetTitle("Invariant Mass , W2 [GeV]");
+   data_W2->GetXaxis()->CenterTitle();
+   simc_W2->Draw();
+   data_W2->Draw("sameshist");
+   leg21->AddEntry(data_W2,"Data", "f");
+   leg21->AddEntry(simc_W2,"SIMC");
    leg21->Draw();
 
    c3->cd(4);
    data_thq->GetXaxis()->SetTitle("q-vector Angle, #theta_{q} [deg]");
    data_thq->GetXaxis()->CenterTitle();
-   simc_thq->DrawNormalized();
-   data_thq->DrawNormalized("sameshist");
+   simc_thq->Draw();
+   data_thq->Draw("sameshist");
    leg22->AddEntry(data_thq,"Data", "f");
    leg22->AddEntry(simc_thq,"SIMC");
    leg22->Draw();
 
    c3->cd(5);
-   simc_xbj->DrawNormalized();
-   data_xbj->DrawNormalized("sameshist");
+   simc_xbj->Draw();
+   data_xbj->Draw("sameshist");
    leg23->AddEntry(data_xbj,"Data","f");
    leg23->AddEntry(simc_xbj,"SIMC");
    leg23->Draw();
@@ -577,8 +652,8 @@ void compare_heep(int run, int pm, string model, string rad)
    c3->cd(6);
    data_th_elec->GetXaxis()->SetTitle("Electron Scatt. Angle, #theta_{e} [deg]");
    data_th_elec->GetXaxis()->CenterTitle();
-   simc_th_elec->DrawNormalized();
-   data_th_elec->DrawNormalized("sameshist");
+   simc_th_elec->Draw();
+   data_th_elec->Draw("sameshist");
    leg24->AddEntry(data_th_elec,"Data","f");
    leg24->AddEntry(simc_th_elec,"SIMC");
    leg24->Draw();
@@ -586,8 +661,8 @@ void compare_heep(int run, int pm, string model, string rad)
    c3->cd(7);
    data_kf->GetXaxis()->SetTitle("Electron Final Momentum, k_{f} [GeV/c] ");
    data_kf->GetXaxis()->CenterTitle();   
-   simc_kf->DrawNormalized();
-   data_kf->DrawNormalized("sameshist");
+   simc_kf->Draw();
+   data_kf->Draw("sameshist");
    leg25->AddEntry(data_kf,"Data","f");
    leg25->AddEntry(simc_kf,"SIMC");
    leg25->Draw();
@@ -595,8 +670,8 @@ void compare_heep(int run, int pm, string model, string rad)
    c3->cd(8);
    data_emiss->GetXaxis()->SetTitle("Missing Energy, E_{m} [GeV/c] ");
    data_emiss->GetXaxis()->CenterTitle();   
-   simc_emiss->DrawNormalized("hist");
-   data_emiss->DrawNormalized("sameshist");
+   simc_emiss->Draw("hist");
+   data_emiss->Draw("sameshist");
    leg25->AddEntry(data_emiss,"Data","f");
    leg25->AddEntry(simc_emiss,"SIMC");
    leg25->Draw();
@@ -620,8 +695,8 @@ void compare_heep(int run, int pm, string model, string rad)
    ck2->cd(1);
    data_Pm->GetXaxis()->SetTitle("Missing Momentum, P_{miss} [GeV]");
    data_Pm->GetXaxis()->CenterTitle();
-   simc_Pm->DrawNormalized();
-   data_Pm->DrawNormalized("sameshist");
+   simc_Pm->Draw();
+   data_Pm->Draw("sameshist");
    leg_Pm->AddEntry(data_Pm,"Data", "f");
    leg_Pm->AddEntry(simc_Pm,"SIMC");
    leg_Pm->Draw();
@@ -629,8 +704,8 @@ void compare_heep(int run, int pm, string model, string rad)
    ck2->cd(2);
    data_Pf->GetXaxis()->SetTitle("Proton Momentum, P_{p} [GeV]");
    data_Pf->GetXaxis()->CenterTitle();
-   simc_Pf->DrawNormalized();
-   data_Pf->DrawNormalized("sameshist");
+   simc_Pf->Draw();
+   data_Pf->Draw("sameshist");
    leg_Pf->AddEntry(data_Pf,"Data", "f");
    leg_Pf->AddEntry(simc_Pf,"SIMC");
    leg_Pf->Draw();
@@ -638,8 +713,8 @@ void compare_heep(int run, int pm, string model, string rad)
    ck2->cd(3);
    data_th_prot->GetXaxis()->SetTitle("Proton Scatt. Angle, #theta_{p} [deg]");
    data_th_prot->GetXaxis()->CenterTitle();
-   simc_th_prot->DrawNormalized();
-   data_th_prot->DrawNormalized("sameshist");
+   simc_th_prot->Draw();
+   data_th_prot->Draw("sameshist");
    leg_thp->AddEntry(data_th_prot,"Data", "f");
    leg_thp->AddEntry(simc_th_prot,"SIMC");
    leg_thp->Draw();
@@ -647,8 +722,8 @@ void compare_heep(int run, int pm, string model, string rad)
    ck2->cd(4);
    data_q->GetXaxis()->SetTitle("q-Vector Magnitude, |q| [GeV]");
    data_q->GetXaxis()->CenterTitle();
-   simc_q->DrawNormalized();
-   data_q->DrawNormalized("sameshist");
+   simc_q->Draw();
+   data_q->Draw("sameshist");
    leg_q->AddEntry(data_q,"Data", "f");
    leg_q->AddEntry(simc_q,"SIMC");
    leg_q->Draw();
@@ -657,8 +732,8 @@ void compare_heep(int run, int pm, string model, string rad)
    ck2->cd(5);
    data_thpq->GetXaxis()->SetTitle("(Proton, qVec.) Angle, #theta_{pq} [deg]");
    data_thpq->GetXaxis()->CenterTitle();
-   simc_thpq->DrawNormalized();
-   data_thpq->DrawNormalized("sameshist");
+   simc_thpq->Draw();
+   data_thpq->Draw("sameshist");
    leg_thpq->AddEntry(data_thpq,"Data", "f");
    leg_thpq->AddEntry(simc_thpq,"SIMC");
    leg_thpq->Draw();
@@ -666,14 +741,104 @@ void compare_heep(int run, int pm, string model, string rad)
    ck2->cd(6);
    data_thnq->GetXaxis()->SetTitle("(Neutron, qVec.) Angle, #theta_{nq} [deg]");
    data_thnq->GetXaxis()->CenterTitle();
-   simc_thnq->DrawNormalized();
-   data_thnq->DrawNormalized("sameshist");
+   simc_thnq->Draw();
+   data_thnq->Draw("sameshist");
    leg_thnq->AddEntry(data_thnq,"Data", "f");
    leg_thnq->AddEntry(simc_thnq,"SIMC");
    leg_thnq->Draw();
 
    ck2->SaveAs(Form("Kinematics2_%d.pdf", run));                                                                   
 
+
+   //Plot Kinematics 3
+   
+   auto leg_MM = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_En = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Ep = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Kn = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Kp = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pmx = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pmy = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pmz = new TLegend(0.1,0.8,0.28,0.9);
+
+
+   //Create A Canvas to store kinematic variable comparisons
+   TCanvas *ck3 = new TCanvas("ck3", "Kinematics-3", 2000, 1000);
+   
+   ck3->Divide(4,2);
+   ck3->cd(1);
+   data_MM->GetXaxis()->SetTitle("Missing Mass, M_{miss} [GeV]");
+   data_MM->GetXaxis()->CenterTitle();
+   simc_MM->Draw();
+   data_MM->Draw("sameshist");
+   leg_MM->AddEntry(data_Pm,"Data", "f");
+   leg_MM->AddEntry(simc_Pm,"SIMC");
+   leg_MM->Draw();
+   
+   ck3->cd(2);
+   data_En->GetXaxis()->SetTitle("Neutron Energy, E_{n} [GeV]");
+   data_En->GetXaxis()->CenterTitle();
+   simc_En->Draw();
+   data_En->Draw("sameshist");
+   leg_En->AddEntry(data_En,"Data", "f");
+   leg_En->AddEntry(simc_En,"SIMC");
+   leg_En->Draw();
+
+   ck3->cd(3);
+   data_Ep->GetXaxis()->SetTitle("Proton Energy, E_{p} [GeV]");
+   data_Ep->GetXaxis()->CenterTitle();
+   simc_Ep->Draw();
+   data_Ep->Draw("sameshist");
+   leg_Ep->AddEntry(data_Ep,"Data", "f");
+   leg_Ep->AddEntry(simc_Ep,"SIMC");
+   leg_Ep->Draw();
+
+   ck3->cd(4);
+   data_Kn->GetXaxis()->SetTitle("Neutron Kin. Energy, K_{n} [GeV]");
+   data_Kn->GetXaxis()->CenterTitle();
+   simc_Kn->Draw();
+   data_Kn->Draw("sameshist");
+   leg_Kn->AddEntry(data_Kn,"Data", "f");
+   leg_Kn->AddEntry(simc_Kn,"SIMC");
+   leg_Kn->Draw();
+
+   ck3->cd(5);
+   data_Kp->GetXaxis()->SetTitle("Proton Kin. Energy, K_{p} [GeV]");
+   data_Kp->GetXaxis()->CenterTitle();
+   simc_Kp->Draw();
+   data_Kp->Draw("sameshist");
+   leg_Kp->AddEntry(data_Kp,"Data", "f");
+   leg_Kp->AddEntry(simc_Kp,"SIMC");
+   leg_Kp->Draw();
+
+   ck3->cd(6);
+   data_Pmx->GetXaxis()->SetTitle("Missing Momentum X-comp., Pm_{x} [GeV]");
+   data_Pmx->GetXaxis()->CenterTitle();
+   simc_Pmx->Draw();
+   data_Pmx->Draw("sameshist");
+   leg_Pmx->AddEntry(data_Pmx,"Data", "f");
+   leg_Pmx->AddEntry(simc_Pmx,"SIMC");
+   leg_Pmx->Draw();
+  
+   ck3->cd(7);
+   data_Pmy->GetXaxis()->SetTitle("Missing Momentum Y-comp., Pm_{y} [GeV]");
+   data_Pmy->GetXaxis()->CenterTitle();
+   simc_Pmy->Draw();
+   data_Pmy->Draw("sameshist");
+   leg_Pmy->AddEntry(data_Pmy,"Data", "f");
+   leg_Pmy->AddEntry(simc_Pmy,"SIMC");
+   leg_Pmy->Draw();
+
+   ck3->cd(8);
+   data_Pmz->GetXaxis()->SetTitle("Missing Momentum Z-comp., Pm_{z} [GeV]");
+   data_Pmz->GetXaxis()->CenterTitle();
+   simc_Pmz->Draw();
+   data_Pmz->Draw("sameshist");
+   leg_Pmz->AddEntry(data_Pmz,"Data", "f");
+   leg_Pmz->AddEntry(simc_Pmz,"SIMC");
+   leg_Pmz->Draw();
+   
+   ck3->SaveAs(Form("Kinematics3_%d.pdf", run));                                                                   
 
  //-----------------PLOT TARGET  Variables SIMC/Data comparison-----------------------
 
@@ -688,22 +853,22 @@ void compare_heep(int run, int pm, string model, string rad)
    c4->Divide(3,1);
 
    c4->cd(1);
-   simc_xtar->DrawNormalized();
-   data_xtar->DrawNormalized("sameshist");
+   simc_xtar->Draw();
+   data_xtar->Draw("sameshist");
    leg28->AddEntry(data_xtar,"Data","f");
    leg28->AddEntry(simc_xtar,"SIMC");
    leg28->Draw();
   
    c4->cd(2);
-   simc_ytar->DrawNormalized();
-   data_ytar->DrawNormalized("sameshist");
+   simc_ytar->Draw();
+   data_ytar->Draw("sameshist");
    leg29->AddEntry(data_ytar,"Data","f");
    leg29->AddEntry(simc_ytar,"SIMC");
    leg29->Draw();
 
    c4->cd(3);
-   simc_ztar->DrawNormalized();
-   data_ztar->DrawNormalized("sameshist");
+   simc_ztar->Draw();
+   data_ztar->Draw("sameshist");
    leg30->AddEntry(data_ztar,"Data","f");
    leg30->AddEntry(simc_ztar,"SIMC");
    leg30->Draw();
@@ -729,29 +894,29 @@ void compare_heep(int run, int pm, string model, string rad)
    htr->Divide(2,2);
 
    htr->cd(1);
-   simc_hytar->DrawNormalized();
-   data_hytar->DrawNormalized("sameshist");
+   simc_hytar->Draw();
+   data_hytar->Draw("sameshist");
    htr_l1->AddEntry(data_hytar,"Data","f");
    htr_l1->AddEntry(simc_hytar,"SIMC");
    htr_l1->Draw();
 
    htr->cd(2);
-   simc_hxptar->DrawNormalized();
-   data_hxptar->DrawNormalized("sameshist");
+   simc_hxptar->Draw();
+   data_hxptar->Draw("sameshist");
    htr_l2->AddEntry(data_hxptar,"Data", "f");
    htr_l2->AddEntry(simc_hxptar,"SIMC");
    htr_l2->Draw();
 
    htr->cd(3);
-   simc_hyptar->DrawNormalized();
-   data_hyptar->DrawNormalized("sameshist");
+   simc_hyptar->Draw();
+   data_hyptar->Draw("sameshist");
    htr_l3->AddEntry(data_hyptar,"Data", "f");
    htr_l3->AddEntry(simc_hyptar,"SIMC");
    htr_l3->Draw();
      
    htr->cd(4);
-   simc_hdelta->DrawNormalized();
-   data_hdelta->DrawNormalized("sameshist");
+   simc_hdelta->Draw();
+   data_hdelta->Draw("sameshist");
    htr_l4->AddEntry(data_hdelta,"Data", "f");
    htr_l4->AddEntry(simc_hdelta,"SIMC");
    htr_l4->Draw();
@@ -773,29 +938,29 @@ void compare_heep(int run, int pm, string model, string rad)
    hfp->Divide(2,2);
 
    hfp->cd(1);
-   simc_hxfp->DrawNormalized();
-   data_hxfp->DrawNormalized("sameshist");
+   simc_hxfp->Draw();
+   data_hxfp->Draw("sameshist");
    hfp_l1->AddEntry(data_hxfp,"Data","f");
    hfp_l1->AddEntry(simc_hxfp,"SIMC");
    hfp_l1->Draw();
    
    hfp->cd(2);
-   simc_hyfp->DrawNormalized();
-   data_hyfp->DrawNormalized("sameshist");
+   simc_hyfp->Draw();
+   data_hyfp->Draw("sameshist");
    hfp_l2->AddEntry(data_hyfp,"Data", "f");
    hfp_l2->AddEntry(simc_hyfp,"SIMC");
    hfp_l2->Draw();
 
    hfp->cd(3);
-   simc_hxpfp->DrawNormalized();
-   data_hxpfp->DrawNormalized("sameshist");
+   simc_hxpfp->Draw();
+   data_hxpfp->Draw("sameshist");
    hfp_l3->AddEntry(data_hxpfp,"Data", "f");
    hfp_l3->AddEntry(simc_hxpfp,"SIMC");
    hfp_l3->Draw();
      
    hfp->cd(4);
-   simc_hypfp->DrawNormalized();
-   data_hypfp->DrawNormalized("sameshist");
+   simc_hypfp->Draw();
+   data_hypfp->Draw("sameshist");
    hfp_l4->AddEntry(data_hypfp,"Data", "f");
    hfp_l4->AddEntry(simc_hypfp,"SIMC");
    hfp_l4->Draw();

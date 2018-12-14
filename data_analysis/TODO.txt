@@ -1,0 +1,21 @@
+--------------------------------
+TO-DO List for Deuteron 80 MeV
+--------------------------------
+
+Dec. 14, 2018 Meeting
+
+** Fix the z_target offset issue observed in data. Look at the
+z_target variable calculated by HMS and compare it to that of SHMS.
+They should be the same.  Also, determine whether this is a real offset
+or is there something wrong in data that is causing this offset, for example,
+a ytar / yptar offset. Once this is fixed, apply the proper vertex cuts to cut 
+out the Al. target cell walls. We can also try looking at the Al. dummy data. 
+
+** Estimate the background underneath the coincidence peak. Even though this
+might be small, we still we to subtrack it when we determine the cross-sections.
+
+** With respect to the resolution issues observed in Missin Mass and Missing
+Energy, there is a flag in extra_hydrogen called: MC_smear_addl = TRUE, in
+addition to adding the parameter for extra mult scatt in the input file. Try
+a setting of 20 mr first.
+
