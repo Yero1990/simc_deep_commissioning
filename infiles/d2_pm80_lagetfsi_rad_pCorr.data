@@ -73,9 +73,9 @@
      targ%fr_pattern  =  3		!  raster pattern: 1=square, 2=circular, 3=real square
      targ%fr1  =  0.1		!  horizontal size OR inner radius(2)
      targ%fr2  =  0.1		!  vertical size OR outer radius(2)
-     targ%xoffset  =  0.147674		!  target x-offset (cm): +x = beam left ( opposite of EPICS)
-     targ%yoffset  =  -0.125227		!  target y-offset (cm): +y = up
-     targ%zoffset  =  0.0		!  target z-offset (cm): +z = downstream
+     targ%xoffset  =  0.147674		!  target x-offset (cm): +x = beam left ( opposite of EPICS,  Xbpm_tar in hcana is in EPICS)
+     targ%yoffset  =  -0.125227		!  target y-offset (cm): +y = up (EPICS = Hall Cooridinate System)
+     targ%zoffset  =  0.0		!  target z-offset (cm): +z = downstream (EPICS = Hall Coordinate System)
    				!   zreal = znominal + zoffset
 /
 

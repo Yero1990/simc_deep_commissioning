@@ -6,7 +6,7 @@
 
  =?
  &EXPERIMENT
-     ngen  =  1000000			!  POS: # of successes
+     ngen  =  100000			!  POS: # of successes
      EXPER%charge  =   1.0		!  total charge (mC)
      doing_phsp  =  F		!  (T = TRUE)	- If all of the doing_* are
      doing_kaon  =  F		!  (T = TRUE)   false, then doing (e,e'p).
@@ -21,9 +21,9 @@
      dEbeam  =  0.05                                   !  beam energy variation (%)
      electron_arm  =  5                                !  1=hms,2=sos,3=hrsr,4=hrsl,5 = shms
      hadron_arm  =  1                                  !  1=hms,2=sos,3=hrsr,4=hrsl,5 = shms
-     spec%e%P  =   8700.0                   !  e arm central momentum (MeV/c)
+     spec%e%P  =   8520.526                   !  e arm central momentum (MeV/c)
      spec%e%theta  =   12.194                !  e arm angle setting (degrees)
-     spec%p%P  =   2843.8                  !  p arm central momentum (MeV/c)
+     spec%p%P  =   2837.188                  !  p arm central momentum (MeV/c)
      spec%p%theta  =   38.896                  !  p arm angle setting (degrees)
 / 
 
@@ -73,9 +73,9 @@
      targ%fr_pattern  =  3		!  raster pattern: 1=square, 2=circular, 3=real square
      targ%fr1  =  0.1		!  horizontal size OR inner radius(2)
      targ%fr2  =  0.1		!  vertical size OR outer radius(2)
-     targ%xoffset  =  0.147674		!  target x-offset (cm): +x = beam left ( opposite of EPICS)
-     targ%yoffset  =  -0.125227		!  target y-offset (cm): +y = up
-     targ%zoffset  =  0.0		!  target z-offset (cm): +z = downstream
+     targ%xoffset  =  0.147674		!  target x-offset (cm): +x = beam left ( opposite of EPICS,  Xbpm_tar in hcana is in EPICS)
+     targ%yoffset  =  -0.125227		!  target y-offset (cm): +y = up (EPICS = Hall Cooridinate System)
+     targ%zoffset  =  0.0		!  target z-offset (cm): +z = downstream (EPICS = Hall Coordinate System)
    				!   zreal = znominal + zoffset
 /
 

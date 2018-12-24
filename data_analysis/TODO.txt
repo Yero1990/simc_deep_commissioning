@@ -4,6 +4,11 @@ TO-DO List for Deuteron 80 MeV
 
 Dec. 14, 2018 Meeting
 
+ Double_t ztarg=(ytar_off-beam_org(0)*(costheta-yptar*sintheta))/(-sintheta-yptar*costheta);
+ v.SetXYZ(beam_org(0),beam_org(1),ztarg);
+ Double_t ytar_off=theTrack->GetTY()+pointing_off(1);
+
+
 ** Fix the z_target offset issue observed in data. Look at the
 z_target variable calculated by HMS and compare it to that of SHMS.
 They should be the same.  Also, determine whether this is a real offset
@@ -19,3 +24,59 @@ Energy, there is a flag in extra_hydrogen called: MC_smear_addl = TRUE, in
 addition to adding the parameter for extra mult scatt in the input file. Try
 a setting of 20 mr first.
 
+
+
+----------------------------------------
+FIXING ZTARG Mismatch between HMS/SHMS
+----------------------------------------
+There is a mis-match between targz (HCS) as determined by HMS and SHMS. The general 
+formula used in hcana is: 
+ 
+   Double_t ztarg=(ytar_off-beam_org(0)*(costheta-yptar*sintheta))/(-sintheta-yptar*costheta);  (Also found on HMS_Optics notes)
+
+The break down of the components is:
+ytar_off:      ytar + y_mispointing (Spectrometer coordinates, --> +Y beam left, +X towards floor)
+beam_org(0):    beam_org = fBeam->GetPosition();
+                           fBeam->GetPosition() {return fPosition};
+               In THcRaster:  fPosition[0].SetXYZ(-fXbpm_tar, fYbpm_tar, 0.0); ---> Then beam_org(0) = -fXbpm_tar (Hall Coordinates, due to the negative sign)
+
+      -------------------------------------------------------------------------------------------------------
+       When *fXbpm_tar and fYbpm_tar* written to a tree, (XBPM at target is +X beam right, EPICS coordinates
+      -------------------------------------------------------------------------------------------------------
+
+yptar:  Reconstructed quantity in spectrometer coordinates --->  Double_t yptar = theTrack->GetTPhi();    **NOTE: This returns yptar before applying the yptar-offset (See THcHallCSpectrometer.cxx)
+
+costheta:  ---> Double_t costheta=TMath::Cos(fSpectro->GetThetaSph());  
+sintheta: --->  Double_t sintheta=TMath::Cos(fSpectro->GetPhiSph())*TMath::Sin(fSpectro->GetThetaSph());  
+--> I dont know where is Phi Angle. I did not find it in param
+--> There is a phi-offset however, fPhiOffset ("phi_offset") found in hmsflags.param (or shmsflags.param)
+
+--> There is a theta_angle (Spectrometer Central Angle), 
+--> There is also an fThetaOffset ("theta_offset")
+
+*****************************************
+My Ztarget Formula:  (December 18, 2018)
+*****************************************
+Starting from Jure's HMS Notes, his Ztarget formula was:
+
+z_vert = [ ytar + xBPM * (cos (theta) + yptar*sin(theta) ) ] / [ sin(theta) - yptar*cos(theta) ],    xBPM must be in Hall Coordinat System (+X beam left)
+
+
+Assuming HMS theta is NEGATIVE and SHMS theta is POSITIVE (from standard kinematics),  and using the property:  sin (-Angle) = -sin(Angle)
+
+---> z_vert_hms = -[ hytar + xBPM * (cos (theta) - yptar*sin(theta) ) ] / [ -sin(theta) - yptar*cos(theta) ]
+
+---> z_vert_shms = -[ eytar + xBPM * (cos (theta) + yptar*sin(theta) ) ] / [ sin(theta) - yptar*cos(theta) ]
+
+**NOTE: I had to put an overall "-" sign in front, for it to match SIMC, as it was initially anti-symmetric
+
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+December 18, 2018 Continued . . . 
+
+After fixing ztar, use my own formula for now. Then speak with Mark / Steve about the possibility of including it in hcana 
+
+** Next, look at Al dummy data taken at these same kinematics
+--->Unfortunately, the Al dummy was only taken at the H(e,e'p) elastics kinematics. Even though, the SHMS was kept fiexed. So it may be useful, since we
+took single SHMS data. Currently replaying Al. Dummy Run 3255, to compare it with Pm = 80 MeV zTarget.

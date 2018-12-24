@@ -6,8 +6,16 @@ void analyze_deepData(int run, int Pmiss)
 //PREVENT DISPLAY 
   //gROOT->SetBatch(kTRUE);
     
+  
+  //Define Central Angle for HMS/SHMS
+  Double_t htheta_cent = 38.896 * TMath::Pi()/180.;   //              3255: 37.29 deg
+  Double_t ptheta_cent = 12.194 * TMath::Pi()/180.;   //3289: 12.194, 3255:12.2  deg
+  Double_t xBPM_tar = 0.147674;   //Projected beam position at target (Hall Coordinate System)
+  
+
   //Read DATA ROOTfiles
-  TString filename =Form("../../hallc_replay/ROOTfiles/coin_replay_deep_check_%d_-1.root",run);        
+  TString filename =Form("../../hallc_replay/ROOTfiles/D2_pm80/coin_replay_deep_check_%d_-1_pCorr.root",run);        
+  //  TString filename =Form("../../hallc_replay/ROOTfiles/shms_coin_replay_deep_check_%d_-1.root" ,run);                                                   
 
   TFile *data_file = new TFile(filename, "READ"); 
   TTree *T = (TTree*)data_file->Get("T");
@@ -56,10 +64,28 @@ void analyze_deepData(int run, int Pmiss)
 
 
   //Target Reconstruction Variables
-  TH1F *x_tar = new TH1F("x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *y_tar = new TH1F("y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *z_tar = new TH1F("z_tar", "z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *hx_tar = new TH1F("hx_tar", "HMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *hy_tar = new TH1F("hy_tar", "HMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *hz_tar = new TH1F("hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
   
+  //Target Reconstruction Variables
+  TH1F *px_tar = new TH1F("px_tar", "SHMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *py_tar = new TH1F("py_tar", "SHMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *pz_tar = new TH1F("pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  TH1F *ztar_diff = new TH1F("ztar_diff", "z_Target Difference (hcana)", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  //  ----Calculated Ztarget Quantities (Using a formula)
+  //Target Reconstruction Variables
+  TH1F *calc_hz_tar = new TH1F("calc_hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *calc_pz_tar = new TH1F("calc_pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  TH1F *calc_hz_tar2 = new TH1F("calc_hz_tar2", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *calc_pz_tar2 = new TH1F("calc_pz_tar2", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  TH1F *calc_ztar_diff = new TH1F("calc_ztar_diff", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *calc_ztar_diff2 = new TH1F("calc_ztar_diff2", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
+
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *hytar = new TH1F("hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
   TH1F *hxptar = new TH1F("hxptar", hadron_arm + " X'_{tar}", hxptar_nbins, hxptar_xmin, hxptar_xmax);
@@ -95,6 +121,7 @@ void analyze_deepData(int run, int Pmiss)
   TH2F *e_xfp_vs_yfp = new TH2F("e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, exfp_nbins, exfp_xmin, exfp_xmax);
   
   //2D HMS v. SHMS Acceptance Correlations
+  TH2F *hytar_vs_eytar = new TH2F("hytar_vs_eytar", "HMS vs. SHMS, Y_{tar}", eytar_nbins, eytar_xmin, eytar_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
   TH2F *hxptar_vs_exptar = new TH2F("hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", exptar_nbins, exptar_xmin, exptar_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
   TH2F *hyptar_vs_eyptar = new TH2F("hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", eyptar_nbins, eyptar_xmin, eyptar_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
   TH2F *hdelta_vs_edelta = new TH2F("hdelta_vs_edelta", "HMS vs. SHMS, #delta", edelta_nbins, edelta_xmin, edelta_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
@@ -144,6 +171,47 @@ void analyze_deepData(int run, int Pmiss)
  
   TH2F *dP_vs_reacty = new TH2F("dP_vs_reacty", "dP vs hreacsty", 100, -0.5, 0.5, 100 , -0.5, 0.5);
 
+  //OPTICS CHECK (Electron Arm Reconstructed Quantities vs. Focal Plane Quantities) --Each of the reconstructed quantities is a polynomial expansion of focal plane quantities
+  TH2F *eytar_vs_exfp = new TH2F("eytar_vs_exfp", "SHMS eY_{tar} vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+  TH2F *eytar_vs_expfp = new TH2F("eytar_vs_expfp", "SHMS eY_{tar} vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+  TH2F *eytar_vs_eyfp = new TH2F("eytar_vs_eyfp", "SHMS eY_{tar} vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+  TH2F *eytar_vs_eypfp = new TH2F("eytar_vs_eypfp", "SHMS eY_{tar} vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+
+  TH2F *eyptar_vs_exfp = new TH2F("eyptar_vs_exfp", "SHMS eY'_{tar} vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+  TH2F *eyptar_vs_expfp = new TH2F("eyptar_vs_expfp", "SHMS eY'_{tar} vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+  TH2F *eyptar_vs_eyfp = new TH2F("eyptar_vs_eyfp", "SHMS eY'_{tar} vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+  TH2F *eyptar_vs_eypfp = new TH2F("eyptar_vs_eypfp", "SHMS eY'_{tar} vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+
+  TH2F *exptar_vs_exfp = new TH2F("exptar_vs_exfp", "SHMS eX'_{tar} vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *exptar_vs_expfp = new TH2F("exptar_vs_expfp", "SHMS eX'_{tar} vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *exptar_vs_eyfp = new TH2F("exptar_vs_eyfp", "SHMS eX'_{tar} vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *exptar_vs_eypfp = new TH2F("exptar_vs_eypfp", "SHMS eX'_{tar} vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+
+  TH2F *edelta_vs_exfp = new TH2F("edelta_vs_exfp", "SHMS Delta e#delta vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  TH2F *edelta_vs_expfp = new TH2F("edelta_vs_expfp", "SHMS Delta e#delta vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  TH2F *edelta_vs_eyfp = new TH2F("edelta_vs_eyfp", "SHMS Delta e#delta vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  TH2F *edelta_vs_eypfp = new TH2F("edelta_vs_eypfp", "SHMS Delta e#delta vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+
+  //OPTICS CHECK (Hadron  Arm Reconstructed Quantities vs. Focal Plane Quantities) --Each of the reconstructed quantities is a polynomial expansion of focal plane quantities
+  TH2F *hytar_vs_hxfp = new TH2F("hytar_vs_hxfp", "HMS hY_{tar} vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+  TH2F *hytar_vs_hxpfp = new TH2F("hytar_vs_hxpfp", "HMS hY_{tar} vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+  TH2F *hytar_vs_hyfp = new TH2F("hytar_vs_hyfp", "HMS hY_{tar} vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+  TH2F *hytar_vs_hypfp = new TH2F("hytar_vs_hypfp", "HMS hY_{tar} vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+
+  TH2F *hyptar_vs_hxfp = new TH2F("hyptar_vs_hxfp", "HMS hY'_{tar} vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+  TH2F *hyptar_vs_hxpfp = new TH2F("hyptar_vs_hxpfp", "HMS hY'_{tar} vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+  TH2F *hyptar_vs_hyfp = new TH2F("hyptar_vs_hyfp", "HMS hY'_{tar} vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+  TH2F *hyptar_vs_hypfp = new TH2F("hyptar_vs_hypfp", "HMS hY'_{tar} vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+
+  TH2F *hxptar_vs_hxfp = new TH2F("hxptar_vs_hxfp", "HMS hX'_{tar} vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+  TH2F *hxptar_vs_hxpfp = new TH2F("hxptar_vs_hxpfp", "HMS hX'_{tar} vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+  TH2F *hxptar_vs_hyfp = new TH2F("hxptar_vs_hyfp", "HMS hX'_{tar} vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+  TH2F *hxptar_vs_hypfp = new TH2F("hxptar_vs_hypfp", "HMS hX'_{tar} vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+
+  TH2F *hdelta_vs_hxfp = new TH2F("hdelta_vs_hxfp", "HMS Delta h#delta vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+  TH2F *hdelta_vs_hxpfp = new TH2F("hdelta_vs_hxpfp", "HMS Delta h#delta vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+  TH2F *hdelta_vs_hyfp = new TH2F("hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+  TH2F *hdelta_vs_hypfp = new TH2F("hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
 
   /************Define Histos to APPLY CUTS*********************************/
  
@@ -184,10 +252,26 @@ void analyze_deepData(int run, int Pmiss)
 
 
   //Target Reconstruction Variables
-  TH1F *cut_x_tar = new TH1F("cut_x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *cut_y_tar = new TH1F("cut_y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *cut_z_tar = new TH1F("cut_z_tar", "z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-  
+  TH1F *cut_hx_tar = new TH1F("cut_hx_tar", "HMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *cut_hy_tar = new TH1F("cut_hy_tar", "HMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *cut_hz_tar = new TH1F("cut_hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+    
+  TH1F *cut_px_tar = new TH1F("cut_px_tar", "SHMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *cut_py_tar = new TH1F("cut_py_tar", "SHMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *cut_pz_tar = new TH1F("cut_pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+    
+  TH1F *cut_ztar_diff = new TH1F("cut_ztar_diff", "z_Target Difference (hcana)", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  //Calculated Targ Variables
+  TH1F *cut_calc_hz_tar = new TH1F("cut_calc_hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *cut_calc_pz_tar = new TH1F("cut_calc_pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  TH1F *cut_calc_hz_tar2 = new TH1F("cut_calc_hz_tar2", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *cut_calc_pz_tar2 = new TH1F("cut_calc_pz_tar2", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+
+  TH1F *cut_calc_ztar_diff = new TH1F("cut_calc_ztar_diff", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *cut_calc_ztar_diff2 = new TH1F("cut_calc_ztar_diff2", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
+
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *cut_hytar = new TH1F("cut_hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
   TH1F *cut_hxptar = new TH1F("cut_hxptar", hadron_arm + " X'_{tar}", hxptar_nbins, hxptar_xmin, hxptar_xmax);
@@ -223,6 +307,7 @@ void analyze_deepData(int run, int Pmiss)
   TH2F *cut_e_xfp_vs_yfp = new TH2F("cut_e_xfp_vs_yfp", "X_{fp} vs Y_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, exfp_nbins, exfp_xmin, exfp_xmax);
   
   //2D HMS v. SHMS Acceptance Correlations
+  TH2F *cut_hytar_vs_eytar = new TH2F("cut_hytar_vs_eytar", "HMS vs. SHMS, Y_{tar}", eytar_nbins, eytar_xmin, eytar_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
   TH2F *cut_hxptar_vs_exptar = new TH2F("cut_hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", exptar_nbins, exptar_xmin, exptar_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
   TH2F *cut_hyptar_vs_eyptar = new TH2F("cut_hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", eyptar_nbins, eyptar_xmin, eyptar_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
   TH2F *cut_hdelta_vs_edelta = new TH2F("cut_hdelta_vs_edelta", "HMS vs. SHMS, #delta", edelta_nbins, edelta_xmin, edelta_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
@@ -269,6 +354,49 @@ void analyze_deepData(int run, int Pmiss)
   TH2F *cut_Em_vs_hyptar = new TH2F("cut_Em_vs_hyptar", "cut_Em vs hY'_{tar}", hyptar_nbins, hyptar_xmin, hyptar_xmax, Em_nbins, Em_xmin, Em_xmax);
   TH2F *cut_Em_vs_hdelta = new TH2F("cut_Em_vs_hdelta", "cut_Em vs hdelta", hdelta_nbins, hdelta_xmin, hdelta_xmax, Em_nbins, Em_xmin, Em_xmax);
   
+  //OPTICS CHECK (Electron Arm Reconstructed Quantities vs. Focal Plane Quantities) --Each of the reconstructed quantities is a polynomial expansion of focal plane quantities
+  TH2F *cut_eytar_vs_exfp = new TH2F("cut_eytar_vs_exfp", "SHMS eY_{tar} vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+  TH2F *cut_eytar_vs_expfp = new TH2F("cut_eytar_vs_expfp", "SHMS eY_{tar} vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+  TH2F *cut_eytar_vs_eyfp = new TH2F("cut_eytar_vs_eyfp", "SHMS eY_{tar} vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+  TH2F *cut_eytar_vs_eypfp = new TH2F("cut_eytar_vs_eypfp", "SHMS eY_{tar} vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, eytar_nbins, eytar_xmin, eytar_xmax);
+
+  TH2F *cut_eyptar_vs_exfp = new TH2F("cut_eyptar_vs_exfp", "SHMS eY'_{tar} vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+  TH2F *cut_eyptar_vs_expfp = new TH2F("cut_eyptar_vs_expfp", "SHMS eY'_{tar} vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+  TH2F *cut_eyptar_vs_eyfp = new TH2F("cut_eyptar_vs_eyfp", "SHMS eY'_{tar} vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+  TH2F *cut_eyptar_vs_eypfp = new TH2F("cut_eyptar_vs_eypfp", "SHMS eY'_{tar} vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, eyptar_nbins, eyptar_xmin, eyptar_xmax);
+
+  TH2F *cut_exptar_vs_exfp = new TH2F("cut_exptar_vs_exfp", "SHMS eX'_{tar} vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *cut_exptar_vs_expfp = new TH2F("cut_exptar_vs_expfp", "SHMS eX'_{tar} vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *cut_exptar_vs_eyfp = new TH2F("cut_exptar_vs_eyfp", "SHMS eX'_{tar} vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *cut_exptar_vs_eypfp = new TH2F("cut_exptar_vs_eypfp", "SHMS eX'_{tar} vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+
+  TH2F *cut_edelta_vs_exfp = new TH2F("cut_edelta_vs_exfp", "SHMS Delta e#delta vs. eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  TH2F *cut_edelta_vs_expfp = new TH2F("cut_edelta_vs_expfp", "SHMS Delta e#delta vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  TH2F *cut_edelta_vs_eyfp = new TH2F("cut_edelta_vs_eyfp", "SHMS Delta e#delta vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  TH2F *cut_edelta_vs_eypfp = new TH2F("cut_edelta_vs_eypfp", "SHMS Delta e#delta vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+
+  //OPTICS CHECK (Hadron  Arm Reconstructed Quantities vs. Focal Plane Quantities) --Each of the reconstructed quantities is a polynomial expansion of focal plane quantities
+  TH2F *cut_hytar_vs_hxfp = new TH2F("cut_hytar_vs_hxfp", "HMS hY_{tar} vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+  TH2F *cut_hytar_vs_hxpfp = new TH2F("cut_hytar_vs_hxpfp", "HMS hY_{tar} vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+  TH2F *cut_hytar_vs_hyfp = new TH2F("cut_hytar_vs_hyfp", "HMS hY_{tar} vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+  TH2F *cut_hytar_vs_hypfp = new TH2F("cut_hytar_vs_hypfp", "HMS hY_{tar} vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hytar_nbins, hytar_xmin, hytar_xmax);
+
+  TH2F *cut_hyptar_vs_hxfp = new TH2F("cut_hyptar_vs_hxfp", "HMS hY'_{tar} vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+  TH2F *cut_hyptar_vs_hxpfp = new TH2F("cut_hyptar_vs_hxpfp", "HMS hY'_{tar} vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+  TH2F *cut_hyptar_vs_hyfp = new TH2F("cut_hyptar_vs_hyfp", "HMS hY'_{tar} vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+  TH2F *cut_hyptar_vs_hypfp = new TH2F("cut_hyptar_vs_hypfp", "HMS hY'_{tar} vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
+
+  TH2F *cut_hxptar_vs_hxfp = new TH2F("cut_hxptar_vs_hxfp", "HMS hX'_{tar} vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+  TH2F *cut_hxptar_vs_hxpfp = new TH2F("cut_hxptar_vs_hxpfp", "HMS hX'_{tar} vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+  TH2F *cut_hxptar_vs_hyfp = new TH2F("cut_hxptar_vs_hyfp", "HMS hX'_{tar} vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+  TH2F *cut_hxptar_vs_hypfp = new TH2F("cut_hxptar_vs_hypfp", "HMS hX'_{tar} vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+
+  TH2F *cut_hdelta_vs_hxfp = new TH2F("cut_hdelta_vs_hxfp", "HMS Delta h#delta vs. hX_{fp}", hxfp_nbins, hxfp_xmin, hxfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+  TH2F *cut_hdelta_vs_hxpfp = new TH2F("cut_hdelta_vs_hxpfp", "HMS Delta h#delta vs. hX'_{fp}", hxpfp_nbins, hxpfp_xmin, hxpfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+  TH2F *cut_hdelta_vs_hyfp = new TH2F("cut_hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+  TH2F *cut_hdelta_vs_hypfp = new TH2F("cut_hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
+
+
 
   //Set Variable Names and Branches
  
@@ -386,13 +514,34 @@ void analyze_deepData(int run, int Pmiss)
   T->SetBranchAddress("H.gtr.dp",&h_delta);
   
   //--------Target Quantities (tarx, tary, tarz)
-  Double_t  tar_x;
-  Double_t  tar_y;
-  Double_t  tar_z;
+  Double_t  htar_x;
+  Double_t  htar_y;
+  Double_t  htar_z;
   
-  T->SetBranchAddress("P.react.x",&tar_x);
-  T->SetBranchAddress("P.react.y",&tar_y);
-  T->SetBranchAddress("P.react.z",&tar_z);
+  Double_t  ptar_x;
+  Double_t  ptar_y;
+  Double_t  ptar_z;
+  
+  T->SetBranchAddress("H.react.x",&htar_x);
+  T->SetBranchAddress("H.react.y",&htar_y);
+  T->SetBranchAddress("H.react.z",&htar_z);
+  
+  T->SetBranchAddress("P.react.x",&ptar_x);
+  T->SetBranchAddress("P.react.y",&ptar_y);
+  T->SetBranchAddress("P.react.z",&ptar_z);
+ 
+
+  //--------Calculated Alternative Ztar-------------------
+  Double_t hcostheta;
+  Double_t hsintheta;
+  Double_t hztarg;
+  Double_t hztarg2;
+
+  Double_t pcostheta;
+  Double_t psintheta;
+  Double_t pztarg;
+  Double_t pztarg2;
+
 
   //------SHMS Detector Quantities
   Double_t  pcal_etracknorm;
@@ -400,7 +549,7 @@ void analyze_deepData(int run, int Pmiss)
 
   T->SetBranchAddress("P.cal.etracknorm",&pcal_etracknorm);
   T->SetBranchAddress("P.ngcer.npeSum",&pngcer_npesum);
-  
+ 
  
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
@@ -423,7 +572,15 @@ void analyze_deepData(int run, int Pmiss)
     
     T->GetEntry(i);
     
-    
+
+    //calculate Ztarget varibales from hcana formula (This formula already takes the negative HMS angle sign into account, so ONLY use "+" angles)
+    hztarg=-(h_ytar+xBPM_tar*(cos(htheta_cent)-h_yptar*sin(htheta_cent)))/(-sin(htheta_cent)-h_yptar*cos(htheta_cent));
+    pztarg=-(e_ytar+xBPM_tar*(cos(ptheta_cent)+e_yptar*sin(ptheta_cent)))/(sin(ptheta_cent)-e_yptar*cos(ptheta_cent));
+ 
+    hztarg2=-(h_ytar+xBPM_tar*cos(htheta_cent))/(-sin(htheta_cent)-h_yptar*cos(htheta_cent));
+    pztarg2=-(e_ytar+xBPM_tar*cos(ptheta_cent))/(sin(ptheta_cent)-e_yptar*cos(ptheta_cent));
+
+
     //Determine theta_p
     theta_p = xangle - theta_e;
     W2 = W*W;
@@ -433,13 +590,18 @@ void analyze_deepData(int run, int Pmiss)
     MM = sqrt(TMath::Power(nu+MD-Ep,2) - Pm*Pm);
 
     c_Em = Em_nuc>-0.02 && Em_nuc<0.04;
+    //c_Em = Em_nuc<-0.02 || Em_nuc>0.04;
     c_ctime = epCoinTime>8.6 && epCoinTime<13.6;
     c_hdelta = h_delta>-8. && h_delta<8.;
     
     //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em&&c_ctime&&c_hdelta)
-	{
-	  cut_epCT->Fill(epCoinTime);
+    if (c_Em&&c_ctime&&c_hdelta)
+    {
+
+      //cout << "NUM = " <<eytar_off+0.148769*(pcostheta+shmsyptar*psintheta)<<endl;
+      //cout << "DEN = " <<psintheta-shmsyptar*pcostheta <<endl;
+      //cout << "pztarg = " << pztarg << endl;
+      cut_epCT->Fill(epCoinTime);
 
 	  //Kinematics
 	  cut_Emiss->Fill(Em);
@@ -475,11 +637,25 @@ void analyze_deepData(int run, int Pmiss)
 	  cut_E_p->Fill(Ep);
 
 	  //Reconstructed Target Quantities (Lab Frame)
-	  cut_x_tar->Fill(tar_x);
-	  cut_y_tar->Fill(tar_y);
-	  cut_z_tar->Fill(tar_z);
+	  cut_hx_tar->Fill(htar_x);
+	  cut_hy_tar->Fill(htar_y);
+	  cut_hz_tar->Fill(htar_z);
 	  
+	  cut_px_tar->Fill(ptar_x);
+	  cut_py_tar->Fill(ptar_y);
+	  cut_pz_tar->Fill(ptar_z);
+
+	  cut_calc_hz_tar->Fill(hztarg);
+	  cut_calc_pz_tar->Fill(pztarg);
 	  
+	  cut_calc_hz_tar2->Fill(hztarg2);
+	  cut_calc_pz_tar2->Fill(pztarg2);
+	  
+	  cut_ztar_diff->Fill(ptar_z - htar_z);
+	  cut_calc_ztar_diff->Fill(pztarg - hztarg);
+	  cut_calc_ztar_diff2->Fill(pztarg2 - hztarg2);
+
+
 	  //Hadron-Arm Target Reconstruction 
 	  cut_hytar->Fill(h_ytar);
 	  cut_hxptar->Fill(h_xptar);
@@ -561,6 +737,49 @@ void analyze_deepData(int run, int Pmiss)
 	  cut_Em_vs_hyptar->Fill(h_yptar, Em);
 	  cut_Em_vs_hdelta->Fill(h_delta, Em);
 	  
+
+	  //OPTICS CHECK (electron Arm Recon. vs. Focal Plane)
+	  cut_eytar_vs_exfp->Fill(e_xfp, e_ytar);
+	  cut_eytar_vs_expfp->Fill(e_xpfp, e_ytar);
+	  cut_eytar_vs_eyfp->Fill(e_yfp, e_ytar);
+	  cut_eytar_vs_eypfp->Fill(e_ypfp, e_ytar);
+  
+	  cut_eyptar_vs_exfp->Fill(e_xfp, e_yptar);
+	  cut_eyptar_vs_expfp->Fill(e_xpfp, e_yptar);
+	  cut_eyptar_vs_eyfp->Fill(e_yfp, e_yptar);
+	  cut_eyptar_vs_eypfp->Fill(e_ypfp, e_yptar);
+
+	  cut_exptar_vs_exfp->Fill(e_xfp, e_xptar);
+	  cut_exptar_vs_expfp->Fill(e_xpfp, e_xptar);
+	  cut_exptar_vs_eyfp->Fill(e_yfp, e_xptar);
+	  cut_exptar_vs_eypfp->Fill(e_ypfp, e_xptar);
+
+	  cut_edelta_vs_exfp->Fill(e_xfp, e_delta);
+	  cut_edelta_vs_expfp->Fill(e_xpfp, e_delta);
+	  cut_edelta_vs_eyfp->Fill(e_yfp, e_delta);
+	  cut_edelta_vs_eypfp->Fill(e_ypfp, e_delta);
+
+	  //OPTICS CHECK (hadron Arm Recon. vs. Focal Plane)
+	  cut_hytar_vs_hxfp->Fill(h_xfp, h_ytar);
+	  cut_hytar_vs_hxpfp->Fill(h_xpfp, h_ytar);
+	  cut_hytar_vs_hyfp->Fill(h_yfp, h_ytar);
+	  cut_hytar_vs_hypfp->Fill(h_ypfp, h_ytar);
+  
+	  cut_hyptar_vs_hxfp->Fill(h_xfp, h_yptar);
+	  cut_hyptar_vs_hxpfp->Fill(h_xpfp, h_yptar);
+	  cut_hyptar_vs_hyfp->Fill(h_yfp, h_yptar);
+	  cut_hyptar_vs_hypfp->Fill(h_ypfp, h_yptar);
+
+	  cut_hxptar_vs_hxfp->Fill(h_xfp, h_xptar);
+	  cut_hxptar_vs_hxpfp->Fill(h_xpfp, h_xptar);
+	  cut_hxptar_vs_hyfp->Fill(h_yfp, h_xptar);
+	  cut_hxptar_vs_hypfp->Fill(h_ypfp, h_xptar);
+
+	  cut_hdelta_vs_hxfp->Fill(h_xfp, h_delta);
+	  cut_hdelta_vs_hxpfp->Fill(h_xpfp, h_delta);
+	  cut_hdelta_vs_hyfp->Fill(h_yfp, h_delta);
+	  cut_hdelta_vs_hypfp->Fill(h_ypfp, h_delta);
+
 	}//End CUTS LOOP
       
       
@@ -600,11 +819,24 @@ void analyze_deepData(int run, int Pmiss)
       E_p->Fill(Ep);
 
       //Reconstructed Target Quantities (Lab Frame)
-      x_tar->Fill(tar_x);
-      y_tar->Fill(tar_y);
-      z_tar->Fill(tar_z);
-
+      hx_tar->Fill(htar_x);
+      hy_tar->Fill(htar_y);
+      hz_tar->Fill(htar_z);
       
+      px_tar->Fill(ptar_x);
+      py_tar->Fill(ptar_y);
+      pz_tar->Fill(ptar_z);
+      	 
+      calc_hz_tar->Fill(hztarg);
+      calc_pz_tar->Fill(pztarg);
+      
+      calc_hz_tar2->Fill(hztarg2);
+      calc_pz_tar2->Fill(pztarg2);  
+      
+      ztar_diff->Fill(ptar_z - htar_z);
+      calc_ztar_diff->Fill(pztarg - hztarg);
+      calc_ztar_diff2->Fill(pztarg2 - hztarg2);
+
       //Hadron-Arm Target Reconstruction 
       hytar->Fill(h_ytar);
       hxptar->Fill(h_xptar);

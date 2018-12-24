@@ -9,14 +9,14 @@ void compare_heep(int run, int pm, string model, string rad)
   //TString simc_filename =  "weighted_ep_coin_simc_1854.root"; //"ep_coin_simc_1929.root";
   
   //Pre-defined SIMC/data root file names containing histogram object to comapare
-  //TString simc_filename =  Form("D2simc_pm%d_laget%s_%s.root", pm, model.c_str(), rad.c_str());
-  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s_usingTLT.root", pm, model.c_str(), rad.c_str());
+  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s.root", pm, model.c_str(), rad.c_str());
+  // TString simc_filename =  Form("D2simc_pm%d_laget%s_%s_usingTLT.root", pm, model.c_str(), rad.c_str());
 
 
   //TString simc_filename =  Form("Weighted_simc_hms_single_%d_gfor.root", runNUM);
   //TString data_filename = Form("./D2data_pm%d_%d.root",pm, run); 
   //TString data_filename = Form("./D2data_pm%d_%d_EmANDCtimeCut.root",pm, run); 
-  TString data_filename = Form("./D2data_pm%d_%d_EmANDCtimeANDhdeltaCut.root",pm, run); 
+  TString data_filename = Form("./D2data_pm%d_%d.root",pm, run); 
 
   TString simc_path;
   TString data_path;
@@ -36,9 +36,18 @@ void compare_heep(int run, int pm, string model, string rad)
   TH1F *simc_ztar =  0;
 
   //Define data histos
-  TH1F *data_xtar = 0;
-  TH1F *data_ytar = 0;
-  TH1F *data_ztar = 0;
+  TH1F *data_xtarH = 0;
+  TH1F *data_ytarH = 0;
+  TH1F *data_ztarH = 0;
+  
+  TH1F *data_xtarP = 0;
+  TH1F *data_ytarP = 0;
+  TH1F *data_ztarP = 0;
+  
+  TH1F *data_calc_ztarH = 0;
+  TH1F *data_calc_ztarP = 0;
+
+  
 
   //---------------Target Reconstruction Variables----------------
   //Define SIMC histos ('h'-->hadron arm,  'e'-->electron arm)
@@ -175,18 +184,37 @@ void compare_heep(int run, int pm, string model, string rad)
   data_file->cd();
 
   //Get Histogram objects from data rootfile
-  data_file->GetObject("cut_x_tar", data_xtar);
-  data_file->GetObject("cut_y_tar", data_ytar);
-  data_file->GetObject("cut_z_tar", data_ztar);
+  data_file->GetObject("cut_hx_tar", data_xtarH);
+  data_file->GetObject("cut_hy_tar", data_ytarH);
+  data_file->GetObject("cut_hz_tar", data_ztarH);
+  data_file->GetObject("cut_calc_hz_tar", data_calc_ztarH);
 
+  data_file->GetObject("cut_px_tar", data_xtarP);
+  data_file->GetObject("cut_py_tar", data_ytarP);
+  data_file->GetObject("cut_pz_tar", data_ztarP);
+  data_file->GetObject("cut_calc_pz_tar", data_calc_ztarP);
+
+
+    //Set data Histo Aesthetics
+  data_xtarH->SetFillColorAlpha(kBlue, 0.35);
+  data_xtarH->SetFillStyle(3004);
+  data_ytarH->SetFillColorAlpha(kBlue, 0.35);
+  data_ytarH->SetFillStyle(3004);
+  data_ztarH->SetFillColorAlpha(kBlue, 0.35);
+  data_ztarH->SetFillStyle(3004);
+
+  data_calc_ztarH->SetLineColor(kMagenta);
+  data_calc_ztarH->SetLineWidth(2);
+
+  data_xtarP->SetFillColorAlpha(kBlue, 0.35);
+  data_xtarP->SetFillStyle(3004);
+  data_ytarP->SetFillColorAlpha(kBlue, 0.35);
+  data_ytarP->SetFillStyle(3004);
+  data_ztarP->SetFillColorAlpha(kBlue, 0.35);
+  data_ztarP->SetFillStyle(3004);
   
-  //Set data Histo Aesthetics
-  data_xtar->SetFillColorAlpha(kBlue, 0.35);
-  data_xtar->SetFillStyle(3004);
-  data_ytar->SetFillColorAlpha(kBlue, 0.35);
-  data_ytar->SetFillStyle(3004);
-  data_ztar->SetFillColorAlpha(kBlue, 0.35);
-  data_ztar->SetFillStyle(3004);
+  data_calc_ztarP->SetLineColor(kMagenta);
+  data_calc_ztarP->SetLineWidth(2);
 
   //-----------------------------------------------------------------
 
@@ -843,39 +871,70 @@ void compare_heep(int run, int pm, string model, string rad)
  //-----------------PLOT TARGET  Variables SIMC/Data comparison-----------------------
 
   //Set Legend
-   auto leg28 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg29 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg30 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg31 = new TLegend(0.1,0.8,0.28,0.9);
+   auto leghxt = new TLegend(0.1,0.8,0.28,0.9);
+   auto leghyt = new TLegend(0.1,0.8,0.28,0.9);
+   auto leghzt = new TLegend(0.1,0.8,0.28,0.9);
+   
+   auto legpxt = new TLegend(0.1,0.8,0.28,0.9);
+   auto legpyt = new TLegend(0.1,0.8,0.28,0.9);
+   auto legpzt = new TLegend(0.1,0.8,0.28,0.9);
 
 
-   TCanvas *c4 = new TCanvas("c4", "Target Variables", 2000, 1000);
-   c4->Divide(3,1);
+   TCanvas *c4a = new TCanvas("c4a", "HMS Target Variables", 2000, 1000);
+   c4a->Divide(3,1);
 
-   c4->cd(1);
-   simc_xtar->Draw();
-   data_xtar->Draw("sameshist");
-   leg28->AddEntry(data_xtar,"Data","f");
-   leg28->AddEntry(simc_xtar,"SIMC");
-   leg28->Draw();
+   c4a->cd(1);
+   simc_xtar->Draw("hist");
+   data_xtarH->Draw("sameshist");
+   leghxt->AddEntry(data_xtarH,"Data","f");
+   leghxt->AddEntry(simc_xtar,"SIMC");
+   leghxt->Draw();
   
-   c4->cd(2);
-   simc_ytar->Draw();
-   data_ytar->Draw("sameshist");
-   leg29->AddEntry(data_ytar,"Data","f");
-   leg29->AddEntry(simc_ytar,"SIMC");
-   leg29->Draw();
+   c4a->cd(2);
+   simc_ytar->Draw("hist");
+   data_ytarH->Draw("sameshist");
+   leghyt->AddEntry(data_ytarH,"Data","f");
+   leghyt->AddEntry(simc_ytar,"SIMC");
+   leghyt->Draw();
 
-   c4->cd(3);
-   simc_ztar->Draw();
-   data_ztar->Draw("sameshist");
-   leg30->AddEntry(data_ztar,"Data","f");
-   leg30->AddEntry(simc_ztar,"SIMC");
-   leg30->Draw();
+   c4a->cd(3);
+   simc_ztar->Draw("hist");
+   data_ztarH->Draw("sameshist");
+   data_calc_ztarH->Draw("sameshist");
+   leghzt->AddEntry(data_ztarH,"Data","f");
+   leghzt->AddEntry(data_calc_ztarH,"Calculated","f");
+   leghzt->AddEntry(simc_ztar,"SIMC");
+   leghzt->Draw();
   
-   c4->SaveAs(Form("eArm_TargVar_%d.pdf", run));                                                                                              
+   c4a->SaveAs(Form("hArm_TargVar_%d.pdf", run));                                                                                              
 
+   TCanvas *c4b = new TCanvas("c4b", "SHMS Target Variables", 2000, 1000);
+   c4b->Divide(3,1);
 
+   c4b->cd(1);
+   simc_xtar->Draw("hist");
+   data_xtarP->Draw("sameshist");
+   legpxt->AddEntry(data_xtarP,"Data","f");
+   legpxt->AddEntry(simc_xtar,"SIMC");
+   legpxt->Draw();
+  
+   c4b->cd(2);
+   simc_ytar->Draw("hist");
+   data_ytarP->Draw("sameshist");
+   legpyt->AddEntry(data_ytarP,"Data","f");
+   legpyt->AddEntry(simc_ytar,"SIMC");
+   legpyt->Draw();
+
+   c4b->cd(3);
+   simc_ztar->Draw("hist");
+   data_ztarP->Draw("sameshist");
+   data_calc_ztarP->Draw("sameshist");
+   legpzt->AddEntry(data_ztarP,"Data","f");
+   legpzt->AddEntry(data_calc_ztarP,"Calculated","f");
+   legpzt->AddEntry(simc_ztar,"SIMC");
+   legpzt->Draw();
+  
+   c4b->SaveAs(Form("pArm_TargVar_%d.pdf", run));      
    //--------PLOT HADRON ARM QUANTITIES--------
 
 
