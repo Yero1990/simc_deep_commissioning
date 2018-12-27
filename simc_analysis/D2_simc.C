@@ -32,8 +32,8 @@ void D2_simc(int run, int Pmiss, string model, string rad)
     //sP0 = 8700. / 1000.; 
 
     //Corrected Momentum (from run 3288)
-    hP0 = 2837.188 / 1000.;
-    sP0 = 8520.256 / 1000.;
+    hP0 = 2837.185 / 1000.;
+    sP0 = 8520.525 / 1000.;
     
     charge_factor =137.572;   //BCM4A
     e_trkEff =0.9849;       //shms e- trk eff
@@ -563,7 +563,7 @@ void D2_simc(int run, int Pmiss, string model, string rad)
     Kn = En - MN;
     
     //Define cuts
-    c_Em = Em>-0.01 && Em<0.02;
+    c_Em = Em>-0.02 && Em<0.04;
     c_hdelta = h_delta > -8. && h_delta < 8.;
 
     //Full Weight

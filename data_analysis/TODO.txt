@@ -80,3 +80,15 @@ After fixing ztar, use my own formula for now. Then speak with Mark / Steve abou
 ** Next, look at Al dummy data taken at these same kinematics
 --->Unfortunately, the Al dummy was only taken at the H(e,e'p) elastics kinematics. Even though, the SHMS was kept fiexed. So it may be useful, since we
 took single SHMS data. Currently replaying Al. Dummy Run 3255, to compare it with Pm = 80 MeV zTarget.
+
+
+December 23, 2018
+After looking at P.react.z and my formula for ztar in an SHMS Centered Sieve run, I determined to keep using the hcana original formula, as that one gave three clean peaks,
+representing the foil locations. My formula had one peak too wide. Also, this is the formula that has been used in the past to do these optimizations, so is best to keep it
+consistent. SHould still discuss with Mark about it.
+
+
+December 27, 2018
+After applying Werner's new subroutine to add additional smearing to SIMC, the missing energy now matches pretty well between SIMC and data. The ztargte variable still looks
+shifted. This is probably an Optics issue, so the Ytar, Yptar and Xptar need to be optimized using the SHMS optics run 3286 taken. There was no HMS Optics run taken. In this case,
+what to do?

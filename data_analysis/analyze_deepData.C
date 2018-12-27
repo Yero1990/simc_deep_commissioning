@@ -14,7 +14,7 @@ void analyze_deepData(int run, int Pmiss)
   
 
   //Read DATA ROOTfiles
-  TString filename =Form("../../hallc_replay/ROOTfiles/D2_pm80/coin_replay_deep_check_%d_-1_pCorr.root",run);        
+  TString filename =Form("../../hallc_replay/ROOTfiles/coin_replay_deep_check_%d_-1.root",run);        
   //  TString filename =Form("../../hallc_replay/ROOTfiles/shms_coin_replay_deep_check_%d_-1.root" ,run);                                                   
 
   TFile *data_file = new TFile(filename, "READ"); 

@@ -1,7 +1,7 @@
 //Script to make comparison between SIMC and Commissioning Data from HallC Spring 2018
 //Compare Target Reconstruction/FOCAL PLANE/ Kinematics Variables
 
-void compare_heep(int run, int pm, string model, string rad)
+void compare_deep(int run, int pm, string model, string rad)
 {
 
   gROOT->SetBatch(kTRUE);  
@@ -382,7 +382,7 @@ void compare_heep(int run, int pm, string model, string rad)
   simc_file->GetObject("cut_theta_pq", simc_thpq);
   simc_file->GetObject("cut_theta_nq", simc_thnq);
   
-  simc_file->GetObject("cut_Mmiss", simc_MM);
+  simc_file->GetObject("Mmiss", simc_MM);
   simc_file->GetObject("cut_En", simc_En);
   simc_file->GetObject("cut_Ep", simc_Ep);
   simc_file->GetObject("cut_Kn", simc_Kn);
@@ -462,7 +462,7 @@ void compare_heep(int run, int pm, string model, string rad)
   data_file->GetObject("cut_theta_pq", data_thpq);
   data_file->GetObject("cut_theta_nq", data_thnq);
 
-  data_file->GetObject("cut_Mmiss", data_MM);
+  data_file->GetObject("Mmiss", data_MM);
   data_file->GetObject("cut_En", data_En);
   data_file->GetObject("cut_Ep", data_Ep);
   data_file->GetObject("cut_Kn", data_Kn);
@@ -900,9 +900,9 @@ void compare_heep(int run, int pm, string model, string rad)
    c4a->cd(3);
    simc_ztar->Draw("hist");
    data_ztarH->Draw("sameshist");
-   data_calc_ztarH->Draw("sameshist");
+   //data_calc_ztarH->Draw("sameshist");
    leghzt->AddEntry(data_ztarH,"Data","f");
-   leghzt->AddEntry(data_calc_ztarH,"Calculated","f");
+   //leghzt->AddEntry(data_calc_ztarH,"Calculated","f");
    leghzt->AddEntry(simc_ztar,"SIMC");
    leghzt->Draw();
   
@@ -928,9 +928,9 @@ void compare_heep(int run, int pm, string model, string rad)
    c4b->cd(3);
    simc_ztar->Draw("hist");
    data_ztarP->Draw("sameshist");
-   data_calc_ztarP->Draw("sameshist");
+   //data_calc_ztarP->Draw("sameshist");
    legpzt->AddEntry(data_ztarP,"Data","f");
-   legpzt->AddEntry(data_calc_ztarP,"Calculated","f");
+   //legpzt->AddEntry(data_calc_ztarP,"Calculated","f");
    legpzt->AddEntry(simc_ztar,"SIMC");
    legpzt->Draw();
   
