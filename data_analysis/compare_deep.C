@@ -1,7 +1,7 @@
 //Script to make comparison between SIMC and Commissioning Data from HallC Spring 2018
 //Compare Target Reconstruction/FOCAL PLANE/ Kinematics Variables
 
-void compare_deep(int run, int pm, string model, string rad)
+void compare_deep(int set, int pm, string model, string rad)
 {
 
   gROOT->SetBatch(kTRUE);  
@@ -9,14 +9,10 @@ void compare_deep(int run, int pm, string model, string rad)
   //TString simc_filename =  "weighted_ep_coin_simc_1854.root"; //"ep_coin_simc_1929.root";
   
   //Pre-defined SIMC/data root file names containing histogram object to comapare
-  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s.root", pm, model.c_str(), rad.c_str());
-  // TString simc_filename =  Form("D2simc_pm%d_laget%s_%s_usingTLT.root", pm, model.c_str(), rad.c_str());
+  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s_set%d.root", pm, model.c_str(), rad.c_str(), set);
 
-
-  //TString simc_filename =  Form("Weighted_simc_hms_single_%d_gfor.root", runNUM);
-  //TString data_filename = Form("./D2data_pm%d_%d.root",pm, run); 
-  //TString data_filename = Form("./D2data_pm%d_%d_EmANDCtimeCut.root",pm, run); 
-  TString data_filename = Form("./D2data_pm%d_%d.root",pm, run); 
+  //Data File
+  TString data_filename = Form("./D2data_pm%d_set%d.root",pm, set); 
 
   TString simc_path;
   TString data_path;
@@ -32,8 +28,11 @@ void compare_deep(int run, int pm, string model, string rad)
   //Define SIMC histos ('h'-->hadron arm,  'e'-->electron arm)
   
   TH1F *simc_xtar =  0;
-  TH1F *simc_ytar =  0;
-  TH1F *simc_ztar =  0;
+  TH1F *simc_ytarH =  0;
+  TH1F *simc_ztarH =  0;
+
+  TH1F *simc_ytarP =  0;                                                                                                                                     
+  TH1F *simc_ztarP =  0; 
 
   //Define data histos
   TH1F *data_xtarH = 0;
@@ -44,10 +43,7 @@ void compare_deep(int run, int pm, string model, string rad)
   TH1F *data_ytarP = 0;
   TH1F *data_ztarP = 0;
   
-  TH1F *data_calc_ztarH = 0;
-  TH1F *data_calc_ztarP = 0;
 
-  
 
   //---------------Target Reconstruction Variables----------------
   //Define SIMC histos ('h'-->hadron arm,  'e'-->electron arm)
@@ -167,17 +163,25 @@ void compare_deep(int run, int pm, string model, string rad)
   //----------Get Target Histograms------------------
   //Get Histogram objects from SIMC rootfile
   simc_file->GetObject("cut_x_tar", simc_xtar);
-  simc_file->GetObject("cut_y_tar", simc_ytar);
-  simc_file->GetObject("cut_z_tar", simc_ztar);
 
+  simc_file->GetObject("cut_y_tarH", simc_ytarH);
+  simc_file->GetObject("cut_z_tarH", simc_ztarH);
+
+  simc_file->GetObject("cut_y_tarP", simc_ytarP);    
+  simc_file->GetObject("cut_z_tarP", simc_ztarP);   
 
   //Set SIMC Histo Aesthetics
   simc_xtar->SetLineColor(kRed);
   simc_xtar->SetLineWidth(2);
-  simc_ytar->SetLineColor(kRed);
-  simc_ytar->SetLineWidth(2);
-  simc_ztar->SetLineColor(kRed);
-  simc_ztar->SetLineWidth(2);
+  simc_ytarH->SetLineColor(kRed);
+  simc_ytarH->SetLineWidth(2);
+  simc_ztarH->SetLineColor(kRed);
+  simc_ztarH->SetLineWidth(2);
+
+  simc_ytarP->SetLineColor(kRed);          
+  simc_ytarP->SetLineWidth(2);                   
+  simc_ztarP->SetLineColor(kRed);                                          
+  simc_ztarP->SetLineWidth(2); 
 
   
   //change to data_file
@@ -187,12 +191,10 @@ void compare_deep(int run, int pm, string model, string rad)
   data_file->GetObject("cut_hx_tar", data_xtarH);
   data_file->GetObject("cut_hy_tar", data_ytarH);
   data_file->GetObject("cut_hz_tar", data_ztarH);
-  data_file->GetObject("cut_calc_hz_tar", data_calc_ztarH);
 
   data_file->GetObject("cut_px_tar", data_xtarP);
   data_file->GetObject("cut_py_tar", data_ytarP);
   data_file->GetObject("cut_pz_tar", data_ztarP);
-  data_file->GetObject("cut_calc_pz_tar", data_calc_ztarP);
 
 
     //Set data Histo Aesthetics
@@ -203,8 +205,6 @@ void compare_deep(int run, int pm, string model, string rad)
   data_ztarH->SetFillColorAlpha(kBlue, 0.35);
   data_ztarH->SetFillStyle(3004);
 
-  data_calc_ztarH->SetLineColor(kMagenta);
-  data_calc_ztarH->SetLineWidth(2);
 
   data_xtarP->SetFillColorAlpha(kBlue, 0.35);
   data_xtarP->SetFillStyle(3004);
@@ -212,9 +212,6 @@ void compare_deep(int run, int pm, string model, string rad)
   data_ytarP->SetFillStyle(3004);
   data_ztarP->SetFillColorAlpha(kBlue, 0.35);
   data_ztarP->SetFillStyle(3004);
-  
-  data_calc_ztarP->SetLineColor(kMagenta);
-  data_calc_ztarP->SetLineWidth(2);
 
   //-----------------------------------------------------------------
 
@@ -387,9 +384,9 @@ void compare_deep(int run, int pm, string model, string rad)
   simc_file->GetObject("cut_Ep", simc_Ep);
   simc_file->GetObject("cut_Kn", simc_Kn);
   simc_file->GetObject("cut_Kp", simc_Kp);
-  simc_file->GetObject("cut_pmx", simc_Pmx);
-  simc_file->GetObject("cut_pmy", simc_Pmy);
-  simc_file->GetObject("cut_pmz", simc_Pmz);
+  simc_file->GetObject("cut_pmX_q", simc_Pmx);
+  simc_file->GetObject("cut_pmY_q", simc_Pmy);
+  simc_file->GetObject("cut_pmZ_q", simc_Pmz);
 
   //Set SIMC Histo Aesthetics
   simc_Q2->SetLineColor(kRed);
@@ -467,9 +464,9 @@ void compare_deep(int run, int pm, string model, string rad)
   data_file->GetObject("cut_Ep", data_Ep);
   data_file->GetObject("cut_Kn", data_Kn);
   data_file->GetObject("cut_Kp", data_Kp);
-  data_file->GetObject("cut_pmx", data_Pmx);
-  data_file->GetObject("cut_pmy", data_Pmy);
-  data_file->GetObject("cut_pmz", data_Pmz);
+  data_file->GetObject("cut_pmX_q", data_Pmx);
+  data_file->GetObject("cut_pmY_q", data_Pmy);
+  data_file->GetObject("cut_pmZ_q", data_Pmz);
 
   //Set data Histo Aesthetics
   data_Q2->SetFillColorAlpha(kBlue, 0.35);
@@ -534,7 +531,7 @@ void compare_deep(int run, int pm, string model, string rad)
 
    //Create A Canvas to store Target Recon. variable comparisons in HADRON ARM
    
-   TCanvas *c1 = new TCanvas("c1", "Electron Arm: Target Reconstruction", 2000, 1000);
+   TCanvas *c1 = new TCanvas("c1", "Electron Arm: Target Reconstruction", 5000, 3000);
    c1->Divide(2,2);
 
    c1->cd(1);
@@ -565,7 +562,7 @@ void compare_deep(int run, int pm, string model, string rad)
    leg8->AddEntry(simc_edelta,"SIMC");
    leg8->Draw();
 
-   c1->SaveAs(Form("eArm_TargRecon_%d.pdf", run));
+   c1->SaveAs(Form("eArm_TargRecon_pm%d_set%d.pdf", pm, set));
 
    //------------------------------------------------------------------------------
 
@@ -584,7 +581,7 @@ void compare_deep(int run, int pm, string model, string rad)
    auto leg15 = new TLegend(0.1,0.8,0.28,0.9);
    auto leg16 = new TLegend(0.1,0.8,0.28,0.9);
 
-   TCanvas *c2 = new TCanvas("c2", "Electron Arm: Focal Plane", 2000, 1000);
+   TCanvas *c2 = new TCanvas("c2", "Electron Arm: Focal Plane", 5000, 3000);
    c2->Divide(2,2);
 
    c2->cd(1);
@@ -615,112 +612,43 @@ void compare_deep(int run, int pm, string model, string rad)
    leg16->AddEntry(simc_eypfp,"SIMC");
    leg16->Draw();
 
-   c2->SaveAs(Form("eArm_FocalPlane_%d.pdf", run));                                                                                   
+   c2->SaveAs(Form("eArm_FocalPlane_pm%d_set%d.pdf", pm, set));                                                                                   
 
    //----------------------------------------------------------- 
  
    
    //-----------------PLOT KINEMATICS SIMC/Data comparison---------------
 
-//Set Legend
-   auto leg19 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg20 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg21 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg22 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg23 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg24 = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg25 = new TLegend(0.1,0.8,0.28,0.9);
+   //Kinematics 1:  Missing Varibales
+   auto leg_em = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_MM = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pm = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pmx = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pmy = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Pmz = new TLegend(0.1,0.8,0.28,0.9);
 
-   TCanvas *c3 = new TCanvas("c3", "Kinematics", 2000, 1000);
-   c3->Divide(4,2);
-   
-   c3->cd(1);
-   data_Q2->GetXaxis()->SetTitle("Q^{2} [GeV^{2}]");
-   data_Q2->GetXaxis()->CenterTitle();
-   simc_Q2->Draw();
-   data_Q2->Draw("sameshist");
-   leg19->AddEntry(data_Q2,"Data", "f");
-   leg19->AddEntry(simc_Q2,"SIMC");
-   leg19->Draw();
-     
-   c3->cd(2);
-   data_omega->GetXaxis()->SetTitle("Energy Transfer, #omega [GeV]");
-   data_omega->GetXaxis()->CenterTitle();  
-   simc_omega->Draw();
-   data_omega->Draw("sameshist");
-   leg20->AddEntry(data_omega,"Data", "f");
-   leg20->AddEntry(simc_omega,"SIMC");
-   leg20->Draw();
 
-   c3->cd(3);
-   data_W2->GetXaxis()->SetTitle("Invariant Mass , W2 [GeV]");
-   data_W2->GetXaxis()->CenterTitle();
-   simc_W2->Draw();
-   data_W2->Draw("sameshist");
-   leg21->AddEntry(data_W2,"Data", "f");
-   leg21->AddEntry(simc_W2,"SIMC");
-   leg21->Draw();
-
-   c3->cd(4);
-   data_thq->GetXaxis()->SetTitle("q-vector Angle, #theta_{q} [deg]");
-   data_thq->GetXaxis()->CenterTitle();
-   simc_thq->Draw();
-   data_thq->Draw("sameshist");
-   leg22->AddEntry(data_thq,"Data", "f");
-   leg22->AddEntry(simc_thq,"SIMC");
-   leg22->Draw();
-
-   c3->cd(5);
-   simc_xbj->Draw();
-   data_xbj->Draw("sameshist");
-   leg23->AddEntry(data_xbj,"Data","f");
-   leg23->AddEntry(simc_xbj,"SIMC");
-   leg23->Draw();
-
-   c3->cd(6);
-   data_th_elec->GetXaxis()->SetTitle("Electron Scatt. Angle, #theta_{e} [deg]");
-   data_th_elec->GetXaxis()->CenterTitle();
-   simc_th_elec->Draw();
-   data_th_elec->Draw("sameshist");
-   leg24->AddEntry(data_th_elec,"Data","f");
-   leg24->AddEntry(simc_th_elec,"SIMC");
-   leg24->Draw();
-
-   c3->cd(7);
-   data_kf->GetXaxis()->SetTitle("Electron Final Momentum, k_{f} [GeV/c] ");
-   data_kf->GetXaxis()->CenterTitle();   
-   simc_kf->Draw();
-   data_kf->Draw("sameshist");
-   leg25->AddEntry(data_kf,"Data","f");
-   leg25->AddEntry(simc_kf,"SIMC");
-   leg25->Draw();
-
-   c3->cd(8);
-   data_emiss->GetXaxis()->SetTitle("Missing Energy, E_{m} [GeV/c] ");
-   data_emiss->GetXaxis()->CenterTitle();   
+   TCanvas *ck1 = new TCanvas("ck1", "Kinematics1", 5000, 3000);
+   ck1->Divide(3,2);
+   ck1->cd(1);
    simc_emiss->Draw("hist");
    data_emiss->Draw("sameshist");
-   leg25->AddEntry(data_emiss,"Data","f");
-   leg25->AddEntry(simc_emiss,"SIMC");
-   leg25->Draw();
-
-   c3->SaveAs(Form("Kinematics_%d.pdf", run));                                                                   
-
-   //Plot Additional Kinematics
+   data_emiss->GetXaxis()->SetTitle("Missing Energy, E_{m} [GeV] ");
+   data_emiss->GetXaxis()->CenterTitle();      
+   leg_em->AddEntry(data_emiss,"Data","f");
+   leg_em->AddEntry(simc_emiss,"SIMC");
+   leg_em->Draw();
    
-   auto leg_Pm = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Pf = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_thp = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_q = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_thpq = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_thnq = new TLegend(0.1,0.8,0.28,0.9);
+   ck1->cd(2);
+   data_MM->GetXaxis()->SetTitle("Missing Mass, M_{miss} [GeV]");
+   data_MM->GetXaxis()->CenterTitle();
+   simc_MM->Draw();
+   data_MM->Draw("sameshist");
+   leg_MM->AddEntry(data_MM,"Data", "f");
+   leg_MM->AddEntry(simc_MM,"SIMC");
+   leg_MM->Draw();
 
-
-   //Create A Canvas to store kinematic variable comparisons
-   TCanvas *ck2 = new TCanvas("ck2", "Kinematics-2", 2000, 1000);
-   
-   ck2->Divide(3,2);
-   ck2->cd(1);
+   ck1->cd(3);
    data_Pm->GetXaxis()->SetTitle("Missing Momentum, P_{miss} [GeV]");
    data_Pm->GetXaxis()->CenterTitle();
    simc_Pm->Draw();
@@ -729,117 +657,7 @@ void compare_deep(int run, int pm, string model, string rad)
    leg_Pm->AddEntry(simc_Pm,"SIMC");
    leg_Pm->Draw();
 
-   ck2->cd(2);
-   data_Pf->GetXaxis()->SetTitle("Proton Momentum, P_{p} [GeV]");
-   data_Pf->GetXaxis()->CenterTitle();
-   simc_Pf->Draw();
-   data_Pf->Draw("sameshist");
-   leg_Pf->AddEntry(data_Pf,"Data", "f");
-   leg_Pf->AddEntry(simc_Pf,"SIMC");
-   leg_Pf->Draw();
-
-   ck2->cd(3);
-   data_th_prot->GetXaxis()->SetTitle("Proton Scatt. Angle, #theta_{p} [deg]");
-   data_th_prot->GetXaxis()->CenterTitle();
-   simc_th_prot->Draw();
-   data_th_prot->Draw("sameshist");
-   leg_thp->AddEntry(data_th_prot,"Data", "f");
-   leg_thp->AddEntry(simc_th_prot,"SIMC");
-   leg_thp->Draw();
-
-   ck2->cd(4);
-   data_q->GetXaxis()->SetTitle("q-Vector Magnitude, |q| [GeV]");
-   data_q->GetXaxis()->CenterTitle();
-   simc_q->Draw();
-   data_q->Draw("sameshist");
-   leg_q->AddEntry(data_q,"Data", "f");
-   leg_q->AddEntry(simc_q,"SIMC");
-   leg_q->Draw();
-
-
-   ck2->cd(5);
-   data_thpq->GetXaxis()->SetTitle("(Proton, qVec.) Angle, #theta_{pq} [deg]");
-   data_thpq->GetXaxis()->CenterTitle();
-   simc_thpq->Draw();
-   data_thpq->Draw("sameshist");
-   leg_thpq->AddEntry(data_thpq,"Data", "f");
-   leg_thpq->AddEntry(simc_thpq,"SIMC");
-   leg_thpq->Draw();
-
-   ck2->cd(6);
-   data_thnq->GetXaxis()->SetTitle("(Neutron, qVec.) Angle, #theta_{nq} [deg]");
-   data_thnq->GetXaxis()->CenterTitle();
-   simc_thnq->Draw();
-   data_thnq->Draw("sameshist");
-   leg_thnq->AddEntry(data_thnq,"Data", "f");
-   leg_thnq->AddEntry(simc_thnq,"SIMC");
-   leg_thnq->Draw();
-
-   ck2->SaveAs(Form("Kinematics2_%d.pdf", run));                                                                   
-
-
-   //Plot Kinematics 3
-   
-   auto leg_MM = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_En = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Ep = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Kn = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Kp = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Pmx = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Pmy = new TLegend(0.1,0.8,0.28,0.9);
-   auto leg_Pmz = new TLegend(0.1,0.8,0.28,0.9);
-
-
-   //Create A Canvas to store kinematic variable comparisons
-   TCanvas *ck3 = new TCanvas("ck3", "Kinematics-3", 2000, 1000);
-   
-   ck3->Divide(4,2);
-   ck3->cd(1);
-   data_MM->GetXaxis()->SetTitle("Missing Mass, M_{miss} [GeV]");
-   data_MM->GetXaxis()->CenterTitle();
-   simc_MM->Draw();
-   data_MM->Draw("sameshist");
-   leg_MM->AddEntry(data_Pm,"Data", "f");
-   leg_MM->AddEntry(simc_Pm,"SIMC");
-   leg_MM->Draw();
-   
-   ck3->cd(2);
-   data_En->GetXaxis()->SetTitle("Neutron Energy, E_{n} [GeV]");
-   data_En->GetXaxis()->CenterTitle();
-   simc_En->Draw();
-   data_En->Draw("sameshist");
-   leg_En->AddEntry(data_En,"Data", "f");
-   leg_En->AddEntry(simc_En,"SIMC");
-   leg_En->Draw();
-
-   ck3->cd(3);
-   data_Ep->GetXaxis()->SetTitle("Proton Energy, E_{p} [GeV]");
-   data_Ep->GetXaxis()->CenterTitle();
-   simc_Ep->Draw();
-   data_Ep->Draw("sameshist");
-   leg_Ep->AddEntry(data_Ep,"Data", "f");
-   leg_Ep->AddEntry(simc_Ep,"SIMC");
-   leg_Ep->Draw();
-
-   ck3->cd(4);
-   data_Kn->GetXaxis()->SetTitle("Neutron Kin. Energy, K_{n} [GeV]");
-   data_Kn->GetXaxis()->CenterTitle();
-   simc_Kn->Draw();
-   data_Kn->Draw("sameshist");
-   leg_Kn->AddEntry(data_Kn,"Data", "f");
-   leg_Kn->AddEntry(simc_Kn,"SIMC");
-   leg_Kn->Draw();
-
-   ck3->cd(5);
-   data_Kp->GetXaxis()->SetTitle("Proton Kin. Energy, K_{p} [GeV]");
-   data_Kp->GetXaxis()->CenterTitle();
-   simc_Kp->Draw();
-   data_Kp->Draw("sameshist");
-   leg_Kp->AddEntry(data_Kp,"Data", "f");
-   leg_Kp->AddEntry(simc_Kp,"SIMC");
-   leg_Kp->Draw();
-
-   ck3->cd(6);
+   ck1->cd(4);
    data_Pmx->GetXaxis()->SetTitle("Missing Momentum X-comp., Pm_{x} [GeV]");
    data_Pmx->GetXaxis()->CenterTitle();
    simc_Pmx->Draw();
@@ -847,8 +665,8 @@ void compare_deep(int run, int pm, string model, string rad)
    leg_Pmx->AddEntry(data_Pmx,"Data", "f");
    leg_Pmx->AddEntry(simc_Pmx,"SIMC");
    leg_Pmx->Draw();
-  
-   ck3->cd(7);
+   
+   ck1->cd(5);
    data_Pmy->GetXaxis()->SetTitle("Missing Momentum Y-comp., Pm_{y} [GeV]");
    data_Pmy->GetXaxis()->CenterTitle();
    simc_Pmy->Draw();
@@ -857,7 +675,7 @@ void compare_deep(int run, int pm, string model, string rad)
    leg_Pmy->AddEntry(simc_Pmy,"SIMC");
    leg_Pmy->Draw();
 
-   ck3->cd(8);
+   ck1->cd(6);
    data_Pmz->GetXaxis()->SetTitle("Missing Momentum Z-comp., Pm_{z} [GeV]");
    data_Pmz->GetXaxis()->CenterTitle();
    simc_Pmz->Draw();
@@ -865,8 +683,194 @@ void compare_deep(int run, int pm, string model, string rad)
    leg_Pmz->AddEntry(data_Pmz,"Data", "f");
    leg_Pmz->AddEntry(simc_Pmz,"SIMC");
    leg_Pmz->Draw();
+
+   ck1->SaveAs(Form("Kinematics1_pm%d_set%d.pdf", pm, set));                                                                   
+
+
+   //Kinematics 2:  Electron Kinematics
+
+   //Set Legend
+   auto leg_Q2 = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_om = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_xbj = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_W2 = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_the = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_kf = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_thq = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_q = new TLegend(0.1,0.8,0.28,0.9);
+
+
+   TCanvas *ck2 = new TCanvas("ck2", "Kinematics2", 5000, 3000);
+   ck2->Divide(4,2);
    
-   ck3->SaveAs(Form("Kinematics3_%d.pdf", run));                                                                   
+   ck2->cd(1);
+   data_Q2->GetXaxis()->SetTitle("Q^{2} [GeV^{2}]");
+   data_Q2->GetXaxis()->CenterTitle();
+   simc_Q2->Draw();
+   data_Q2->Draw("sameshist");
+   leg_Q2->AddEntry(data_Q2,"Data", "f");
+   leg_Q2->AddEntry(simc_Q2,"SIMC");
+   leg_Q2->Draw();
+     
+   ck2->cd(2);
+   data_omega->GetXaxis()->SetTitle("Energy Transfer, #omega [GeV]");
+   data_omega->GetXaxis()->CenterTitle();  
+   simc_omega->Draw();
+   data_omega->Draw("sameshist");
+   leg_om->AddEntry(data_omega,"Data", "f");
+   leg_om->AddEntry(simc_omega,"SIMC");
+   leg_om->Draw();
+   
+   ck2->cd(3);
+   data_xbj->GetXaxis()->SetTitle("BjorkenX,  X_{bj} ");
+   data_xbj->GetXaxis()->CenterTitle();
+   simc_xbj->Draw();
+   data_xbj->Draw("sameshist");
+   leg_xbj->AddEntry(data_xbj,"Data","f");
+   leg_xbj->AddEntry(simc_xbj,"SIMC");
+   leg_xbj->Draw();
+
+   ck2->cd(4);
+   data_W2->GetXaxis()->SetTitle("Invariant Mass , W2 [GeV]");
+   data_W2->GetXaxis()->CenterTitle();
+   simc_W2->Draw();
+   data_W2->Draw("sameshist");
+   leg_W2->AddEntry(data_W2,"Data", "f");
+   leg_W2->AddEntry(simc_W2,"SIMC");
+   leg_W2->Draw();
+   
+   ck2->cd(5);
+   data_th_elec->GetXaxis()->SetTitle("Electron Scatt. Angle, #theta_{e} [deg]");
+   data_th_elec->GetXaxis()->CenterTitle();
+   simc_th_elec->Draw();
+   data_th_elec->Draw("sameshist");
+   leg_the->AddEntry(data_th_elec,"Data","f");
+   leg_the->AddEntry(simc_th_elec,"SIMC");
+   leg_the->Draw();
+   
+   ck2->cd(6);
+   data_kf->GetXaxis()->SetTitle("Electron Final Momentum, k_{f} [GeV/c] ");
+   data_kf->GetXaxis()->CenterTitle();   
+   simc_kf->Draw();
+   data_kf->Draw("sameshist");
+   leg_kf->AddEntry(data_kf,"Data","f");
+   leg_kf->AddEntry(simc_kf,"SIMC");
+   leg_kf->Draw();
+
+   ck2->cd(7);
+   data_thq->GetXaxis()->SetTitle("q-vector Angle, #theta_{q} [deg]");
+   data_thq->GetXaxis()->CenterTitle();
+   simc_thq->Draw();
+   data_thq->Draw("sameshist");
+   leg_thq->AddEntry(data_thq,"Data", "f");
+   leg_thq->AddEntry(simc_thq,"SIMC");
+   leg_thq->Draw();
+
+   ck2->cd(8);
+   data_q->GetXaxis()->SetTitle("q-Vector Magnitude, |q| [GeV]");
+   data_q->GetXaxis()->CenterTitle();
+   simc_q->Draw();
+   data_q->Draw("sameshist");
+   leg_q->AddEntry(data_q,"Data", "f");
+   leg_q->AddEntry(simc_q,"SIMC");
+   leg_q->Draw();
+
+   ck2->SaveAs(Form("Kinematics2_pm%d_set%d.pdf", pm, set));                                                                   
+
+
+   
+   //Kinematics 3: Proton Kinematics
+   
+   auto leg_Pf = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_thp = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Kp = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Ep = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_Kn = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_En = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_thpq = new TLegend(0.1,0.8,0.28,0.9);
+   auto leg_thnq = new TLegend(0.1,0.8,0.28,0.9);
+
+
+   //Create A Canvas to store kinematic variable comparisons
+   TCanvas *ck3 = new TCanvas("ck3", "Kinematics3", 5000, 3000);
+   
+   ck3->Divide(4,2);
+ 
+   ck3->cd(1);
+   data_Pf->GetXaxis()->SetTitle("Proton Momentum, P_{p} [GeV]");
+   data_Pf->GetXaxis()->CenterTitle();
+   simc_Pf->Draw();
+   data_Pf->Draw("sameshist");
+   leg_Pf->AddEntry(data_Pf,"Data", "f");
+   leg_Pf->AddEntry(simc_Pf,"SIMC");
+   leg_Pf->Draw();
+
+   ck3->cd(2);
+   data_th_prot->GetXaxis()->SetTitle("Proton Scatt. Angle, #theta_{p} [deg]");
+   data_th_prot->GetXaxis()->CenterTitle();
+   simc_th_prot->Draw();
+   data_th_prot->Draw("sameshist");
+   leg_thp->AddEntry(data_th_prot,"Data", "f");
+   leg_thp->AddEntry(simc_th_prot,"SIMC");
+   leg_thp->Draw();
+
+   ck3->cd(3);
+   data_Kp->GetXaxis()->SetTitle("Proton Kin. Energy, K_{p} [GeV]");
+   data_Kp->GetXaxis()->CenterTitle();
+   simc_Kp->Draw();
+   data_Kp->Draw("sameshist");
+   leg_Kp->AddEntry(data_Kp,"Data", "f");
+   leg_Kp->AddEntry(simc_Kp,"SIMC");
+   leg_Kp->Draw();
+
+   ck3->cd(4);
+   data_Ep->GetXaxis()->SetTitle("Proton Energy, E_{p} [GeV]");
+   data_Ep->GetXaxis()->CenterTitle();
+   simc_Ep->Draw();
+   data_Ep->Draw("sameshist");
+   leg_Ep->AddEntry(data_Ep,"Data", "f");
+   leg_Ep->AddEntry(simc_Ep,"SIMC");
+   leg_Ep->Draw();
+
+   ck3->cd(5);
+   data_Kn->GetXaxis()->SetTitle("Neutron Kin. Energy, K_{n} [GeV]");
+   data_Kn->GetXaxis()->CenterTitle();
+   simc_Kn->Draw();
+   data_Kn->Draw("sameshist");
+   leg_Kn->AddEntry(data_Kn,"Data", "f");
+   leg_Kn->AddEntry(simc_Kn,"SIMC");
+   leg_Kn->Draw();
+
+   ck3->cd(6);
+   data_En->GetXaxis()->SetTitle("Neutron Energy, E_{n} [GeV]");
+   data_En->GetXaxis()->CenterTitle();
+   simc_En->Draw();
+   data_En->Draw("sameshist");
+   leg_En->AddEntry(data_En,"Data", "f");
+   leg_En->AddEntry(simc_En,"SIMC");
+   leg_En->Draw();
+
+
+   ck3->cd(7);
+   data_thpq->GetXaxis()->SetTitle("(Proton, qVec.) Angle, #theta_{pq} [deg]");
+   data_thpq->GetXaxis()->CenterTitle();
+   simc_thpq->Draw();
+   data_thpq->Draw("sameshist");
+   leg_thpq->AddEntry(data_thpq,"Data", "f");
+   leg_thpq->AddEntry(simc_thpq,"SIMC");
+   leg_thpq->Draw();
+
+   ck3->cd(8);
+   data_thnq->GetXaxis()->SetTitle("(Neutron, qVec.) Angle, #theta_{nq} [deg]");
+   data_thnq->GetXaxis()->CenterTitle();
+   simc_thnq->Draw();
+   data_thnq->Draw("sameshist");
+   leg_thnq->AddEntry(data_thnq,"Data", "f");
+   leg_thnq->AddEntry(simc_thnq,"SIMC");
+   leg_thnq->Draw();
+
+   ck3->SaveAs(Form("Kinematics3_pm%d_set%d.pdf", pm, set));                                                                   
+                                                               
 
  //-----------------PLOT TARGET  Variables SIMC/Data comparison-----------------------
 
@@ -880,7 +884,7 @@ void compare_deep(int run, int pm, string model, string rad)
    auto legpzt = new TLegend(0.1,0.8,0.28,0.9);
 
 
-   TCanvas *c4a = new TCanvas("c4a", "HMS Target Variables", 2000, 1000);
+   TCanvas *c4a = new TCanvas("c4a", "HMS Target Variables", 5000, 3000);
    c4a->Divide(3,1);
 
    c4a->cd(1);
@@ -891,24 +895,22 @@ void compare_deep(int run, int pm, string model, string rad)
    leghxt->Draw();
   
    c4a->cd(2);
-   simc_ytar->Draw("hist");
+   simc_ytarH->Draw("hist");
    data_ytarH->Draw("sameshist");
    leghyt->AddEntry(data_ytarH,"Data","f");
-   leghyt->AddEntry(simc_ytar,"SIMC");
+   leghyt->AddEntry(simc_ytarH,"SIMC");
    leghyt->Draw();
 
    c4a->cd(3);
-   simc_ztar->Draw("hist");
+   simc_ztarH->Draw("hist");
    data_ztarH->Draw("sameshist");
-   //data_calc_ztarH->Draw("sameshist");
    leghzt->AddEntry(data_ztarH,"Data","f");
-   //leghzt->AddEntry(data_calc_ztarH,"Calculated","f");
-   leghzt->AddEntry(simc_ztar,"SIMC");
+   leghzt->AddEntry(simc_ztarH,"SIMC");
    leghzt->Draw();
   
-   c4a->SaveAs(Form("hArm_TargVar_%d.pdf", run));                                                                                              
+   c4a->SaveAs(Form("hArm_TargVar_pm%d_set%d.pdf", pm, set));                                                                                              
 
-   TCanvas *c4b = new TCanvas("c4b", "SHMS Target Variables", 2000, 1000);
+   TCanvas *c4b = new TCanvas("c4b", "SHMS Target Variables", 5000, 3000);
    c4b->Divide(3,1);
 
    c4b->cd(1);
@@ -919,22 +921,20 @@ void compare_deep(int run, int pm, string model, string rad)
    legpxt->Draw();
   
    c4b->cd(2);
-   simc_ytar->Draw("hist");
+   simc_ytarP->Draw("hist");
    data_ytarP->Draw("sameshist");
    legpyt->AddEntry(data_ytarP,"Data","f");
-   legpyt->AddEntry(simc_ytar,"SIMC");
+   legpyt->AddEntry(simc_ytarP,"SIMC");
    legpyt->Draw();
 
    c4b->cd(3);
-   simc_ztar->Draw("hist");
+   simc_ztarP->Draw("hist");
    data_ztarP->Draw("sameshist");
-   //data_calc_ztarP->Draw("sameshist");
    legpzt->AddEntry(data_ztarP,"Data","f");
-   //legpzt->AddEntry(data_calc_ztarP,"Calculated","f");
-   legpzt->AddEntry(simc_ztar,"SIMC");
+   legpzt->AddEntry(simc_ztarP,"SIMC");
    legpzt->Draw();
   
-   c4b->SaveAs(Form("pArm_TargVar_%d.pdf", run));      
+   c4b->SaveAs(Form("pArm_TargVar_pm%d_set%d.pdf", pm, set));      
    //--------PLOT HADRON ARM QUANTITIES--------
 
 
@@ -949,7 +949,7 @@ void compare_deep(int run, int pm, string model, string rad)
    
    //Create A Canvas to store Target Recon. variable comparisons in HADRON ARM
    
-   TCanvas *htr = new TCanvas("htr", "Hadron Arm: Target Reconstruction", 2000, 1000);
+   TCanvas *htr = new TCanvas("htr", "Hadron Arm: Target Reconstruction", 5000, 3000);
    htr->Divide(2,2);
 
    htr->cd(1);
@@ -980,7 +980,7 @@ void compare_deep(int run, int pm, string model, string rad)
    htr_l4->AddEntry(simc_hdelta,"SIMC");
    htr_l4->Draw();
 
-   htr->SaveAs(Form("hArm_TargRecon_%d.pdf", run));
+   htr->SaveAs(Form("hArm_TargRecon_pm%d_set%d.pdf", pm, set));
 
    //------------------------------------------------------------------------------
 
@@ -993,7 +993,7 @@ void compare_deep(int run, int pm, string model, string rad)
    auto hfp_l3 = new TLegend(0.1,0.8,0.28,0.9);
    auto hfp_l4 = new TLegend(0.1,0.8,0.28,0.9);
 
-   TCanvas *hfp = new TCanvas("hfp", "Hadron Arm: Focal Plane", 2000, 1000);
+   TCanvas *hfp = new TCanvas("hfp", "Hadron Arm: Focal Plane", 5000, 3000);
    hfp->Divide(2,2);
 
    hfp->cd(1);
@@ -1024,7 +1024,7 @@ void compare_deep(int run, int pm, string model, string rad)
    hfp_l4->AddEntry(simc_hypfp,"SIMC");
    hfp_l4->Draw();
 
-   hfp->SaveAs(Form("hArm_FocalPlane_%d.pdf", run));                                                                                   
+   hfp->SaveAs(Form("hArm_FocalPlane_pm%d_set%d.pdf", pm, set));                                                                                   
 
    //----------------------------------------------------------- 
  

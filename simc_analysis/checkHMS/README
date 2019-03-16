@@ -1,0 +1,8 @@
+********************
+check HMS Momentum 
+for D(e,e'p)n
+********************
+
+The code in this directory serves a similar purpose to that in the H(e,e'p)
+which is to verify the HMS proton momentum, using a calculated proton 
+momentum formula and comparing it to the measured to that in simc.

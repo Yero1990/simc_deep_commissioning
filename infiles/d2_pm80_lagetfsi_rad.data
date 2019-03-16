@@ -6,7 +6,7 @@
 
  =?
  &EXPERIMENT
-     ngen  =  100000			!  POS: # of successes
+     ngen  =  1000000			!  POS: # of successes
      EXPER%charge  =   1.0		!  total charge (mC)
      doing_phsp  =  F		!  (T = TRUE)	- If all of the doing_* are
      doing_kaon  =  F		!  (T = TRUE)   false, then doing (e,e'p).
@@ -21,10 +21,15 @@
      dEbeam  =  0.05                                   !  beam energy variation (%)
      electron_arm  =  5                                !  1=hms,2=sos,3=hrsr,4=hrsl,5 = shms
      hadron_arm  =  1                                  !  1=hms,2=sos,3=hrsr,4=hrsl,5 = shms
-     spec%e%P  =   8520.526                   !  e arm central momentum (MeV/c)
-     spec%e%theta  =   12.194                !  e arm angle setting (degrees)
-     spec%p%P  =   2837.188                  !  p arm central momentum (MeV/c)
+     spec%e%P  =  8543.210                             !  8535.648  8541.0   e arm central momentum (MeV/c)
+     spec%e%theta  =  12.168                           ! 12.194 e arm angle setting (degrees)
+     spec%p%P  =   2835.403                  !  p arm central momentum (MeV/c)
      spec%p%theta  =   38.896                  !  p arm angle setting (degrees)
+     spec%e%sig_musc  = 1.0e-6, 1.0e-6                 ! add extra mult scatt. in e Arm                                     
+     spec%p%sig_musc  = 1.0e-6, 1.0e-6                 ! add extra mult scatt in pArm            
+     spec%e%sig_smear = 1.0e-8, 2.0e-3, 2.0e-3, 0.075 !add extra smear. in recon eArm (Ytar, xptar, yptar, delta) 
+     spec%p%sig_smear = 1.0e-8, 2.0e-3, 2.0e-3, 0.075 !add extra smear. in  recon pArm 
+
 / 
 
  ?=
@@ -51,30 +56,30 @@
 
  &E_ARM_ACCEPT
      SPedge%e%delta%min  =   -15.0	!  delta min (SPECTROMETER ACCEPTANC
-     SPedge%e%delta%max  =   25.0	!  delta max
-     SPedge%e%yptar%min  =   -90.0	!  yptar min = {TF} / 1000 (mrad)
-     SPedge%e%yptar%max  =   90.0	!  yptar max = {TF} / 1000
-     SPedge%e%xptar%min  =   -100.0	!  xptar min = {TF} / 1000 (mrad)
-     SPedge%e%xptar%max  =   100.0	!  xptar max = {TF} / 1000
+     SPedge%e%delta%max  =   5.0	!  delta max
+     SPedge%e%yptar%min  =   -40.0	!  yptar min = {TF} / 1000 (mrad)
+     SPedge%e%yptar%max  =   30.0	!  yptar max = {TF} / 1000
+     SPedge%e%xptar%min  =   -60.0	!  xptar min = {TF} / 1000 (mrad)
+     SPedge%e%xptar%max  =   60.0	!  xptar max = {TF} / 1000
 / 
 
  &P_ARM_ACCEPT
      SPedge%p%delta%min  =   -15.0	!  delta min (SPECTROMETER ACCEPTANC
      SPedge%p%delta%max  =   15.0	!  delta max
-     SPedge%p%yptar%min  =   -90.0	!  yptar min = {TF} / 1000 (mrad)
-     SPedge%p%yptar%max  =   90.0	!  yptar max = {TF} / 1000
-     SPedge%p%xptar%min  =   -100.0	!  xptar min = {TF} / 1000 (mrad)
-     SPedge%p%xptar%max  =   100.0	!  xptar max = {TF} / 1000
+     SPedge%p%yptar%min  =   -45.0	!  yptar min = {TF} / 1000 (mrad)
+     SPedge%p%yptar%max  =   45.0	!  yptar max = {TF} / 1000
+     SPedge%p%xptar%min  =   -90.0	!  xptar min = {TF} / 1000 (mrad)
+     SPedge%p%xptar%max  =   90.0	!  xptar max = {TF} / 1000
 / 
 
  &BEAM_AND_TARGET_INFO
-     gen%xwid  =  0.008868		!  beam width - one sigma (cm)  (89microns)
-     gen%ywid  =  0.004235		!  beam width - one sigma (cm)  (42microns)
+     gen%xwid  =  0.005		!  beam width - one sigma (cm)  (89microns)
+     gen%ywid  =  0.005		!  beam width - one sigma (cm)  (42microns)
      targ%fr_pattern  =  3		!  raster pattern: 1=square, 2=circular, 3=real square
-     targ%fr1  =  0.1		!  horizontal size OR inner radius(2)
-     targ%fr2  =  0.1		!  vertical size OR outer radius(2)
-     targ%xoffset  =  0.147674		!  target x-offset (cm): +x = beam left ( opposite of EPICS)
-     targ%yoffset  =  -0.125227		!  target y-offset (cm): +y = up
+     targ%fr1  =  0.13		!  horizontal size OR inner radius(2)
+     targ%fr2  =  0.13		!  vertical size OR outer radius(2)
+     targ%xoffset  =  0.026637		!  target x-offset (cm): +x = beam right ( EPICS)
+     targ%yoffset  =  0.016842		!  target y-offset (cm): +y = up
      targ%zoffset  =  0.0		!  target z-offset (cm): +z = downstream
    				!   zreal = znominal + zoffset
 /

@@ -1,37 +1,55 @@
 #include "../simc_analysis/set_deep_histos.h"
 
-void analyze_deepData(int run, int Pmiss)
+void analyze_deepData(int set, int Pmiss)
 {
+
+  //the set="", represents different data sets, with ideally same kinematics, but spectrometer has been moved back and forth
+  //so the reproducibility needs to be checked.  For 80 MeV, use set=0
 
 //PREVENT DISPLAY 
   //gROOT->SetBatch(kTRUE);
     
   
-  //Define Central Angle for HMS/SHMS
-  Double_t htheta_cent = 38.896 * TMath::Pi()/180.;   //              3255: 37.29 deg
-  Double_t ptheta_cent = 12.194 * TMath::Pi()/180.;   //3289: 12.194, 3255:12.2  deg
-  Double_t xBPM_tar = 0.147674;   //Projected beam position at target (Hall Coordinate System)
-  
 
   //Read DATA ROOTfiles
-  TString filename =Form("../../hallc_replay/ROOTfiles/coin_replay_deep_check_%d_-1.root",run);        
-  //  TString filename =Form("../../hallc_replay/ROOTfiles/shms_coin_replay_deep_check_%d_-1.root" ,run);                                                   
+  TString filename; 
+  
+  if(set==0&&Pmiss==80){ filename = "../../hallc_replay/ROOTfiles/coin_replay_deep_check_3289_-1.root"; }
+  
+  if(set==1&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_set1.root"; }
+  if(set==2&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_set2.root"; }
+  
+  if(set==1&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_set1.root"; }
+  if(set==2&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_set2.root"; }
+  if(set==3&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_set3.root"; }
+
+
 
   TFile *data_file = new TFile(filename, "READ"); 
   TTree *T = (TTree*)data_file->Get("T");
  
   //Create output root file where histograms will be stored
-  TFile *outROOT = new TFile(Form("D2data_pm%d_%d.root", Pmiss, run), "recreate");
+  TFile *outROOT = new TFile(Form("D2data_pm%d_set%d.root", Pmiss, set), "recreate");
   
 
   //********* Create 1D Histograms **************
   
   TH1F *epCT = new TH1F("epCT","e-Proton Coincidence Time", 100, 0, 20);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
+  TH1F *ecal_etotnorm = new TH1F("ecal_etotnorm","SHMS Calorimeter Total Norm. Energy", 100, 0.1, 2.);
 
   //Kinematics Quantities
 
   TH1F *Emiss = new TH1F("Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
   TH1F *pm = new TH1F("pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+
+  TH1F *pmX_lab = new TH1F("pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *pmY_lab = new TH1F("pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *pmZ_lab = new TH1F("pmZ_Lab","Pmiss Z (Lab) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+  TH1F *pmX_q = new TH1F("pmX_q","Pmiss X (w.r.t q-vec) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *pmY_q = new TH1F("pmY_q","Pmiss Y (w.r.t q-vec) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *pmZ_q = new TH1F("pmZ_q","Pmiss Z (w.r.t. q-vec) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+  
+
   TH1F *Q_2 = new TH1F("Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
   TH1F *omega = new TH1F("omega","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
   TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", W_nbins, W_xmin, W_xmax);     //min width = 19.9 MeV (0.0199) (bin width = 25 MeV)
@@ -51,7 +69,6 @@ void analyze_deepData(int run, int Pmiss)
   TH1F *thet_pq_v2 = new TH1F("theta_pq_v2", "(Proton, q-vector) Angle, #theta_{pq}", thpq_nbins, thpq_xmin, thpq_xmax);
     
   TH1F *Mmiss = new TH1F("Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);      
-  TH1F *Mmissv2 = new TH1F("Mmissv2","Missing Mass Version 2", Mm_nbins, Mm_xmin, Mm_xmax);      
   TH1F *Emiss_nuc = new TH1F("Emiss_nuc","Nuclear Missing Energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
   TH1F *Erecoil = new TH1F("Erecoil","Recoil Neutron Energy", En_nbins, En_xmin, En_xmax);
   TH1F *pmx = new TH1F("pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);
@@ -64,27 +81,15 @@ void analyze_deepData(int run, int Pmiss)
 
 
   //Target Reconstruction Variables
-  TH1F *hx_tar = new TH1F("hx_tar", "HMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *hy_tar = new TH1F("hy_tar", "HMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *hz_tar = new TH1F("hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *hx_tar = new TH1F("hx_tar", "HMS x-Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *hy_tar = new TH1F("hy_tar", "HMS y_Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *hz_tar = new TH1F("hz_tar", "HMS z_Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);
   
   //Target Reconstruction Variables
-  TH1F *px_tar = new TH1F("px_tar", "SHMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *py_tar = new TH1F("py_tar", "SHMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *pz_tar = new TH1F("pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *px_tar = new TH1F("px_tar", "SHMS x-Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *py_tar = new TH1F("py_tar", "SHMS y-Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *pz_tar = new TH1F("pz_tar", "SHMS z-Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);
 
-  TH1F *ztar_diff = new TH1F("ztar_diff", "z_Target Difference (hcana)", ztar_nbins, ztar_xmin, ztar_xmax);
-
-  //  ----Calculated Ztarget Quantities (Using a formula)
-  //Target Reconstruction Variables
-  TH1F *calc_hz_tar = new TH1F("calc_hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-  TH1F *calc_pz_tar = new TH1F("calc_pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-
-  TH1F *calc_hz_tar2 = new TH1F("calc_hz_tar2", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-  TH1F *calc_pz_tar2 = new TH1F("calc_pz_tar2", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-
-  TH1F *calc_ztar_diff = new TH1F("calc_ztar_diff", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
-  TH1F *calc_ztar_diff2 = new TH1F("calc_ztar_diff2", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
 
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *hytar = new TH1F("hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
@@ -216,10 +221,19 @@ void analyze_deepData(int run, int Pmiss)
   /************Define Histos to APPLY CUTS*********************************/
  
   TH1F *cut_epCT = new TH1F("cut_epCT","e-Proton Coincidence Time", 100, 0, 20);
+  TH1F *cut_ecal_etotnorm = new TH1F("cut_ecal_etotnorm","SHMS Calorimeter Total Norm. Energy", 100, 0.1, 2.); 
   
   //Kinematics Quantities
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+
+  TH1F *cut_pmX_lab = new TH1F("cut_pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *cut_pmY_lab = new TH1F("cut_pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *cut_pmZ_lab = new TH1F("cut_pmZ_Lab","Pmiss Z (Lab) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+  TH1F *cut_pmX_q = new TH1F("cut_pmX_q","Pmiss X (w.r.t q-vec) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *cut_pmY_q = new TH1F("cut_pmY_q","Pmiss Y (w.r.t q-vec) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *cut_pmZ_q = new TH1F("cut_pmZ_q","Pmiss Z (w.r.t. q-vec) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+
   TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
   TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
   TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", W_nbins, W_xmin, W_xmax);     //min width = 19.9 MeV (0.0199) (bin width = 25 MeV)
@@ -239,38 +253,24 @@ void analyze_deepData(int run, int Pmiss)
   TH1F *cut_theta_nq = new TH1F("cut_theta_nq", "(q-vector, Neutron) Angle, #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax);
   
   TH1F *cut_Mmiss = new TH1F("cut_Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);      
-  TH1F *cut_Mmissv2 = new TH1F("cut_Mmissv2","Missing Mass Version 2", Mm_nbins, Mm_xmin, Mm_xmax);      
   TH1F *cut_Emiss_nuc = new TH1F("cut_Emiss_nuc","Nuclear Missing Energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
   TH1F *cut_Erecoil = new TH1F("cut_Erecoil","Recoil Neutron Energy", En_nbins, En_xmin, En_xmax);
-  TH1F *cut_pmx = new TH1F("cut_pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);
-  TH1F *cut_pmy = new TH1F("cut_pmy","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);
-  TH1F *cut_pmz = new TH1F("cut_pmz","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);
-    
+
   TH1F *cut_KinN = new TH1F("cut_Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);
   TH1F *cut_KinP = new TH1F("cut_Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);
   TH1F *cut_E_p = new TH1F("cut_Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
 
 
   //Target Reconstruction Variables
-  TH1F *cut_hx_tar = new TH1F("cut_hx_tar", "HMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *cut_hy_tar = new TH1F("cut_hy_tar", "HMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *cut_hz_tar = new TH1F("cut_hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *cut_hx_tar = new TH1F("cut_hx_tar", "HMS x-Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *cut_hy_tar = new TH1F("cut_hy_tar", "HMS y-Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *cut_hz_tar = new TH1F("cut_hz_tar", "HMS z-Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);
     
-  TH1F *cut_px_tar = new TH1F("cut_px_tar", "SHMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *cut_py_tar = new TH1F("cut_py_tar", "SHMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *cut_pz_tar = new TH1F("cut_pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *cut_px_tar = new TH1F("cut_px_tar", "SHMS x-Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *cut_py_tar = new TH1F("cut_py_tar", "SHMS y-Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *cut_pz_tar = new TH1F("cut_pz_tar", "SHMS z-Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);
     
-  TH1F *cut_ztar_diff = new TH1F("cut_ztar_diff", "z_Target Difference (hcana)", ztar_nbins, ztar_xmin, ztar_xmax);
 
-  //Calculated Targ Variables
-  TH1F *cut_calc_hz_tar = new TH1F("cut_calc_hz_tar", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-  TH1F *cut_calc_pz_tar = new TH1F("cut_calc_pz_tar", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-
-  TH1F *cut_calc_hz_tar2 = new TH1F("cut_calc_hz_tar2", "HMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-  TH1F *cut_calc_pz_tar2 = new TH1F("cut_calc_pz_tar2", "SHMS z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
-
-  TH1F *cut_calc_ztar_diff = new TH1F("cut_calc_ztar_diff", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
-  TH1F *cut_calc_ztar_diff2 = new TH1F("cut_calc_ztar_diff2", "z_Target Difference", ztar_nbins, ztar_xmin, ztar_xmax);
 
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *cut_hytar = new TH1F("cut_hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
@@ -396,11 +396,10 @@ void analyze_deepData(int run, int Pmiss)
   TH2F *cut_hdelta_vs_hyfp = new TH2F("cut_hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
   TH2F *cut_hdelta_vs_hypfp = new TH2F("cut_hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
 
-
-
   //Set Variable Names and Branches
  
   //------Kinematics
+  Double_t  Eb = 10.6005;
   Double_t  epCoinTime;
   Double_t  theta_e;
   Double_t  W;
@@ -410,7 +409,9 @@ void analyze_deepData(int run, int Pmiss)
   Double_t  q3m;   //q-vect magnitude
   Double_t  th_q;
   Double_t  kf;
+  Double_t  kfv2;  //Final electron momentum (NOT using delta)
   Double_t  Pf;
+  Double_t Pfv2;  //final proton momentum (NOT using delta)
   Double_t  Ep;
   Double_t  Kp;
   Double_t  Kn;
@@ -419,9 +420,12 @@ void analyze_deepData(int run, int Pmiss)
   Double_t  M_recoil;  //invariant mass of recoiling system (should be equivalent to missing mass of neutron)
   Double_t  E_recoil;   //recoil system energy (should be equivalent to neutron energy)
   Double_t  Pm;
-  Double_t  Pmx;
-  Double_t  Pmy;
-  Double_t  Pmz;
+  Double_t  Pmx_lab;
+  Double_t  Pmy_lab;
+  Double_t  Pmz_lab;
+  Double_t  Pmx_q;
+  Double_t  Pmy_q;
+  Double_t  Pmz_q;
   Double_t  thbq;
   Double_t  thxq;
   Double_t  phbq;
@@ -453,9 +457,14 @@ void analyze_deepData(int run, int Pmiss)
 
   //Recoil System Variables (Missing Neutron)
   T->SetBranchAddress("H.kin.secondary.pmiss",&Pm);
-  T->SetBranchAddress("H.kin.secondary.Prec_x",&Pmx);   //x-component of recoil momentum
-  T->SetBranchAddress("H.kin.secondary.Prec_y",&Pmy);   //y
-  T->SetBranchAddress("H.kin.secondary.Prec_z",&Pmz);   //z
+
+  T->SetBranchAddress("H.kin.secondary.Prec_x",&Pmx_lab);   //x-component of recoil momentum ( in Hall or Lab Coordinates)
+  T->SetBranchAddress("H.kin.secondary.Prec_y",&Pmy_lab);   //y
+  T->SetBranchAddress("H.kin.secondary.Prec_z",&Pmz_lab);   //z
+  
+  T->SetBranchAddress("H.kin.secondary.pmiss_x",&Pmx_q);   //x-component of recoil momentum (perpendicular with respect to the q-vector)
+  T->SetBranchAddress("H.kin.secondary.pmiss_y",&Pmy_q);   //y (Out-of plane Oop)
+  T->SetBranchAddress("H.kin.secondary.pmiss_z",&Pmz_q);   //z (Parallel)
 
   T->SetBranchAddress("H.kin.secondary.tx",&Kp);   //kinetic energy of detected particle (proton)
   T->SetBranchAddress("H.kin.secondary.tb",&Kn);   //kinetic energy of recoil system (neutron)
@@ -530,24 +539,11 @@ void analyze_deepData(int run, int Pmiss)
   T->SetBranchAddress("P.react.y",&ptar_y);
   T->SetBranchAddress("P.react.z",&ptar_z);
  
-
-  //--------Calculated Alternative Ztar-------------------
-  Double_t hcostheta;
-  Double_t hsintheta;
-  Double_t hztarg;
-  Double_t hztarg2;
-
-  Double_t pcostheta;
-  Double_t psintheta;
-  Double_t pztarg;
-  Double_t pztarg2;
-
-
   //------SHMS Detector Quantities
-  Double_t  pcal_etracknorm;
+  Double_t  pcal_etotnorm;
   Double_t  pngcer_npesum;
 
-  T->SetBranchAddress("P.cal.etracknorm",&pcal_etracknorm);
+  T->SetBranchAddress("P.cal.etotnorm",&pcal_etotnorm);
   T->SetBranchAddress("P.ngcer.npeSum",&pngcer_npesum);
  
  
@@ -556,6 +552,13 @@ void analyze_deepData(int run, int Pmiss)
   Bool_t c_ctime;  //coincidence time cut
   Bool_t c_hdelta;
   Bool_t c_edelta;
+  Bool_t c_ecal;
+  Bool_t c_ngc_NpeSum;
+
+  //Kinematic Cuts to select PWIA region
+  Bool_t c_Q2;
+  Bool_t c_th_nq;
+  Bool_t c_MM;
 
   //======================
   // E V E N T   L O O P 
@@ -572,40 +575,44 @@ void analyze_deepData(int run, int Pmiss)
     
     T->GetEntry(i);
     
-
-    //calculate Ztarget varibales from hcana formula (This formula already takes the negative HMS angle sign into account, so ONLY use "+" angles)
-    hztarg=-(h_ytar+xBPM_tar*(cos(htheta_cent)-h_yptar*sin(htheta_cent)))/(-sin(htheta_cent)-h_yptar*cos(htheta_cent));
-    pztarg=-(e_ytar+xBPM_tar*(cos(ptheta_cent)+e_yptar*sin(ptheta_cent)))/(sin(ptheta_cent)-e_yptar*cos(ptheta_cent));
- 
-    hztarg2=-(h_ytar+xBPM_tar*cos(htheta_cent))/(-sin(htheta_cent)-h_yptar*cos(htheta_cent));
-    pztarg2=-(e_ytar+xBPM_tar*cos(ptheta_cent))/(sin(ptheta_cent)-e_yptar*cos(ptheta_cent));
-
-
     //Determine theta_p
     theta_p = xangle - theta_e;
     W2 = W*W;
     theta_pq_v2 = th_q - theta_p;
-    Ep = sqrt(MP*MP + Pf*Pf);
     En = sqrt(MN*MN + Pm*Pm);
-    MM = sqrt(TMath::Power(nu+MD-Ep,2) - Pm*Pm);
+    Pfv2 = sqrt(pow(nu + MD - En,2) - MP*MP);
+    Ep = sqrt(MP*MP + Pfv2*Pfv2);
 
-    c_Em = Em_nuc>-0.02 && Em_nuc<0.04;
-    //c_Em = Em_nuc<-0.02 || Em_nuc>0.04;
-    c_ctime = epCoinTime>8.6 && epCoinTime<13.6;
+    //Define Cuts
+    c_Em = Em_nuc<0.04;
+    c_ctime = epCoinTime>10.5 && epCoinTime<15.5;
     c_hdelta = h_delta>-8. && h_delta<8.;
-    
+    c_edelta = e_delta>-10. && e_delta<22.;
+    c_ecal = pcal_etotnorm >0.6;
+    c_ngc_NpeSum = pngcer_npesum > 0.5;
+    c_Q2 = Q2 >= 4.;
+    c_th_nq = (thbq/dtr) <= 45.;
+    //c_MM = M_recoil > 0.92 && M_recoil < 0.96;
+
     //APPLY CUTS: BEGIN CUTS LOOP
-    if (c_Em&&c_ctime&&c_hdelta)
+    if (c_Em&&c_hdelta&&c_edelta&&c_ecal&&c_ctime)
     {
 
-      //cout << "NUM = " <<eytar_off+0.148769*(pcostheta+shmsyptar*psintheta)<<endl;
-      //cout << "DEN = " <<psintheta-shmsyptar*pcostheta <<endl;
-      //cout << "pztarg = " << pztarg << endl;
       cut_epCT->Fill(epCoinTime);
+      cut_ecal_etotnorm->Fill(pcal_etotnorm);
 
 	  //Kinematics
 	  cut_Emiss->Fill(Em);
 	  cut_pm->Fill(Pm);
+
+	  cut_pmX_lab->Fill(Pmx_lab);
+	  cut_pmY_lab->Fill(Pmy_lab);
+	  cut_pmZ_lab->Fill(Pmz_lab);
+	  
+	  cut_pmX_q->Fill(Pmx_q);
+	  cut_pmY_q->Fill(Pmy_q);
+	  cut_pmZ_q->Fill(Pmz_q);
+
 	  cut_Q_2->Fill(Q2);
 	  cut_omega->Fill(nu);
 	  cut_W_inv->Fill(W);
@@ -616,7 +623,7 @@ void analyze_deepData(int run, int Pmiss)
 	  //Additional Kinematics Variables
 	  cut_W_2->Fill(W2); 
 	  cut_xbj->Fill(X); 
-	  cut_P_f->Fill(Pf);
+	  cut_P_f->Fill(Pfv2);
 	  cut_k_f->Fill(kf);
 	  cut_theta_q->Fill(th_q/dtr);
 	  cut_q_vec->Fill(q3m);
@@ -626,12 +633,9 @@ void analyze_deepData(int run, int Pmiss)
 	  cut_E_n->Fill(En);
 
 	  cut_Mmiss->Fill(M_recoil);
-	  cut_Mmissv2->Fill(MM); 
 	  cut_Emiss_nuc->Fill(Em_nuc);
 	  cut_Erecoil->Fill(E_recoil);
-	  cut_pmx->Fill(Pmx);
-	  cut_pmy->Fill(Pmy);
-	  cut_pmz->Fill(Pmz);
+
 	  cut_KinN->Fill(Kn);
 	  cut_KinP->Fill(Kp);
 	  cut_E_p->Fill(Ep);
@@ -644,17 +648,7 @@ void analyze_deepData(int run, int Pmiss)
 	  cut_px_tar->Fill(ptar_x);
 	  cut_py_tar->Fill(ptar_y);
 	  cut_pz_tar->Fill(ptar_z);
-
-	  cut_calc_hz_tar->Fill(hztarg);
-	  cut_calc_pz_tar->Fill(pztarg);
 	  
-	  cut_calc_hz_tar2->Fill(hztarg2);
-	  cut_calc_pz_tar2->Fill(pztarg2);
-	  
-	  cut_ztar_diff->Fill(ptar_z - htar_z);
-	  cut_calc_ztar_diff->Fill(pztarg - hztarg);
-	  cut_calc_ztar_diff2->Fill(pztarg2 - hztarg2);
-
 
 	  //Hadron-Arm Target Reconstruction 
 	  cut_hytar->Fill(h_ytar);
@@ -784,10 +778,23 @@ void analyze_deepData(int run, int Pmiss)
       
       
       epCT->Fill(epCoinTime);
+      ecal_etotnorm->Fill(pcal_etotnorm); 
 
       //Kinematics
+      Emiss_nuc->Fill(Em_nuc);                                                                               
+      Mmiss->Fill(M_recoil);
+
       Emiss->Fill(Em);
       pm->Fill(Pm);
+      
+      pmX_lab->Fill(Pmx_lab);
+      pmY_lab->Fill(Pmy_lab);
+      pmZ_lab->Fill(Pmz_lab);
+      
+      pmX_q->Fill(Pmx_q);
+      pmY_q->Fill(Pmy_q);
+      pmZ_q->Fill(Pmz_q);
+
       Q_2->Fill(Q2);
       omega->Fill(nu);
       W_inv->Fill(W);
@@ -798,7 +805,7 @@ void analyze_deepData(int run, int Pmiss)
       //Additional Kinematics Variables
       W_2->Fill(W2); 
       xbj->Fill(X); 
-      P_f->Fill(Pf);
+      P_f->Fill(Pfv2);
       k_f->Fill(kf);
       theta_q->Fill(th_q/dtr);
       q_vec->Fill(q3m);
@@ -807,13 +814,8 @@ void analyze_deepData(int run, int Pmiss)
       theta_nq->Fill(thbq/dtr);
       E_n->Fill(En);
 
-      Mmiss->Fill(M_recoil);                                                                                 
-      Mmissv2->Fill(MM);                                                                                     
-      Emiss_nuc->Fill(Em_nuc);                                                                               
       Erecoil->Fill(E_recoil);                                                                               
-      pmx->Fill(Pmx);                                                                                        
-      pmy->Fill(Pmy);                                                                                        
-      pmz->Fill(Pmz);                                      
+                                    
       KinN->Fill(Kn);                                                                                        
       KinP->Fill(Kp); 
       E_p->Fill(Ep);
@@ -827,15 +829,6 @@ void analyze_deepData(int run, int Pmiss)
       py_tar->Fill(ptar_y);
       pz_tar->Fill(ptar_z);
       	 
-      calc_hz_tar->Fill(hztarg);
-      calc_pz_tar->Fill(pztarg);
-      
-      calc_hz_tar2->Fill(hztarg2);
-      calc_pz_tar2->Fill(pztarg2);  
-      
-      ztar_diff->Fill(ptar_z - htar_z);
-      calc_ztar_diff->Fill(pztarg - hztarg);
-      calc_ztar_diff2->Fill(pztarg2 - hztarg2);
 
       //Hadron-Arm Target Reconstruction 
       hytar->Fill(h_ytar);

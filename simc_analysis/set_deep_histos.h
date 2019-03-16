@@ -23,59 +23,27 @@ static const Double_t me = 0.00051099;
 // D E F I N E    H I S T O G R A M    B I N N I N G
 //=====================================================
 
-Double_t nbins = 100;
+Double_t nbins = 30;
 
 
 //----------Kinematic Quantities---------
-//Emiss
-Double_t Em_nbins = 100;
-Double_t Em_xmin = -0.08;
-Double_t Em_xmax = 0.1;
 
 //Missing Mass
-Double_t Mm_nbins = 100;                                                                     
-Double_t Mm_xmin = 0.9;                                                                              
-Double_t Mm_xmax = 0.985;  
+Double_t MM2_nbins = 100;                                                                     
+Double_t MM2_xmin = 0.6;                                                                              
+Double_t MM2_xmax = 0.95;  
 
-//Pmiss
-Double_t Pm_nbins = nbins;
-Double_t Pm_xmin = -0.1;
-Double_t Pm_xmax = 0.5;
-
-
-//PmissX                                                                   
-Double_t Pmx_nbins = nbins;                                           
-Double_t Pmx_xmin = -0.3;                                                                      
-Double_t Pmx_xmax = 0.5;   
-
-//PmissY                                                                            
-Double_t Pmy_nbins = nbins;                                               
-Double_t Pmy_xmin = -0.5;                                                                                
-Double_t Pmy_xmax = 0.5; 
-
-//PmissZ                                                           
-Double_t Pmz_nbins = nbins;              
-Double_t Pmz_xmin = -0.5;                       
-Double_t Pmz_xmax = 0.5; 
 
 //Neutron Energy
 Double_t En_nbins = nbins;
-Double_t En_xmin = 0.935;
-Double_t En_xmax = 0.96;
 
 //Proton Energy
 Double_t Ep_nbins = nbins;
-Double_t Ep_xmin = 2.;
-Double_t Ep_xmax = 4.;
 
 //Proton / Neutron Kin Energy
 Double_t Kn_nbins = nbins;
-Double_t Kn_xmin = -0.01;
-Double_t Kn_xmax = 0.03;
 
 Double_t Kp_nbins = nbins;                                        
-Double_t Kp_xmin = 1;                                  
-Double_t Kp_xmax = 3;  
 
 //Q2
 Double_t Q2_nbins = nbins;
@@ -85,11 +53,13 @@ Double_t om_nbins = nbins;
 
 //W_inv
 Double_t W_nbins = nbins;
-Double_t W_xmin = 0.5;
+Double_t W_xmin = -2;
 Double_t W_xmax = 2.;
 
 //theta_elec
 Double_t the_nbins = nbins;
+Double_t the_xmin = 10.;
+Double_t the_xmax = 15.;
 
 //theta_prot
 Double_t thp_nbins = nbins;
@@ -98,13 +68,12 @@ Double_t thp_nbins = nbins;
 
 //W2
 Double_t W2_nbins = nbins;
-Double_t W2_xmin = 0.;
+Double_t W2_xmin = -2.;
 Double_t W2_xmax = 2.;
 
 //xBj
 Double_t xbj_nbins = nbins;
-Double_t xbj_xmin = 0.5;
-Double_t xbj_xmax = 1.5;
+
 
 //Pf
 Double_t Pf_nbins = nbins;
@@ -120,17 +89,8 @@ Double_t thq_nbins = nbins;
 //|q| vector magnitude
 Double_t q_nbins = nbins;
 
-
-
 //th_pq
 Double_t thpq_nbins = nbins;
-Double_t thpq_xmin = -5.0;
-Double_t thpq_xmax = 10.0;
-
-//th_nq
-Double_t thnq_nbins = nbins;
-Double_t thnq_xmin = 0;
-Double_t thnq_xmax = 180;
 
 
 //------Target Reconstruction Variables----------
@@ -148,8 +108,8 @@ Double_t ztar_xmax = 10.0;
 
 //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
 Double_t hytar_nbins = nbins;
-Double_t hytar_xmin = -5.;
-Double_t hytar_xmax = 5.;
+Double_t hytar_xmin = -7.;
+Double_t hytar_xmax = 7.;
 
 Double_t hxptar_nbins = nbins;
 Double_t hxptar_xmin = -0.1;
@@ -208,7 +168,34 @@ Double_t eypfp_nbins = nbins;
 
 
 
-//Run 3288
+/*
+//Pmiss = 80 MeV
+//Missing Mass          
+Double_t Mm_nbins = 50;                                       
+Double_t Mm_xmin = 0.9;    
+Double_t Mm_xmax = 0.985;    
+
+//Emiss                                   
+Double_t Em_nbins = 80; 
+Double_t Em_xmin = -0.1;                           
+Double_t Em_xmax = 0.1;  
+
+Double_t Pm_nbins = 60;   //bin width; 10 MeV
+Double_t Pm_xmin = -0.1;
+Double_t Pm_xmax = 0.5;
+
+Double_t Pmx_nbins = 100.;
+Double_t Pmx_xmin = -0.5;                                                                      
+Double_t Pmx_xmax = 0.5;   
+
+Double_t Pmy_nbins = 100.;  
+Double_t Pmy_xmin = -0.5;                                                                                
+Double_t Pmy_xmax = 0.5; 
+
+Double_t Pmz_nbins = 100.;  
+Double_t Pmz_xmin = -0.5;                       
+Double_t Pmz_xmax = 0.5; 
+
 Double_t exfp_xmin = -15.;
 Double_t exfp_xmax = 10.;
 
@@ -230,8 +217,9 @@ Double_t Q2_xmax = 5;
 Double_t om_xmin = 1.5;
 Double_t om_xmax = 2.7;
 
-Double_t the_xmin = 10.;
-Double_t the_xmax = 15.;
+//th_pq
+Double_t thpq_xmin = -2.0;
+Double_t thpq_xmax = 6.0;
 
 Double_t thp_xmin = 34.;
 Double_t thp_xmax = 42.;
@@ -248,134 +236,113 @@ Double_t thq_xmax = 42.;
 Double_t q_xmin = 2.;
 Double_t q_xmax = 4.;
 
+//th_nq                                   
+Double_t thnq_nbins = 20;   //10 degree bins             
+Double_t thnq_xmin = -10;
+Double_t thnq_xmax = 190;
 
-/*
-//Run 3371
-Double_t exfp_xmin = -25.;
-Double_t exfp_xmax = 0.;
+Double_t Ep_xmin = 2.4;        
+Double_t Ep_xmax = 3.6; 
 
-Double_t eyfp_xmin = -20.;
-Double_t eyfp_xmax = 15.;
+Double_t Kn_xmin = -0.005;                                                                                                  
+Double_t Kn_xmax = 0.02; 
 
-Double_t expfp_xmin = -0.06;
-Double_t expfp_xmax = 0.02;
+Double_t Kp_xmin = 1.6;                                    
+Double_t Kp_xmax = 2.6;  
 
-Double_t eypfp_xmin = -0.04;
-Double_t eypfp_xmax = 0.03;
+Double_t En_xmin = 0.93;   
+Double_t En_xmax = 0.96;
 
-Double_t edelta_xmin = -12.;
-Double_t edelta_xmax = -3.;
-
-Double_t kf_xmin = 7;
-Double_t kf_xmax = 8.5;
-
-Double_t Pf_xmin = 3.;
-Double_t Pf_xmax = 4.;
-
-Double_t Q2_xmin = 4.;
-Double_t Q2_xmax = 5.8;
-
-Double_t om_xmin = 1.8;
-Double_t om_xmax = 3.4;
-
-Double_t the_xmin = 10.;
-Double_t the_xmax = 16.;
-
-Double_t thp_xmin = 30.;
-Double_t thp_xmax = 37.;
-
-Double_t thq_xmin = 27.;
-Double_t thq_xmax = 37.;
-
-Double_t q_xmin = 3.1;
-Double_t q_xmax = 4.2;
+Double_t xbj_xmin = 0.5;                                                                
+Double_t xbj_xmax = 1.5; 
 */
 
 
-/*
-//Run: 3374
-Double_t exfp_xmin = 0.;
-Double_t exfp_xmax = 15.;
+//Pm = 580
+//Missing Mass                                       
+Double_t Mm_nbins = 50;                                          
+Double_t Mm_xmin = 0.9;    
+Double_t Mm_xmax = 0.985;    
 
-Double_t eyfp_xmin = -7.;
-Double_t eyfp_xmax = 3.;
+//Emiss                                    
+Double_t Em_nbins = 80; 
+Double_t Em_xmin = -0.1;                       
+Double_t Em_xmax = 0.1;  
 
-Double_t expfp_xmin = -0.01;
-Double_t expfp_xmax = 0.04;
+Double_t Pm_nbins = 40;    //40 MeV bin width  
+Double_t Pm_xmin = 0.1;     
+Double_t Pm_xmax = 1.5;  
 
-Double_t eypfp_xmin = -0.02;
-Double_t eypfp_xmax = 0.02;
+Double_t Pmx_nbins = 40.;  
+Double_t Pmx_xmin = -2.;                        
+Double_t Pmx_xmax = 2.;   
 
-Double_t edelta_xmin = 3.;
-Double_t edelta_xmax = 9.;
+Double_t Pmy_nbins = 40.;  
+Double_t Pmy_xmin = -2.;                        
+Double_t Pmy_xmax = 2.; 
+
+Double_t Pmz_nbins = 40.;  
+Double_t Pmz_xmin = -2.;                       
+Double_t Pmz_xmax = 2.; 
+
+Double_t exfp_xmin = -40.;
+Double_t exfp_xmax = 40.;
+
+Double_t eyfp_xmin = -40.;
+Double_t eyfp_xmax = 40.;
+
+Double_t expfp_xmin = -0.1;
+Double_t expfp_xmax = 0.1;
+
+Double_t eypfp_xmin = -0.1;
+Double_t eypfp_xmax = 0.1;
+
+Double_t edelta_xmin = -5.;
+Double_t edelta_xmax = 15;
 
 Double_t kf_xmin = 8;
-Double_t kf_xmax = 9.5;
-
-Double_t Pf_xmin = 2.;
-Double_t Pf_xmax = 3.;
-
-Double_t Q2_xmin = 2.;
-Double_t Q2_xmax = 3.4;
-
-Double_t om_xmin = 1.3;
-Double_t om_xmax = 2.0;
-
-Double_t the_xmin = 9.;
-Double_t the_xmax = 12.;
-
-Double_t thp_xmin = 40.;
-Double_t thp_xmax = 47.;
-
-Double_t thq_xmin = 38.;
-Double_t thq_xmax = 45.5;
-
-Double_t q_xmin = 2.;
-Double_t q_xmax = 3.;
-
-*/
-
-/*
-//Run: 3376/3377
-Double_t exfp_xmin = 10.;
-Double_t exfp_xmax = 25.;
-
-Double_t eyfp_xmin = -10.;
-Double_t eyfp_xmax = 5.;
-
-Double_t expfp_xmin = 0.01;
-Double_t expfp_xmax = 0.05;
-
-Double_t eypfp_xmin = -0.01;
-Double_t eypfp_xmax = 0.01;
-
-Double_t edelta_xmin = 8.;
-Double_t edelta_xmax = 13.;
-
-Double_t kf_xmin = 9;
-Double_t kf_xmax = 9.7;
+Double_t kf_xmax = 10.;
 
 Double_t Pf_xmin = 1.5;
 Double_t Pf_xmax = 2.5;
 
-Double_t Q2_xmin = 1.4;
-Double_t Q2_xmax = 2.6;
+Double_t Q2_xmin = 2.5;
+Double_t Q2_xmax = 5.5;
 
-Double_t om_xmin = 0.9;
-Double_t om_xmax = 1.7;
+Double_t om_xmin = 1.;
+Double_t om_xmax = 2.5;
 
-Double_t the_xmin = 7.5;
-Double_t the_xmax = 10.;
+Double_t thp_xmin = 50.;
+Double_t thp_xmax = 65.;
 
-Double_t thp_xmin = 44.;
-Double_t thp_xmax = 52.;
+Double_t thq_xmin = 30.;
+Double_t thq_xmax = 55.;
 
-Double_t thq_xmin = 44.;
-Double_t thq_xmax = 52.;
+Double_t q_xmin = 2.;
+Double_t q_xmax = 3.5;
 
-Double_t q_xmin = 1.6;
-Double_t q_xmax = 2.4;
-*/
+Double_t thpq_xmin = 0.;
+Double_t thpq_xmax = 30.0;
+
+//th_nq [5 deg bins]                           
+Double_t thnq_nbins = 16;   
+Double_t thnq_xmin = 0;
+Double_t thnq_xmax = 80;
+
+Double_t Ep_xmin = 2.;  
+Double_t Ep_xmax = 2.8; 
+
+Double_t Kn_xmin = 0;   
+Double_t Kn_xmax = 0.8;
+
+Double_t Kp_xmin = 1;                                                                                       
+Double_t Kp_xmax = 1.8;  
+
+Double_t En_xmin = 0.;
+Double_t En_xmax = 2.;
+
+Double_t xbj_xmin = 0.5;    
+Double_t xbj_xmax = 2.0; 
 
 
 #endif

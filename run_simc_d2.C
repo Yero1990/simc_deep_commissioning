@@ -123,7 +123,7 @@ void get_normfac(string ifile)
   found.erase (0, 14);  //remove trailing spaces
 
   //write to file
-  ofile.open("normfact.data");
+  ofile.open("normfact.data", std::fstream::out);
   ofile << found;
   ofile.close();
   

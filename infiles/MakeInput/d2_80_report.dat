@@ -1,0 +1,13 @@
+#!Run[i,0]/   hmsP[f,1]/   hmsAng[f,2]/   shmsP[f,3]/   shmsAng[f,4]/   BCM4A_Current[f,1]/    BCM4A_Charge[f,2]/    h3of4_rate[f,3]/    p3of4_rate[f,4]/     coin_rate[f,5]/    htrk_eff[f,6]/   htrk_eff_err[f,7]/  ptrk_eff[f,8]/   ptrk_eff_err[f,9]/    cpuLT[f,10]/    tLT[f,11]/    x_bpm[f,12]/    y_bpm[f,13]/   hMisP_X[f,14]/    hMisP_Y[f,15]/    pMisP_X[f,16]/    pMisP_Y[f,17]/   ptrig6_accepted[i,18]/     ptrig6_scaler[i,19]/    edtm_accepted[i,20]/   edtm_scaler[i,21]/    pdid_e[i,22]/    pshould_e[i,23]/    hdid_h[i,24]/   hshould_h[i,25]/ 
+3289		2.835403		-38.896		8.54321		12.168		51.536		142.553		0.63		143.261		0.109		0.989		0.0003		0.9665		0.0004		97.8811		90.9529		0.026637		0.016842		0.084042		0.307905		-0.126		-0.06		303734		310309		7550		8301		187641		194140		92092		93116
+
+#-------------------------------------
+#--------- Average Summary -----------
+#-------------------------------------
+# x_bpm_avg = 0.026637 cm
+# y_bpm_avg = 0.016842 cm
+# total_Charge = 142.553000 mC
+# cpuLT_avg = 0.978811
+# tLT_avg = 0.909529
+# htrk_eff_avg = 0.989003 +/- 0.000344 
+# ptrk_eff_avg = 0.966524 +/- 0.000415 

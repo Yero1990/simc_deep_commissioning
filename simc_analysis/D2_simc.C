@@ -2,22 +2,18 @@
 
 #include "set_deep_histos.h"
 
-void D2_simc(int run, int Pmiss, string model, string rad)
+void D2_simc(int set, int Pmiss, string model, string rad)
 {
 
   /*Code Usage Example:
     >> root -l
     >> .L D2_simc.C
-    >> D2_simc(3289, 80, "pwia", "rad")     // Missing Momentum Pmiss = 80, 580 or 750,  model = "pwia" or "fsi", rad = "rad" or "norad"
+    >> D2_simc(1, 80, "pwia", "rad")     // set = 0, 1 ,2, 3, :: Missing Momentum Pmiss = 80, 580 or 750,  model = "pwia" or "fsi", rad = "rad" or "norad"
     where "rad" ---> simulate radiative tail and Eloss,   "norad"---> Does NOT simulate radiative tail or Eloss
    */
   
   //PREVENT DISPLAY 
   //gROOT->SetBatch(kTRUE);
-
-  //Central Momenta
-  Double_t hP0;
-  Double_t sP0;
 
   Double_t charge_factor;       //Units: mC   :: beam_current(uA) * time (hrs) * 3600. / 1000.  3600--> hrs to sec,  1000--> uC to mC
   Double_t e_trkEff;
@@ -25,40 +21,112 @@ void D2_simc(int run, int Pmiss, string model, string rad)
   Double_t c_LT;
   Double_t t_LT;
 
-  if(run==3289){
-
-    //Uncorrected Momentum
-    //    hP0 = 2843.8 / 1000.;                  
-    //sP0 = 8700. / 1000.; 
-
-    //Corrected Momentum (from run 3288)
-    hP0 = 2837.185 / 1000.;
-    sP0 = 8520.525 / 1000.;
+  if(set==0&&Pmiss==80){
     
-    charge_factor =137.572;   //BCM4A
-    e_trkEff =0.9849;       //shms e- trk eff
-    h_trkEff = 0.9876;        //hms had trk eff
-    c_LT = 0.979594;          //computer live time
-    t_LT = 0.944154;          //total live time
+    charge_factor = 142.553;   //BCM4A
+    
+    c_LT = 0.97881;          //computer live time
+    t_LT = 0.909529;          //total live time
+    
+    e_trkEff = 0.966524;       //shms e- trk eff
+    h_trkEff = 0.989003;        //hms had trk eff
 
   }
 
-  //Read SIMC ROOTfiles
-  //TString filename = Form("../../worksim_voli/D2_pCorr/D2_heep_%d.root",run);                                 
-  //   TString filename = Form("../../worksim_voli/D2_heep_%d_noOffset.root",run);                                 
-  //TString filename = Form("../worksim_voli/d2_pm%d_laget%s_%s_pCorr_originalMispoint.root", Pmiss, model.c_str(), rad.c_str());                                 
-  TString filename = "../worksim_voli/d2_pm80_lagetfsi_rad_pCorr.root";
-  TFile *data_file = new TFile(filename, "READ"); 
-  TTree *SNT = (TTree*)data_file->Get("SNT");
+ if(set==1&&Pmiss==580){
+    
+    charge_factor =1827.029;   //BCM4A (mC)
+    
+    c_LT = 0.998534;          //computer live time
+    t_LT = 0.930728;          //total live time
+    
+    e_trkEff = 0.966850;       //shms e- trk eff
+    h_trkEff = 0.962029;        //hms had trk eff
+
+  }
+
+ if(set==2&&Pmiss==580){
+    
+    charge_factor = 1932.75;   //BCM4A (mC)
+    
+    c_LT = 0.998398;          //computer live time
+    t_LT = 0.929696;          //total live time
+    
+    e_trkEff = 0.965208;       //shms e- trk eff
+    h_trkEff = 0.987885;        //hms had trk eff
+
+  }
+
+ if(set==1&&Pmiss==750){
+    
+    charge_factor = 5335.617;   //BCM4A (mC)
+    
+    c_LT = 0.998538;          //computer live time
+    t_LT = 0.926217;          //total live time
+    
+    e_trkEff = 0.962456;       //shms e- trk eff
+    h_trkEff = 0.988749;        //hms had trk eff
+
+  }
+ if(set==2&&Pmiss==750){
+    
+    charge_factor = 1894.894;   //BCM4A (mC)
+    
+    c_LT = 0.998538;          //computer live time
+    t_LT = 0.924257;          //total live time
+    
+    e_trkEff = 0.960770;       //shms e- trk eff
+    h_trkEff = 0.989432;        //hms had trk eff
+
+  }
+
+ if(set==3&&Pmiss==750){
+    
+    charge_factor = 1084.872;   //BCM4A (mC)
+    
+    c_LT = 0.998583;          //computer live time
+    t_LT = 0.925570;          //total live time
+    
+    e_trkEff = 0.963303;       //shms e- trk eff
+    h_trkEff = 0.990051;        //hms had trk eff
+
+  }
+                                
  
-  //Create output root file where histograms will be stored
-  TFile *outROOT = new TFile(Form("D2simc_pm%d_laget%s_%s.root", Pmiss, model.c_str(), rad.c_str()), "recreate");
-  
+ TString filename = Form("../worksim_voli/d2_pm%d_laget%s_rad_set%d.root", Pmiss, model.c_str(), set);
+ 
+ 
+ TFile *data_file = new TFile(filename, "READ"); 
+ TTree *SNT = (TTree*)data_file->Get("SNT");
+ 
+ //Create output root file where histograms will be stored
+ TFile *outROOT = new TFile(Form("D2simc_pm%d_laget%s_%s_set%d.root", Pmiss, model.c_str(), rad.c_str(), set), "recreate");
+
+  //*****************************************
+  // Phase Spase Histograms: 
+  // Only fill with variable (Un-weighted)
+  //*****************************************
+  TH1F *pm_ps = new TH1F("pm_ps","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);
+  TH1F *cut_pm_ps = new TH1F("cut_pm_ps","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax); 
+
+  pm_ps->Sumw2();
+  cut_pm_ps->Sumw2();
+
   //********* Create 1D Histograms **************
   
   //Kinematics Quantities
+  TH1F *MM2 = new TH1F("MM2", "Missing Mass Squared, MM2", MM2_nbins, MM2_xmin, MM2_xmax );
   TH1F *Emiss = new TH1F("Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
   TH1F *pm = new TH1F("pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+   
+  TH1F *pmX_lab = new TH1F("pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *pmY_lab = new TH1F("pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *pmZ_lab = new TH1F("pmZ_Lab","Pmiss Z (Lab) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+  TH1F *pmX_q = new TH1F("pmX_q","Pmiss X (w.r.t q-vec) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *pmY_q = new TH1F("pmY_q","Pmiss Y (w.r.t q-vec) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *pmZ_q = new TH1F("pmZ_q","Pmiss Z (w.r.t. q-vec) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+
+
   TH1F *Q_2 = new TH1F("Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
   TH1F *omega = new TH1F("omega","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
   TH1F *W_inv = new TH1F("W_inv", "Invariant Mass, W", W_nbins, W_xmin, W_xmax);     //min width = 19.9 MeV (0.0199) (bin width = 25 MeV)
@@ -86,10 +154,13 @@ void D2_simc(int run, int Pmiss, string model, string rad)
 
   
   //Target Reconstruction Variables
-  TH1F *x_tar = new TH1F("x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *y_tar = new TH1F("y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *z_tar = new TH1F("z_tar", "z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *x_tar = new TH1F("x_tar", "x_Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
+  TH1F *y_tarH = new TH1F("y_tarH", hadron_arm + " y_Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
+  TH1F *z_tarH = new TH1F("z_tarH", hadron_arm + " z_Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);
   
+  TH1F *y_tarP = new TH1F("y_tarP", electron_arm + " y_Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);                                     
+  TH1F *z_tarP = new TH1F("z_tarP", electron_arm + " z_Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);  
+
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *hytar = new TH1F("hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
   TH1F *hxptar = new TH1F("hxptar", hadron_arm + " X'_{tar}", hxptar_nbins, hxptar_xmin, hxptar_xmax);
@@ -220,13 +291,30 @@ void D2_simc(int run, int Pmiss, string model, string rad)
   /************Define Histos to APPLY CUTS*********************************/
   
   //Kinematics Quantities
+  TH1F *cut_MM2 = new TH1F("cut_MM2", "Missing Mass Squared, MM2", MM2_nbins, MM2_xmin, MM2_xmax );
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+
+  cut_Emiss->Sumw2();
+  cut_pm->Sumw2();
+    
+  TH1F *cut_pmX_lab = new TH1F("cut_pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *cut_pmY_lab = new TH1F("cut_pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *cut_pmZ_lab = new TH1F("cut_pmZ_Lab","Pmiss Z (Lab) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+  TH1F *cut_pmX_q = new TH1F("cut_pmX_q","Pmiss X (w.r.t q-vec) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
+  TH1F *cut_pmY_q = new TH1F("cut_pmY_q","Pmiss Y (w.r.t q-vec) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
+  TH1F *cut_pmZ_q = new TH1F("cut_pmZ_q","Pmiss Z (w.r.t. q-vec) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
+  
+
   TH1F *cut_Q_2 = new TH1F("cut_Q_2","Q2", Q2_nbins, Q2_xmin, Q2_xmax);
   TH1F *cut_omega = new TH1F("cut_omega","Energy Transfer, #omega", om_nbins, om_xmin, om_xmax);
   TH1F *cut_W_inv = new TH1F("cut_W_inv", "Invariant Mass, W", W_nbins, W_xmin, W_xmax);     //min width = 19.9 MeV (0.0199) (bin width = 25 MeV)
   TH1F *cut_theta_elec = new TH1F("cut_theta_elec", "Electron Scatt. Angle", the_nbins, the_xmin, the_xmax);
   TH1F *cut_theta_prot = new TH1F("cut_theta_prot", "Proton Scatt. Angle", thp_nbins, thp_xmin, thp_xmax);
+
+  cut_Q_2->Sumw2();
+  cut_omega->Sumw2();
+  
   
   //Additional Kinematics Variables
   TH1F *cut_W_2 = new TH1F("cut_W2", "Invariant Mass W2", W2_nbins, W2_xmin, W2_xmax);
@@ -248,12 +336,25 @@ void D2_simc(int run, int Pmiss, string model, string rad)
   TH1F *cut_KinN = new TH1F("cut_Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);                        
   TH1F *cut_KinP = new TH1F("cut_Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);    
   TH1F *cut_E_p = new TH1F("cut_Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
+  
 
+  cut_theta_nq->Sumw2();
+  cut_Mmiss->Sumw2();
+  cut_xbj->Sumw2();
+  cut_P_f->Sumw2();
+  cut_k_f->Sumw2();
+  cut_q_vec->Sumw2();
+  cut_theta_q->Sumw2();
+  cut_thet_pq->Sumw2();
 
   //Target Reconstruction Variables
-  TH1F *cut_x_tar = new TH1F("cut_x_tar", "x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
-  TH1F *cut_y_tar = new TH1F("cut_y_tar", "y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
-  TH1F *cut_z_tar = new TH1F("cut_z_tar", "z_Target", ztar_nbins, ztar_xmin, ztar_xmax);
+  TH1F *cut_x_tar = new TH1F("cut_x_tar", "x_Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
+  
+  TH1F *cut_y_tarH = new TH1F("cut_y_tarH", hadron_arm + " y_Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);    
+  TH1F *cut_z_tarH = new TH1F("cut_z_tarH", hadron_arm + " z_Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);                                
+                                                                                                                                                                 
+  TH1F *cut_y_tarP = new TH1F("cut_y_tarP", electron_arm + " y_Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);                     
+  TH1F *cut_z_tarP = new TH1F("cut_z_tarP", electron_arm + " z_Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);  
   
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *cut_hytar = new TH1F("cut_hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
@@ -470,9 +571,9 @@ void D2_simc(int run, int Pmiss, string model, string rad)
   SNT->SetBranchAddress("Pmx", &Pmx);
   SNT->SetBranchAddress("Pmy", &Pmy);
   SNT->SetBranchAddress("Pmz", &Pmz);
-  SNT->SetBranchAddress("PmPar", &PmPar);
-  SNT->SetBranchAddress("PmPer", &PmPer);
-  SNT->SetBranchAddress("PmOop", &PmOop);
+  SNT->SetBranchAddress("PmPar", &PmPar);    //Missing Momentum Components in q-vector coordinates (parallel to q-vec)
+  SNT->SetBranchAddress("PmPer", &PmPer);    //(Perpendicular to q-vec)
+  SNT->SetBranchAddress("PmOop", &PmOop);    //(Out of plane to q-vec)
   SNT->SetBranchAddress("fry", &fry);
   SNT->SetBranchAddress("radphot", &radphot);
   SNT->SetBranchAddress("sigcc", &sigcc);
@@ -508,11 +609,14 @@ void D2_simc(int run, int Pmiss, string model, string rad)
   Double_t W2;             //Invarianrt Mass Squared
   Double_t X;              //B-jorken X
   Double_t Pf;             //Final Proton Momentum 
+  Double_t Pfv2;           //Final Proton Momentum (NOT using delta)
   Double_t Kp;               //Proton Kinetic Energy
   Double_t Kn;               //Neutron Kinetic Energy
   Double_t MM;              //Missing Mass
+  Double_t MM_2;
   Double_t ki;             //Incident e- momentum
   Double_t kf;             //Final electron momentum
+  Double_t kfv2;
   Double_t En;             //Neutron Energy
   Double_t Ep;             //proton final energy
   Double_t Ee;             //electron final energy
@@ -524,20 +628,22 @@ void D2_simc(int run, int Pmiss, string model, string rad)
   Double_t FullWeight;
 
 
-
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
   Bool_t c_hdelta;
+  Bool_t c_edelta;
+  Bool_t c_Q2;
+  Bool_t c_th_nq;
+  Bool_t c_MM;
+
+  Bool_t c_general;  //c_Em&&c_hdelta&&c_edelta
+  Bool_t c_kin;      //kinematic cuts to selec PWIA region
 
   //=======================
   // E N T R Y    L O O P
   //=======================
 
-  Long64_t nentries = SNT->GetEntries();
-  
-  //cout << "nentries = " << nentries << endl;
-  
-  
+  Long64_t nentries = SNT->GetEntries();  
 
   for (Long64_t i=0; i<nentries;i++) {
     
@@ -548,44 +654,58 @@ void D2_simc(int run, int Pmiss, string model, string rad)
     Ein = Ein / 1000.;   //This beam energy has Eloss, therefore, it is slightly smaller than 10.6005 (10.5992)
     W2 = W*W;
     ki = sqrt(Ein*Ein - me*me);    //use beam energy without Eloss corrections, as they are NOT done in data as well                       
-    kf = sP0*(1. + e_delta/100.);
+    kf = e_pf/1000.;
     Ee = sqrt(me*me + kf*kf);
-    Pf = hP0*(1. + h_delta/100.);
+    Pf = h_pf/1000.;
     En = sqrt(MN*MN + Pm*Pm);
-    Ep = sqrt(MP*MP + Pf*Pf);                                               
+    Pfv2 = sqrt(pow(nu + MD - En,2) - MP*MP);
+    Ep = sqrt(MP*MP + Pfv2*Pfv2);
     X = Q2 / (2.*MP*nu);
     th_q = acos( (ki - kf*cos(theta_e))/q ); //th_q = theta_p + theta_pq;
     th_pq =  th_q - theta_p;
     th_nq = acos((q - Pf*cos(th_pq))/Pm);
 
-    MM = TMath::Sqrt( TMath::Power(nu+MD-Ep,2) - Pm*Pm );
+    MM = TMath::Sqrt( TMath::Power(nu+MD-sqrt(MP*MP+Pf*Pf),2) - Pm*Pm );
+    //MM = TMath::Sqrt( Em*Em - Pm*Pm );
+
+    MM_2 = MM*MM;
+
     Kp = Ep - MP;
     Kn = En - MN;
     
+
     //Define cuts
-    c_Em = Em>-0.02 && Em<0.04;
+    c_Em = Em<0.04;
     c_hdelta = h_delta > -8. && h_delta < 8.;
+    c_edelta = e_delta > -10. && h_delta < 22.;
+    c_Q2 = Q2 >=4.;
+    c_th_nq = (th_nq/dtr) <= 45.;
+    //    c_MM = MM > 0.92 && MM < 0.96;
 
     //Full Weight
     FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/nentries;
     
-    /*
-    cout << "Full Weight = " << FullWeight << endl;
-    cout << "Normfac = " << Normfac << endl;
-    cout << "Weight = " << Weight << endl;
-    cout << "Charge Factor = " << charge_factor << endl;
-    cout << "e_trkEff = " << e_trkEff << endl;
-    cout << "h_trkEff = " << h_trkEff << endl;
-    cout << "CLT = " << c_LT << endl;
-    cout << "nentries = " << nentries << endl;
-    */
+ 
 
     //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em&&c_hdelta)
+      if (c_Em&&c_hdelta&&c_edelta)
 	{
+
+	  //Fill Phase Space
+	  cut_pm_ps->Fill(Pm);
+
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
 	  cut_pm->Fill(Pm, FullWeight);
+	  	  
+	  cut_pmX_lab->Fill(Pmx, FullWeight);
+	  cut_pmY_lab->Fill(Pmy, FullWeight);
+	  cut_pmZ_lab->Fill(Pmz, FullWeight);
+	  
+	  cut_pmX_q->Fill(-PmPer, FullWeight);
+	  cut_pmY_q->Fill(PmOop, FullWeight);
+	  cut_pmZ_q->Fill(PmPar, FullWeight);
+
 	  cut_Q_2->Fill(Q2, FullWeight);
 	  cut_omega->Fill(nu, FullWeight);
 	  cut_W_inv->Fill(W, FullWeight);
@@ -596,7 +716,7 @@ void D2_simc(int run, int Pmiss, string model, string rad)
 	  //Additional Kinematics Variables
 	  cut_W_2->Fill(W2, FullWeight); 
 	  cut_xbj->Fill(X, FullWeight); 
-	  cut_P_f->Fill(Pf, FullWeight);
+	  cut_P_f->Fill(Pfv2, FullWeight);
 	  cut_k_f->Fill(kf, FullWeight);
 	  cut_E_n->Fill(En, FullWeight);
 	  cut_theta_q->Fill(th_q/dtr, FullWeight);
@@ -606,19 +726,20 @@ void D2_simc(int run, int Pmiss, string model, string rad)
 	  cut_theta_nq->Fill(th_nq/dtr, FullWeight);
 
 	  cut_Mmiss->Fill(MM, FullWeight);
+	  cut_MM2->Fill(MM_2, FullWeight);
+
 	  cut_KinN->Fill(Kn, FullWeight);
 	  cut_KinP->Fill(Kp, FullWeight);
-	  
-	  cut_pmx->Fill(Pmx, FullWeight);
-	  cut_pmy->Fill(Pmy, FullWeight);
-	  cut_pmz->Fill(Pmz, FullWeight);
 	  cut_E_p->Fill(Ep, FullWeight);
 
 	  //Reconstructed Target Quantities (Lab Frame)
-	  cut_x_tar->Fill(tar_x, FullWeight);
-	  cut_y_tar->Fill(tar_y, FullWeight);
-	  cut_z_tar->Fill(tar_z, FullWeight);
+	  cut_x_tar->Fill(-tar_x, FullWeight);
 	  
+	  cut_y_tarH->Fill(h_yv, FullWeight);
+	  cut_z_tarH->Fill(h_zv, FullWeight);
+	  
+	  cut_y_tarP->Fill(e_yv, FullWeight);         
+          cut_z_tarP->Fill(e_zv, FullWeight); 
 	  
 	  //Hadron-Arm Target Reconstruction 
 	  cut_hytar->Fill(h_ytar, FullWeight);
@@ -726,11 +847,13 @@ void D2_simc(int run, int Pmiss, string model, string rad)
 
 
 	}//End CUTS LOOP
-      
-      
+
+      //Fill Phase SPace
+      pm_ps->Fill(Pm);       
       
       //Kinematics
       Emiss->Fill(Em, FullWeight);
+
       pm->Fill(Pm, FullWeight);
       Q_2->Fill(Q2, FullWeight);
       omega->Fill(nu, FullWeight);
@@ -742,8 +865,8 @@ void D2_simc(int run, int Pmiss, string model, string rad)
       //Additional Kinematics Variables
       W_2->Fill(W2, FullWeight); 
       xbj->Fill(X, FullWeight); 
-      P_f->Fill(Pf, FullWeight);
-      k_f->Fill(kf, FullWeight);
+      P_f->Fill(Pfv2, FullWeight);
+      k_f->Fill(kfv2, FullWeight);
       E_n->Fill(En, FullWeight);
       theta_q->Fill(th_q/dtr, FullWeight);
       q_vec->Fill(q, FullWeight);
@@ -751,7 +874,8 @@ void D2_simc(int run, int Pmiss, string model, string rad)
       thet_pq_v2->Fill(th_pq/dtr, FullWeight);
       theta_nq->Fill(th_nq/dtr, FullWeight);
 
-      Mmiss->Fill(MM, FullWeight);                                                                                                                                                 
+      Mmiss->Fill(MM, FullWeight);     
+      MM2->Fill(MM_2, FullWeight);                                                                                                                                                 
       KinN->Fill(Kn, FullWeight);                                                                                                                                                  
       KinP->Fill(Kp, FullWeight);
       pmx->Fill(Pmx, FullWeight);
@@ -760,9 +884,11 @@ void D2_simc(int run, int Pmiss, string model, string rad)
       E_p->Fill(Ep, FullWeight);
 
       //Reconstructed Target Quantities (Lab Frame)
-      x_tar->Fill(tar_x, FullWeight);
-      y_tar->Fill(tar_y, FullWeight);
-      z_tar->Fill(tar_z, FullWeight);
+      x_tar->Fill(-tar_x, FullWeight);          
+      y_tarH->Fill(h_yv, FullWeight);                                                                                                                                             
+      z_tarH->Fill(h_zv, FullWeight); 
+      y_tarP->Fill(e_yv, FullWeight);                                                                                                                                             
+      z_tarP->Fill(e_zv, FullWeight);    
 
       
       //Hadron-Arm Target Reconstruction 

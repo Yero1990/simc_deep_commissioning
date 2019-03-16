@@ -7,12 +7,14 @@ void carbon_check()
   
  //Define Central Angle for HMS/SHMS
   Double_t ptheta_cent = 8.938 * TMath::Pi()/180.;   //3289: 12.194, 3255:12.2  deg
-  Double_t xBPM_tar = 0.147671;   //Projected beam position at target in cm (Hall Coordinate System)
-  
+  Double_t xBPM_tar =0.026621;   //Projected beam position at target in cm (EPICS Coordinate System, +x beam right)
+  Double_t yBPM_tar =0.017114;
+  //SHMS X Mispointing   : -0.126000 cm
+  //SHMS Y Mispointing   : -0.060000 cm
 
   //Read DATA ROOTfiles
   //TString filename =Form("../../../hallc_replay/ROOTfiles/shms_coin_replay_deep_check_%d_50000_ZtarOrg.root",run);        
-  TString filename ="../../../hallc_replay/ROOTfiles/shms_coin_replay_deep_check_3286_-1.root";                                                
+  TString filename ="../../../hallc_replay/ROOTfiles/shms_coin_replay_heep_check_3286_-1_oldMatrix.root";                                                
 
   TFile *data_file = new TFile(filename, "READ"); 
   TTree *T = (TTree*)data_file->Get("T");
@@ -37,11 +39,6 @@ void carbon_check()
   TH1F *py_tar = new TH1F("py_tar", "SHMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
   TH1F *pz_tar = new TH1F("pz_tar", "SHMS z_Target", ztar_nbins, -15, 15);
 
-
-  //  ----Calculated Ztarget Quantities (Using a formula)
-  //Target Reconstruction Variables
-  TH1F *calc_pz_tar = new TH1F("calc_pz_tar", "SHMS z_Target", ztar_nbins, -30, 30);
-  TH1F *calc_pz_tar2 = new TH1F("calc_pz_tar2", "SHMS z_Target", ztar_nbins, -30, 30);
 
   //Electron Arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *eytar = new TH1F("eytar", electron_arm + " Y_{tar}", eytar_nbins, eytar_xmin, eytar_xmax);
@@ -90,7 +87,8 @@ void carbon_check()
   TH2F *edelta_vs_expfp = new TH2F("edelta_vs_expfp", "SHMS Delta e#delta vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
   TH2F *edelta_vs_eyfp = new TH2F("edelta_vs_eyfp", "SHMS Delta e#delta vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
   TH2F *edelta_vs_eypfp = new TH2F("edelta_vs_eypfp", "SHMS Delta e#delta vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
- 
+  TH2F *edelta_vs_eytar = new TH2F("edelta_vs_eytar", "SHMS Delta e#delta vs. eYtar", 100, -5., 5., 100, -15, 20);
+
   //CUTS
   TH2F *cut_xsieve_v_ysieve = new TH2F("cut_sieve_pattern", "SHMS Y sieve vs. X Sieve", 100, -15, 15, 100, -10, 10);  
 
@@ -106,10 +104,6 @@ void carbon_check()
   TH1F *cut_px_tar = new TH1F("cut_px_tar", "SHMS x_Target", xtar_nbins, xtar_xmin, xtar_xmax);
   TH1F *cut_py_tar = new TH1F("cut_py_tar", "SHMS y_Target", ytar_nbins, ytar_xmin, ytar_xmax);
   TH1F *cut_pz_tar = new TH1F("cut_pz_tar", "SHMS z_Target", ztar_nbins, -25, 25);
-    
-  //Calculated Targ Variables
-  TH1F *cut_calc_pz_tar = new TH1F("cut_calc_pz_tar", "SHMS z_Target", ztar_nbins, -15, 15);
-  TH1F *cut_calc_pz_tar2 = new TH1F("cut_calc_pz_tar2", "SHMS z_Target", ztar_nbins, -15, 15);
 
   //Electron Arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *cut_eytar = new TH1F("cut_eytar", electron_arm + " Y_{tar}", eytar_nbins, eytar_xmin, eytar_xmax);
@@ -158,6 +152,8 @@ void carbon_check()
   TH2F *cut_edelta_vs_expfp = new TH2F("cut_edelta_vs_expfp", "SHMS Delta e#delta vs. eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
   TH2F *cut_edelta_vs_eyfp = new TH2F("cut_edelta_vs_eyfp", "SHMS Delta e#delta vs. eY_{fp}", eyfp_nbins, eyfp_xmin, eyfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
   TH2F *cut_edelta_vs_eypfp = new TH2F("cut_edelta_vs_eypfp", "SHMS Delta e#delta vs. eY'_{fp}", eypfp_nbins, eypfp_xmin, eypfp_xmax, edelta_nbins, edelta_xmin, edelta_xmax);
+  
+  TH2F *cut_edelta_vs_eytar = new TH2F("cut_edelta_vs_eytar", "SHMS Delta e#delta vs. eYtar", 100, -5., 5., 100, -15, 20);
 
 
 
@@ -172,11 +168,11 @@ void carbon_check()
   Double_t  kf;
   
 
-  T->SetBranchAddress("P.kin.primary.scat_ang_rad",&theta_e);
-  T->SetBranchAddress("P.kin.primary.W",&W);
-  T->SetBranchAddress("P.kin.primary.Q2",&Q2);
-  T->SetBranchAddress("P.kin.primary.x_bj",&X);
-  T->SetBranchAddress("P.kin.primary.nu",&nu);
+  T->SetBranchAddress("P.kin.scat_ang_rad",&theta_e);
+  T->SetBranchAddress("P.kin.W",&W);
+  T->SetBranchAddress("P.kin.Q2",&Q2);
+  T->SetBranchAddress("P.kin.x_bj",&X);
+  T->SetBranchAddress("P.kin.nu",&nu);
   T->SetBranchAddress("P.gtr.p",&kf);
 
 
@@ -217,16 +213,11 @@ void carbon_check()
   T->SetBranchAddress("P.extcor.ysieve", &ysieve);                                                                                                                      
 
 
-  //--------Calculated Alternative Ztar-------------------
-  Double_t pztarg;
-  Double_t pztarg2;
-
-
   //------SHMS Detector Quantities
-  Double_t  pcal_etracknorm;
+  Double_t  pcal_etotnorm;
   Double_t  pngcer_npesum;
 
-  T->SetBranchAddress("P.cal.etracknorm",&pcal_etracknorm);
+  T->SetBranchAddress("P.cal.etotnorm",&pcal_etotnorm);
   T->SetBranchAddress("P.ngcer.npeSum",&pngcer_npesum);
  
  
@@ -249,14 +240,11 @@ void carbon_check()
     T->GetEntry(i);
     
 
-    //calculate Ztarget varibales from hcana formula (This formula already takes the negative HMS angle sign into account, so ONLY use "+" angles)
-    pztarg=(e_ytar+ptar_x*(cos(ptheta_cent)+e_yptar*sin(ptheta_cent)))/(sin(ptheta_cent)-e_yptar*cos(ptheta_cent));
-    pztarg2=(e_ytar+ptar_x*cos(ptheta_cent))/(sin(ptheta_cent)-e_yptar*cos(ptheta_cent));
 
-    c_edelta = e_delta>-10.&&e_delta<22.;
+    c_edelta = e_delta>-12.&&e_delta<22.;
     
     //APPLY CUTS: BEGIN CUTS LOOP
-    if (pcal_etracknorm>0.85&&c_edelta)
+    if (pcal_etotnorm>0.6&&c_edelta)
     {
 
 
@@ -277,9 +265,6 @@ void carbon_check()
 	  cut_px_tar->Fill(ptar_x);
 	  cut_py_tar->Fill(ptar_y);
 	  cut_pz_tar->Fill(ptar_z);
-
-	  cut_calc_pz_tar->Fill(pztarg);
-	  cut_calc_pz_tar2->Fill(pztarg2);
 
 	  //Electron-Arm Target Reconstruction
 	  cut_eytar->Fill(e_ytar);
@@ -328,6 +313,7 @@ void carbon_check()
 	  cut_edelta_vs_expfp->Fill(e_xpfp, e_delta);
 	  cut_edelta_vs_eyfp->Fill(e_yfp, e_delta);
 	  cut_edelta_vs_eypfp->Fill(e_ypfp, e_delta);
+	  cut_edelta_vs_eytar->Fill(e_ytar, e_delta);
 
 	}//End CUTS LOOP
 
@@ -346,9 +332,7 @@ void carbon_check()
       px_tar->Fill(ptar_x);
       py_tar->Fill(ptar_y);
       pz_tar->Fill(ptar_z);
-      calc_pz_tar->Fill(pztarg);
-      calc_pz_tar2->Fill(pztarg2);  
-
+   
       //Electron-Arm Target Reconstruction
       eytar->Fill(e_ytar);
       exptar->Fill(e_xptar);
@@ -372,28 +356,29 @@ void carbon_check()
       W_vs_eyptar->Fill(e_yptar, W);
       W_vs_edelta->Fill(e_delta, W);
 
-    
+      edelta_vs_eytar->Fill(e_ytar, e_delta);
+
   } //end entry loop
      
   outROOT->Write();
-  
+  /*
 
   TCanvas *c1 = new TCanvas("c1", "", 2000,1000);
   c1->Divide(2,1);
   c1->cd(1);
 
   //Fit Foils React Z peaks
-  cut_pz_tar->GetXaxis()->SetRange(-12,-5);
+  cut_pz_tar->GetXaxis()->SetRange(-15,-5);
   int binx1 = cut_pz_tar->GetMaximumBin();
   double g1_mu = cut_pz_tar->GetXaxis()->GetBinCenter(binx1);
   double g1_sig = cut_pz_tar->GetStdDev();                                            
 
-  cut_pz_tar->GetXaxis()->SetRange(-3,7); 
+  cut_pz_tar->GetXaxis()->SetRange(-5,5); 
   int binx2 = cut_pz_tar->GetMaximumBin();                                                                                              
   double g2_mu = cut_pz_tar->GetXaxis()->GetBinCenter(binx2);      
   double g2_sig = cut_pz_tar->GetStdDev();  
 
-  cut_pz_tar->GetXaxis()->SetRange(8,15); 
+  cut_pz_tar->GetXaxis()->SetRange(5,15); 
   int binx3 = cut_pz_tar->GetMaximumBin(); 
   double g3_mu = cut_pz_tar->GetXaxis()->GetBinCenter(binx3);      
   double g3_sig = cut_pz_tar->GetStdDev();  
@@ -404,7 +389,7 @@ void carbon_check()
   //Create Fit Functions                                                                  
   TF1 *fGlobal = new TF1("fGlobal", "gaus(0)+gaus(3)+gaus(6)+pol2(9)", -13,16);             
   TF1 *fSignal = new TF1("fSignal", "gaus(0)+gaus(3)+gaus(6)", -13, 16);
-  TF1 *fBkg = new TF1("fBkg", "pol2", -13, 16);                   
+  TF1 *fBkg = new TF1("fBkg", "pol2", -15, 16);                   
 
   fGlobal->SetLineColor(kBlack);
   fSignal->SetLineColor(kRed);
@@ -432,7 +417,7 @@ void carbon_check()
   c1->Update();
   //c1->Close();
   //-----------------------------
-  /*
+  
   TCanvas *c2 = new TCanvas("c2", "", 1000,1000);
   c2->cd();
     
@@ -551,7 +536,7 @@ void carbon_check()
     
 
     //APPLY CUTS: Delta AND SHMS Cal Cuts
-    if (pcal_etracknorm>0.85&&c_edelta)
+    if (pcal_etotnorm>0.85&&c_edelta)
     {
 
       cut_xsieve_v_ysieve2->Fill(xsieve, ysieve);
@@ -565,7 +550,7 @@ void carbon_check()
 
     
     //APPLY CUTS: Delta / SHMS Cal Cuts / FOIL 1 Ztar
-    if (pcal_etracknorm>0.85&&c_edelta&&ztar_cut_f1)
+    if (pcal_etotnorm>0.85&&c_edelta&&ztar_cut_f1)
     {
       //Reconstructed Target Quantities (Lab Frame)
       f1cut_xsieve_v_ysieve->Fill(xsieve, ysieve);
@@ -575,7 +560,7 @@ void carbon_check()
     }
     
     //APPLY CUTS: Delta / SHMS Cal Cuts / FOIL 2 Ztar
-    if (pcal_etracknorm>0.85&&c_edelta&&ztar_cut_f2)
+    if (pcal_etotnorm>0.85&&c_edelta&&ztar_cut_f2)
       {
 	//Reconstructed Target Quantities (Lab Frame)
 	f2cut_xsieve_v_ysieve->Fill(xsieve, ysieve);
@@ -585,7 +570,7 @@ void carbon_check()
       }
     
     //APPLY CUTS: Delta / SHMS Cal Cuts / FOIL 3 Ztar
-    if (pcal_etracknorm>0.85&&c_edelta&&ztar_cut_f3)
+    if (pcal_etotnorm>0.85&&c_edelta&&ztar_cut_f3)
       {
 	//Reconstructed Target Quantities (Lab Frame)
 	f3cut_xsieve_v_ysieve->Fill(xsieve, ysieve);
