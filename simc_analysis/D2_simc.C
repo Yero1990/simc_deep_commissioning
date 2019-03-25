@@ -2,25 +2,27 @@
 
 #include "set_deep_histos.h"
 
-void D2_simc(int set, int Pmiss, string model, string rad)
+void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 {
 
   /*Code Usage Example:
     >> root -l
     >> .L D2_simc.C
-    >> D2_simc(1, 80, "pwia", "rad")     // set = 0, 1 ,2, 3, :: Missing Momentum Pmiss = 80, 580 or 750,  model = "pwia" or "fsi", rad = "rad" or "norad"
+    >> D2_simc(1, 80, "pwia", "rad", false)     // set = 0, 1 ,2, 3, :: Missing Momentum Pmiss = 80, 580 or 750,  model = "pwia" or "fsi", rad = "rad" or "norad"
     where "rad" ---> simulate radiative tail and Eloss,   "norad"---> Does NOT simulate radiative tail or Eloss
-   */
+    Qnorm ---> weight simc by charge/efficiencies/live time ?
+  */
   
   //PREVENT DISPLAY 
   //gROOT->SetBatch(kTRUE);
 
-  Double_t charge_factor;       //Units: mC   :: beam_current(uA) * time (hrs) * 3600. / 1000.  3600--> hrs to sec,  1000--> uC to mC
-  Double_t e_trkEff;
-  Double_t h_trkEff;           
-  Double_t c_LT;
-  Double_t t_LT;
+  Double_t charge_factor = 1.;       //Units: mC   :: beam_current(uA) * time (hrs) * 3600. / 1000.  3600--> hrs to sec,  1000--> uC to mC
+  Double_t e_trkEff = 1.;
+  Double_t h_trkEff = 1.;           
+  Double_t c_LT = 1.;
+  Double_t t_LT = 1.;
 
+  if (Qnorm){
   if(set==0&&Pmiss==80){
     
     charge_factor = 142.553;   //BCM4A
@@ -32,6 +34,18 @@ void D2_simc(int set, int Pmiss, string model, string rad)
     h_trkEff = 0.989003;        //hms had trk eff
 
   }
+
+
+    //Combined 580 data sets 
+    if(set==-1&&Pmiss==580){                                                                                                                                                                                                                                       
+      charge_factor = 3759.779;   //BCM4A (mC)                                                                                                   
+      c_LT = 0.998465;          //computer live time                                                                  
+      t_LT = 0.930204;          //total live time                                                                                 
+      
+      e_trkEff = 0.96600;       //shms e- trk eff                                                                       
+      h_trkEff = 0.974655;        //hms had trk eff                                                         
+      
+    } 
 
  if(set==1&&Pmiss==580){
     
@@ -56,6 +70,19 @@ void D2_simc(int set, int Pmiss, string model, string rad)
     h_trkEff = 0.987885;        //hms had trk eff
 
   }
+
+     //Combined 750 MeV sets
+    if(set==-1&&Pmiss==750){                                                                                                          
+                                                                                                                                    
+      charge_factor = 8315.383;   //BCM4A (mC)                                                                               
+                                                                                                                                        
+      c_LT = 0.998544;          //computer live time                                                                              
+      t_LT = 0.925702;          //total live time                                                                                    
+                                                                                                                                          
+      e_trkEff = 0.962190;       //shms e- trk eff                                                                                            
+      h_trkEff = 0.989080;        //hms had trk eff                                                
+                                                                                                       
+    } 
 
  if(set==1&&Pmiss==750){
     
@@ -92,15 +119,26 @@ void D2_simc(int set, int Pmiss, string model, string rad)
 
   }
                                 
- 
- TString filename = Form("../worksim_voli/d2_pm%d_laget%s_rad_set%d.root", Pmiss, model.c_str(), set);
- 
+  }
+
+  TString filename; 
+
+  filename = Form("../worksim_voli/d2_pm%d_laget%s_rad_set%d.root", Pmiss, model.c_str(), set);
+  
+  if(set==-1){ filename = Form("../worksim_voli/d2_pm%d_laget%s_rad_total.root", Pmiss, model.c_str());}
+
  
  TFile *data_file = new TFile(filename, "READ"); 
  TTree *SNT = (TTree*)data_file->Get("SNT");
  
  //Create output root file where histograms will be stored
- TFile *outROOT = new TFile(Form("D2simc_pm%d_laget%s_%s_set%d.root", Pmiss, model.c_str(), rad.c_str(), set), "recreate");
+ TFile *outROOT;
+ if(set==-1){
+   outROOT = new TFile(Form("D2simc_pm%d_laget%s_%s_total.root", Pmiss, model.c_str(), rad.c_str()), "recreate");
+ }
+ else{
+   outROOT = new TFile(Form("D2simc_pm%d_laget%s_%s_set%d.root", Pmiss, model.c_str(), rad.c_str(), set), "recreate");
+ }
 
   //*****************************************
   // Phase Spase Histograms: 
@@ -108,17 +146,20 @@ void D2_simc(int set, int Pmiss, string model, string rad)
   //*****************************************
   TH1F *pm_ps = new TH1F("pm_ps","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);
   TH1F *cut_pm_ps = new TH1F("cut_pm_ps","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax); 
+  TH1F *cut_pm_ps_red = new TH1F("cut_pm_ps_red","Phase Space (Used in red. Xsec)", Pm_nbins, Pm_xmin, Pm_xmax); 
 
   pm_ps->Sumw2();
   cut_pm_ps->Sumw2();
+  cut_pm_ps_red->Sumw2();
 
   //********* Create 1D Histograms **************
   
   //Kinematics Quantities
   TH1F *MM2 = new TH1F("MM2", "Missing Mass Squared, MM2", MM2_nbins, MM2_xmin, MM2_xmax );
   TH1F *Emiss = new TH1F("Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  COUNTS/25 MeV
-  TH1F *pm = new TH1F("pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
-   
+  TH1F *pm = new TH1F("pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  
+  TH1F *Kred = new TH1F("Kred","K =[ E_{p}P_{p}/(2#pi)^{3}] #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
+     
   TH1F *pmX_lab = new TH1F("pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
   TH1F *pmY_lab = new TH1F("pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
   TH1F *pmZ_lab = new TH1F("pmZ_Lab","Pmiss Z (Lab) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
@@ -287,6 +328,8 @@ void D2_simc(int set, int Pmiss, string model, string rad)
   TH2F *hdelta_vs_hyfp = new TH2F("hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
   TH2F *hdelta_vs_hypfp = new TH2F("hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
 
+  TH2F *Q2_vs_thnq = new TH2F("Q2_vs_thnq", "Q2 vs. #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax, Q2_nbins, Q2_xmin, Q2_xmax);
+  TH2F *Q2_vs_Pm = new TH2F("Q2_vs_Pm", "Q2 vs. Pm", Pm_nbins, Pm_xmin, Pm_xmax, Q2_nbins, Q2_xmin, Q2_xmax); 
 
   /************Define Histos to APPLY CUTS*********************************/
   
@@ -294,10 +337,17 @@ void D2_simc(int set, int Pmiss, string model, string rad)
   TH1F *cut_MM2 = new TH1F("cut_MM2", "Missing Mass Squared, MM2", MM2_nbins, MM2_xmin, MM2_xmax );
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+  TH1F *cut_Kred = new TH1F("cut_Kred","Pmiss*K_{red} =[ E_{p}P_{p}/(2#pi)^{3}] #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
+  TH1F *cut_pm_red = new TH1F("cut_pm_red","Reduced Cross Section, #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
+  TH1F *cut_pm_red2 = new TH1F("cut_pm_red2","Reduced Cross Section, #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
+
 
   cut_Emiss->Sumw2();
   cut_pm->Sumw2();
-    
+  cut_Kred->Sumw2();
+  cut_pm_red->Sumw2();
+  cut_pm_red2->Sumw2();
+
   TH1F *cut_pmX_lab = new TH1F("cut_pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
   TH1F *cut_pmY_lab = new TH1F("cut_pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
   TH1F *cut_pmZ_lab = new TH1F("cut_pmZ_Lab","Pmiss Z (Lab) ", Pmz_nbins, Pmz_xmin, Pmz_xmax);  
@@ -460,6 +510,8 @@ void D2_simc(int set, int Pmiss, string model, string rad)
   TH2F *cut_hdelta_vs_hyfp = new TH2F("cut_hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
   TH2F *cut_hdelta_vs_hypfp = new TH2F("cut_hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
 
+  TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "Q2 vs. #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax, Q2_nbins, Q2_xmin, Q2_xmax);         
+  TH2F *cut_Q2_vs_Pm = new TH2F("cut_Q2_vs_Pm", "Q2 vs. Pm", Pm_nbins, Pm_xmin, Pm_xmax, Q2_nbins, Q2_xmin, Q2_xmax);  
   
   Float_t  Normfac;
   Float_t  h_delta;
@@ -626,7 +678,14 @@ void D2_simc(int set, int Pmiss, string model, string rad)
 
   //Determine Full Weight Quantities (Assume one for heep check)
   Double_t FullWeight;
+  Double_t Fps; //Phase Space weight factor
 
+  //  dSigma / dX  =  K * sig_cc,   factor --> K * sig_cc,  where K = Ep * Pp / (2*pi)^{3}
+  Double_t red_xsec_factor;   
+
+  //simc Pmiss is weighted by this factor to get the SIMC reduced cross section
+  Double_t red_xsec_simc;
+  Double_t red_xsec_simc2;
 
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
@@ -648,8 +707,11 @@ void D2_simc(int set, int Pmiss, string model, string rad)
   for (Long64_t i=0; i<nentries;i++) {
     
     SNT->GetEntry(i);
+   
+    //If cross section sigma = 0, continue to next event
+    if(sig==0) continue;
 
-    
+ 
     //-----Define Additional Kinematic Variables--------
     Ein = Ein / 1000.;   //This beam energy has Eloss, therefore, it is slightly smaller than 10.6005 (10.5992)
     W2 = W*W;
@@ -678,21 +740,59 @@ void D2_simc(int set, int Pmiss, string model, string rad)
     c_Em = Em<0.04;
     c_hdelta = h_delta > -8. && h_delta < 8.;
     c_edelta = e_delta > -10. && h_delta < 22.;
-    c_Q2 = Q2 >=4.;
-    c_th_nq = (th_nq/dtr) <= 45.;
+    c_Q2 = Q2 >=4.0;
+    c_th_nq = (th_nq/dtr) >= 35. &&  (th_nq/dtr) <=45. ;
+    //c_th_nq = (th_nq/dtr) >= 55. &&  (th_nq/dtr) <=65. ;
+    //c_th_nq = (th_nq/dtr) >= 45. &&  (th_nq/dtr) <=55. ;
+
     //    c_MM = MM > 0.92 && MM < 0.96;
 
     //Full Weight
     FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/nentries;
+
+    //Phase Space Weight 
+    Fps = FullWeight / sig ;  //Divide out the cross section
+
     
- 
+    //Reduced Cross Section (Momentum Distribution) Factor  (Pmiss is weighted by this and divided by Pmiss, to get average Ksigma_cc)
+    red_xsec_factor = (sqrt(MP*MP + Pf*Pf) * Pf / pow(2.*TMath::Pi(),3)) * sigcc;      //factor = Ep * Pp / (2*pi)^{3}  * sigma_cc = K*sigma_cc
+    
+
+    //SIMC Reduced Cross Section (Model Dependent)
+    red_xsec_simc = sig / (red_xsec_factor);
+    red_xsec_simc2 = Weight / (red_xsec_factor);
+
+
+
+    //    cout << "Full Weight = " << FullWeight << endl;
+    // cout << "Sig = " << sig << endl;
+    //cout << "FPS = " << Fps << endl;
+
+    if(set==-1&&Pmiss==580){  FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/(nentries); }  //Multiply by 2 mC, since we added 2 rootfiles, each with 1 mC
+    if(set==-1&&Pmiss==750){  FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/(nentries); }  //Multiply by 3 mC, since we added 2 rootfiles, each with 1 mC
 
     //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em&&c_hdelta&&c_edelta)
+      if (c_Em&&c_hdelta&&c_edelta&&c_th_nq&&c_Q2)
 	{
 
 	  //Fill Phase Space
-	  cut_pm_ps->Fill(Pm);
+	  cut_pm_ps->Fill(Pm, Fps);   //This Phase Space is used to get experimental cross sections
+	  cut_pm_ps_red->Fill(Pm);   //This Phase Space is used to get the average K*sigma_cc
+	  cut_Kred->Fill(Pm, red_xsec_factor);  //Missing Momentum, Weighted by reduced cross_section factor
+	  
+
+	  cut_pm_red->Fill(Pm, red_xsec_simc);  //This histogram should be divided by the cut_pm_ps_red, to get the model red. cross section
+	  cut_pm_red2->Fill(Pm, red_xsec_simc2);  //This histogram should be divided by the cut_pm_ps_red, to get the model red. cross section
+
+
+	  //Divide to get simc  red. cross section
+	  // Fill->(Pm,  sig / (red_xsec_factor))
+	  // Fill->(Pm)
+
+	  // K*sigma_cc_avg =  Pm[weighted by K*sigma_cc] / Pm =  cut_Kred / cut_pm_ps_red.  This is done by dividing these two histogram objects in another code.
+	  //The experimental cross section is then divided by K*sigma_cc_avg to get the reduced cross section
+
+	  //Exp. red. Xsec  = sigma_exp(data) / K*sigma_cc_avg, where sigma_exp(data) = dataYield / cut_pm_ps
 
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
@@ -845,11 +945,13 @@ void D2_simc(int set, int Pmiss, string model, string rad)
 	  cut_hdelta_vs_hyfp->Fill(h_yfp, h_delta);
 	  cut_hdelta_vs_hypfp->Fill(h_ypfp, h_delta);
 
+	  cut_Q2_vs_thnq->Fill(th_nq/dtr, Q2, FullWeight);
+	  cut_Q2_vs_Pm->Fill(Pm, Q2, FullWeight);
 
 	}//End CUTS LOOP
 
       //Fill Phase SPace
-      pm_ps->Fill(Pm);       
+      pm_ps->Fill(Pm,  Fps);       
       
       //Kinematics
       Emiss->Fill(Em, FullWeight);
@@ -1017,7 +1119,8 @@ void D2_simc(int set, int Pmiss, string model, string rad)
       hdelta_vs_hyfp->Fill(h_yfp, h_delta);
       hdelta_vs_hypfp->Fill(h_ypfp, h_delta);
       
-      
+      Q2_vs_thnq->Fill(th_nq/dtr, Q2, FullWeight);                                                                                                                  
+      Q2_vs_Pm->Fill(Pm, Q2, FullWeight); 
       
   } //end entry loop
 

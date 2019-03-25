@@ -1,7 +1,7 @@
 import numpy as np
 
 #Enter run list to analyze
-runlist = 'd2_80.dat'
+runlist = 'd2_750_total.dat'
 
 #create lists
 run = []

@@ -1,24 +1,128 @@
 #include "../simc_analysis/set_deep_histos.h"
 
-void analyze_deepData(int set, int Pmiss)
+void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
 {
 
   //the set="", represents different data sets, with ideally same kinematics, but spectrometer has been moved back and forth
   //so the reproducibility needs to be checked.  For 80 MeV, use set=0
+  //QNorm--> Normalize data by charge/live time/tracking efficiencies. Set to true by default
 
 //PREVENT DISPLAY 
   //gROOT->SetBatch(kTRUE);
     
-  
+  Double_t charge_factor = 1.; 
+  Double_t e_trkEff = 1.;
+  Double_t h_trkEff = 1.; 
+  Double_t c_LT = 1.;
+  Double_t t_LT = 1.;
 
+  if (Qnorm){                                                                                                                      
+
+    if(set==0&&Pmiss==80){                                                                                                           
+                                                                                                                                              
+      charge_factor = 142.553;   //BCM4A                                                                                                                                                                                   
+      c_LT = 0.97881;          //computer live time                                                                              
+      t_LT = 0.909529;          //total live time                                                                                                                                                                                                       
+      e_trkEff = 0.966524;       //shms e- trk eff                                                          
+      h_trkEff = 0.989003;        //hms had trk eff
+    }
+
+    //Combined 580 data sets 
+    if(set==-1&&Pmiss==580){                                                                                                                                                                                                                                       
+      charge_factor = 3759.779;   //BCM4A (mC)                                                                                                   
+      c_LT = 0.998465;          //computer live time                                                                  
+      t_LT = 0.930204;          //total live time                                                                                 
+      
+      e_trkEff = 0.96600;       //shms e- trk eff                                                                       
+      h_trkEff = 0.974655;        //hms had trk eff                                                         
+      
+    } 
+
+    if(set==1&&Pmiss==580){                                                                                                                                                                                                                                       
+      charge_factor =1827.029;   //BCM4A (mC)                                                                                                   
+      c_LT = 0.998534;          //computer live time                                                                  
+      t_LT = 0.930728;          //total live time                                                                                 
+      
+      e_trkEff = 0.966850;       //shms e- trk eff                                                                       
+      h_trkEff = 0.962029;        //hms had trk eff                                                         
+      
+    } 
+
+
+    if(set==2&&Pmiss==580){                                        
+                                                                                                                                  
+      charge_factor = 1932.75;   //BCM4A (mC)                                                                               
+                                                                                                                        
+      c_LT = 0.998398;          //computer live time                                                               
+      t_LT = 0.929696;          //total live time                                                                               
+                                                                                                           
+      e_trkEff = 0.965208;       //shms e- trk eff                                                    
+      h_trkEff = 0.987885;        //hms had trk eff                                                                             
+                                                                                                                                  
+    }  
+
+    //Combined 750 MeV sets
+    if(set==-1&&Pmiss==750){                                                                                                          
+                                                                                                                                    
+      charge_factor = 8315.383;   //BCM4A (mC)                                                                               
+                                                                                                                                        
+      c_LT = 0.998544;          //computer live time                                                                              
+      t_LT = 0.925702;          //total live time                                                                                    
+                                                                                                                                          
+      e_trkEff = 0.962190;       //shms e- trk eff                                                                                            
+      h_trkEff = 0.989080;        //hms had trk eff                                                
+                                                                                                       
+    }    
+
+    if(set==1&&Pmiss==750){                                                                                                          
+                                                                                                                                    
+      charge_factor = 5335.617;   //BCM4A (mC)                                                                               
+                                                                                                                                        
+      c_LT = 0.998538;          //computer live time                                                                              
+      t_LT = 0.926217;          //total live time                                                                                    
+                                                                                                                                          
+      e_trkEff = 0.962456;       //shms e- trk eff                                                                                            
+      h_trkEff = 0.988749;        //hms had trk eff                                                
+                                                                                                       
+    }                               
+
+    if(set==2&&Pmiss==750){                                                                                              
+                                                                                                            
+      charge_factor = 1894.894;   //BCM4A (mC)                                                                                    
+                                                                                                                           
+      c_LT = 0.998538;          //computer live time                                                               
+      t_LT = 0.924257;          //total live time                                                                            
+                                                                                                                                  
+      e_trkEff = 0.960770;       //shms e- trk eff                                                                                 
+      h_trkEff = 0.989432;        //hms had trk eff                                                                           
+                                                                                       
+    }    
+
+    if(set==3&&Pmiss==750){                                                                                            
+                                                                                                                               
+      charge_factor = 1084.872;   //BCM4A (mC)                                                                                
+                                                                                                                                    
+      c_LT = 0.998583;          //computer live time                                                                                
+      t_LT = 0.925570;          //total live time                                                                                          
+                                                                                                                              
+      e_trkEff = 0.963303;       //shms e- trk eff                                                                          
+      h_trkEff = 0.990051;        //hms had trk eff                                                             
+                                                                                                 
+    } 
+
+    cout << "Qnorm? = " << Qnorm << endl;
+
+}
   //Read DATA ROOTfiles
   TString filename; 
   
   if(set==0&&Pmiss==80){ filename = "../../hallc_replay/ROOTfiles/coin_replay_deep_check_3289_-1.root"; }
-  
+
+  if(set==-1&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_total.root"; }
   if(set==1&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_set1.root"; }
   if(set==2&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_set2.root"; }
-  
+
+  if(set==-1&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_total.root"; }
   if(set==1&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_set1.root"; }
   if(set==2&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_set2.root"; }
   if(set==3&&Pmiss==750){ filename = "../../hallc_replay/ROOTfiles/pm750_set3.root"; }
@@ -28,9 +132,14 @@ void analyze_deepData(int set, int Pmiss)
   TFile *data_file = new TFile(filename, "READ"); 
   TTree *T = (TTree*)data_file->Get("T");
  
+  TFile *outROOT;
+  if(set==-1){
+    outROOT = new TFile(Form("D2data_pm%d_total.root", Pmiss), "recreate");
+  }
+  else{
   //Create output root file where histograms will be stored
-  TFile *outROOT = new TFile(Form("D2data_pm%d_set%d.root", Pmiss, set), "recreate");
-  
+    outROOT = new TFile(Form("D2data_pm%d_set%d.root", Pmiss, set), "recreate");
+  }
 
   //********* Create 1D Histograms **************
   
@@ -218,6 +327,9 @@ void analyze_deepData(int set, int Pmiss)
   TH2F *hdelta_vs_hyfp = new TH2F("hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
   TH2F *hdelta_vs_hypfp = new TH2F("hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
 
+  TH2F *Q2_vs_thnq = new TH2F("Q2_vs_thnq", "Q2 vs. #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax, Q2_nbins, Q2_xmin, Q2_xmax);                
+  TH2F *Q2_vs_Pm = new TH2F("Q2_vs_Pm", "Q2 vs. Pm", Pm_nbins, Pm_xmin, Pm_xmax, Q2_nbins, Q2_xmin, Q2_xmax);                     
+
   /************Define Histos to APPLY CUTS*********************************/
  
   TH1F *cut_epCT = new TH1F("cut_epCT","e-Proton Coincidence Time", 100, 0, 20);
@@ -226,6 +338,9 @@ void analyze_deepData(int set, int Pmiss)
   //Kinematics Quantities
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+
+  cut_Emiss->Sumw2();
+  cut_pm->Sumw2();
 
   TH1F *cut_pmX_lab = new TH1F("cut_pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
   TH1F *cut_pmY_lab = new TH1F("cut_pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
@@ -240,6 +355,9 @@ void analyze_deepData(int set, int Pmiss)
   TH1F *cut_theta_elec = new TH1F("cut_theta_elec", "Electron Scatt. Angle", the_nbins, the_xmin, the_xmax);
   TH1F *cut_theta_prot = new TH1F("cut_theta_prot", "Proton Scatt. Angle", thp_nbins, thp_xmin, thp_xmax);
   
+  cut_Q_2->Sumw2();
+  cut_omega->Sumw2();
+
   //Additional Kinematics Variables
   TH1F *cut_W_2 = new TH1F("cut_W2", "Invariant Mass W2", W2_nbins, W2_xmin, W2_xmax);
   TH1F *cut_xbj = new TH1F("cut_xbj", "x-Bjorken", xbj_nbins, xbj_xmin, xbj_xmax);
@@ -260,7 +378,17 @@ void analyze_deepData(int set, int Pmiss)
   TH1F *cut_KinP = new TH1F("cut_Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);
   TH1F *cut_E_p = new TH1F("cut_Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
 
-
+  cut_Emiss_nuc->Sumw2();
+  cut_Mmiss->Sumw2();
+  cut_Erecoil->Sumw2();
+  cut_theta_nq->Sumw2();
+  cut_xbj->Sumw2();
+  cut_P_f->Sumw2();
+  cut_k_f->Sumw2();
+  cut_q_vec->Sumw2();
+  cut_theta_q->Sumw2();
+  cut_thet_pq->Sumw2();
+  
   //Target Reconstruction Variables
   TH1F *cut_hx_tar = new TH1F("cut_hx_tar", "HMS x-Target (Lab)", xtar_nbins, xtar_xmin, xtar_xmax);
   TH1F *cut_hy_tar = new TH1F("cut_hy_tar", "HMS y-Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
@@ -396,6 +524,9 @@ void analyze_deepData(int set, int Pmiss)
   TH2F *cut_hdelta_vs_hyfp = new TH2F("cut_hdelta_vs_hyfp", "HMS Delta h#delta vs. hY_{fp}", hyfp_nbins, hyfp_xmin, hyfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
   TH2F *cut_hdelta_vs_hypfp = new TH2F("cut_hdelta_vs_hypfp", "HMS Delta h#delta vs. hY'_{fp}", hypfp_nbins, hypfp_xmin, hypfp_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
 
+  TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "Q2 vs. #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax, Q2_nbins, Q2_xmin, Q2_xmax);       
+  TH2F *cut_Q2_vs_Pm = new TH2F("cut_Q2_vs_Pm", "Q2 vs. Pm", Pm_nbins, Pm_xmin, Pm_xmax, Q2_nbins, Q2_xmin, Q2_xmax);   
+      
   //Set Variable Names and Branches
  
   //------Kinematics
@@ -545,7 +676,11 @@ void analyze_deepData(int set, int Pmiss)
 
   T->SetBranchAddress("P.cal.etotnorm",&pcal_etotnorm);
   T->SetBranchAddress("P.ngcer.npeSum",&pngcer_npesum);
- 
+
+
+  //Determine Full Weight
+  //Each data event will be corrected for by dividing it by charge, efficencys and live time
+  Double_t FullWeight = 1. / (charge_factor*e_trkEff*h_trkEff*t_LT);
  
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
@@ -590,326 +725,335 @@ void analyze_deepData(int set, int Pmiss)
     c_edelta = e_delta>-10. && e_delta<22.;
     c_ecal = pcal_etotnorm >0.6;
     c_ngc_NpeSum = pngcer_npesum > 0.5;
-    c_Q2 = Q2 >= 4.;
-    c_th_nq = (thbq/dtr) <= 45.;
+    c_Q2 = Q2 >= 4.0;
+    c_th_nq = (thbq/dtr) >= 35. && (thbq/dtr) <= 45.;
+    //c_th_nq = (thbq/dtr) >= 55. && (thbq/dtr) <= 65.;
+    //c_th_nq = (thbq/dtr) >= 45. && (thbq/dtr) <= 55.;
+
+
     //c_MM = M_recoil > 0.92 && M_recoil < 0.96;
 
     //APPLY CUTS: BEGIN CUTS LOOP
-    if (c_Em&&c_hdelta&&c_edelta&&c_ecal&&c_ctime)
+    if (c_Em&&c_hdelta&&c_edelta&&c_ecal&&c_ctime&&c_th_nq&&c_Q2)
     {
 
-      cut_epCT->Fill(epCoinTime);
-      cut_ecal_etotnorm->Fill(pcal_etotnorm);
+      cut_epCT->Fill(epCoinTime, FullWeight);
+      cut_ecal_etotnorm->Fill(pcal_etotnorm, FullWeight);
 
 	  //Kinematics
-	  cut_Emiss->Fill(Em);
-	  cut_pm->Fill(Pm);
+	  cut_Emiss->Fill(Em, FullWeight);
+	  cut_pm->Fill(Pm, FullWeight);
 
-	  cut_pmX_lab->Fill(Pmx_lab);
-	  cut_pmY_lab->Fill(Pmy_lab);
-	  cut_pmZ_lab->Fill(Pmz_lab);
+	  cut_pmX_lab->Fill(Pmx_lab, FullWeight);
+	  cut_pmY_lab->Fill(Pmy_lab, FullWeight);
+	  cut_pmZ_lab->Fill(Pmz_lab, FullWeight);
 	  
-	  cut_pmX_q->Fill(Pmx_q);
-	  cut_pmY_q->Fill(Pmy_q);
-	  cut_pmZ_q->Fill(Pmz_q);
+	  cut_pmX_q->Fill(Pmx_q, FullWeight);
+	  cut_pmY_q->Fill(Pmy_q, FullWeight);
+	  cut_pmZ_q->Fill(Pmz_q, FullWeight);
 
-	  cut_Q_2->Fill(Q2);
-	  cut_omega->Fill(nu);
-	  cut_W_inv->Fill(W);
-	  cut_theta_elec->Fill(theta_e/dtr);
-	  cut_theta_prot->Fill(theta_p/dtr);
+	  cut_Q_2->Fill(Q2, FullWeight);
+	  cut_omega->Fill(nu, FullWeight);
+	  cut_W_inv->Fill(W, FullWeight);
+	  cut_theta_elec->Fill(theta_e/dtr, FullWeight);
+	  cut_theta_prot->Fill(theta_p/dtr, FullWeight);
 
 	  
 	  //Additional Kinematics Variables
-	  cut_W_2->Fill(W2); 
-	  cut_xbj->Fill(X); 
-	  cut_P_f->Fill(Pfv2);
-	  cut_k_f->Fill(kf);
-	  cut_theta_q->Fill(th_q/dtr);
-	  cut_q_vec->Fill(q3m);
-	  cut_thet_pq->Fill(thxq/dtr);
-	  cut_thet_pq_v2->Fill(theta_pq_v2/dtr);
-	  cut_theta_nq->Fill(thbq/dtr);
-	  cut_E_n->Fill(En);
+	  cut_W_2->Fill(W2, FullWeight); 
+	  cut_xbj->Fill(X, FullWeight); 
+	  cut_P_f->Fill(Pfv2, FullWeight);
+	  cut_k_f->Fill(kf, FullWeight);
+	  cut_theta_q->Fill(th_q/dtr, FullWeight);
+	  cut_q_vec->Fill(q3m, FullWeight);
+	  cut_thet_pq->Fill(thxq/dtr, FullWeight);
+	  cut_thet_pq_v2->Fill(theta_pq_v2/dtr, FullWeight);
+	  cut_theta_nq->Fill(thbq/dtr, FullWeight);
+	  cut_E_n->Fill(En, FullWeight);
 
-	  cut_Mmiss->Fill(M_recoil);
-	  cut_Emiss_nuc->Fill(Em_nuc);
-	  cut_Erecoil->Fill(E_recoil);
+	  cut_Mmiss->Fill(M_recoil, FullWeight);
+	  cut_Emiss_nuc->Fill(Em_nuc, FullWeight);
+	  cut_Erecoil->Fill(E_recoil, FullWeight);
 
-	  cut_KinN->Fill(Kn);
-	  cut_KinP->Fill(Kp);
-	  cut_E_p->Fill(Ep);
+	  cut_KinN->Fill(Kn, FullWeight);
+	  cut_KinP->Fill(Kp, FullWeight);
+	  cut_E_p->Fill(Ep, FullWeight);
 
 	  //Reconstructed Target Quantities (Lab Frame)
-	  cut_hx_tar->Fill(htar_x);
-	  cut_hy_tar->Fill(htar_y);
-	  cut_hz_tar->Fill(htar_z);
+	  cut_hx_tar->Fill(htar_x, FullWeight);
+	  cut_hy_tar->Fill(htar_y, FullWeight);
+	  cut_hz_tar->Fill(htar_z, FullWeight);
 	  
-	  cut_px_tar->Fill(ptar_x);
-	  cut_py_tar->Fill(ptar_y);
-	  cut_pz_tar->Fill(ptar_z);
+	  cut_px_tar->Fill(ptar_x, FullWeight);
+	  cut_py_tar->Fill(ptar_y, FullWeight);
+	  cut_pz_tar->Fill(ptar_z, FullWeight);
 	  
 
 	  //Hadron-Arm Target Reconstruction 
-	  cut_hytar->Fill(h_ytar);
-	  cut_hxptar->Fill(h_xptar);
-	  cut_hyptar->Fill(h_yptar);
-	  cut_hdelta->Fill(h_delta);
+	  cut_hytar->Fill(h_ytar, FullWeight);
+	  cut_hxptar->Fill(h_xptar, FullWeight);
+	  cut_hyptar->Fill(h_yptar, FullWeight);
+	  cut_hdelta->Fill(h_delta, FullWeight);
 	  
 	  //Hadron-Arm Focal Plane
-	  cut_hxfp->Fill(h_xfp);
-	  cut_hyfp->Fill(h_yfp);
-	  cut_hxpfp->Fill(h_xpfp);
-	  cut_hypfp->Fill(h_ypfp);
+	  cut_hxfp->Fill(h_xfp, FullWeight);
+	  cut_hyfp->Fill(h_yfp, FullWeight);
+	  cut_hxpfp->Fill(h_xpfp, FullWeight);
+	  cut_hypfp->Fill(h_ypfp, FullWeight);
 	  
 	  //Electron-Arm Target Reconstruction
-	  cut_eytar->Fill(e_ytar);
-	  cut_exptar->Fill(e_xptar);
-	  cut_eyptar->Fill(e_yptar);
-	  cut_edelta->Fill(e_delta);
+	  cut_eytar->Fill(e_ytar, FullWeight);
+	  cut_exptar->Fill(e_xptar, FullWeight);
+	  cut_eyptar->Fill(e_yptar, FullWeight);
+	  cut_edelta->Fill(e_delta, FullWeight);
 	  
 	  //Electron-Arm Focal Plane
-	  cut_exfp->Fill(e_xfp);
-	  cut_eyfp->Fill(e_yfp);
-	  cut_expfp->Fill(e_xpfp);
-	  cut_eypfp->Fill(e_ypfp);
+	  cut_exfp->Fill(e_xfp, FullWeight);
+	  cut_eyfp->Fill(e_yfp, FullWeight);
+	  cut_expfp->Fill(e_xpfp, FullWeight);
+	  cut_eypfp->Fill(e_ypfp, FullWeight);
 	  
 
 	  //Fill 2D HMS Focal Plane Quantities
-	  cut_h_xfp_vs_yfp->Fill(h_yfp, h_xfp);
-	  cut_e_xfp_vs_yfp->Fill(e_yfp, e_xfp);
+	  cut_h_xfp_vs_yfp->Fill(h_yfp, h_xfp, FullWeight);
+	  cut_e_xfp_vs_yfp->Fill(e_yfp, e_xfp, FullWeight);
 	  
 	  //Fill 2D reconstructed variables
-	  cut_hxptar_vs_exptar->Fill(e_xptar, h_xptar);
-	  cut_hyptar_vs_eyptar->Fill(e_yptar, h_yptar);
-	  cut_hdelta_vs_edelta->Fill(e_delta, h_delta);
+	  cut_hxptar_vs_exptar->Fill(e_xptar, h_xptar, FullWeight);
+	  cut_hyptar_vs_eyptar->Fill(e_yptar, h_yptar, FullWeight);
+	  cut_hdelta_vs_edelta->Fill(e_delta, h_delta, FullWeight);
 
 	  
 	  //Heep cross check
-	  cut_emiss_vs_pmiss->Fill(Pm, Em);
-	  cut_edelta_vs_eyptar->Fill(e_yptar, e_delta);
+	  cut_emiss_vs_pmiss->Fill(Pm, Em, FullWeight);
+	  cut_edelta_vs_eyptar->Fill(e_yptar, e_delta, FullWeight);
 	  
 	  //OPTICS CHECK (W / Emiss vs. electron Arm Quantities)
-	  cut_W_vs_exfp->Fill(e_xfp, W);
-	  cut_W_vs_expfp->Fill(e_xpfp, W);
-	  cut_W_vs_eyfp->Fill(e_yfp, W);
-	  cut_W_vs_eypfp->Fill(e_ypfp, W);
+	  cut_W_vs_exfp->Fill(e_xfp, W, FullWeight);
+	  cut_W_vs_expfp->Fill(e_xpfp, W, FullWeight);
+	  cut_W_vs_eyfp->Fill(e_yfp, W, FullWeight);
+	  cut_W_vs_eypfp->Fill(e_ypfp, W, FullWeight);
 	  
-	  cut_W_vs_eytar->Fill(e_ytar, W);
-	  cut_W_vs_exptar->Fill(e_xptar, W);
-	  cut_W_vs_eyptar->Fill(e_yptar, W);
-	  cut_W_vs_edelta->Fill(e_delta, W);
+	  cut_W_vs_eytar->Fill(e_ytar, W, FullWeight);
+	  cut_W_vs_exptar->Fill(e_xptar, W, FullWeight);
+	  cut_W_vs_eyptar->Fill(e_yptar, W, FullWeight);
+	  cut_W_vs_edelta->Fill(e_delta, W, FullWeight);
 
-	  cut_Em_vs_exfp->Fill(e_xfp, Em);
-	  cut_Em_vs_expfp->Fill(e_xpfp, Em);
-	  cut_Em_vs_eyfp->Fill(e_yfp, Em);
-	  cut_Em_vs_eypfp->Fill(e_ypfp, Em);
+	  cut_Em_vs_exfp->Fill(e_xfp, Em, FullWeight);
+	  cut_Em_vs_expfp->Fill(e_xpfp, Em, FullWeight);
+	  cut_Em_vs_eyfp->Fill(e_yfp, Em, FullWeight);
+	  cut_Em_vs_eypfp->Fill(e_ypfp, Em, FullWeight);
 	  
-	  cut_Em_vs_eytar->Fill(e_ytar, Em);
-	  cut_Em_vs_exptar->Fill(e_xptar, Em);
-	  cut_Em_vs_eyptar->Fill(e_yptar, Em);
-	  cut_Em_vs_edelta->Fill(e_delta, Em);
+	  cut_Em_vs_eytar->Fill(e_ytar, Em, FullWeight);
+	  cut_Em_vs_exptar->Fill(e_xptar, Em, FullWeight);
+	  cut_Em_vs_eyptar->Fill(e_yptar, Em, FullWeight);
+	  cut_Em_vs_edelta->Fill(e_delta, Em, FullWeight);
 	  
 	  //OPTICS CHECK (W / Emiss vs. hadron Arm Quantities)
-	  cut_W_vs_hxfp->Fill(h_xfp, W);
-	  cut_W_vs_hxpfp->Fill(h_xpfp, W);
-	  cut_W_vs_hyfp->Fill(h_yfp, W);
-	  cut_W_vs_hypfp->Fill(h_ypfp, W);
+	  cut_W_vs_hxfp->Fill(h_xfp, W, FullWeight);
+	  cut_W_vs_hxpfp->Fill(h_xpfp, W, FullWeight);
+	  cut_W_vs_hyfp->Fill(h_yfp, W, FullWeight);
+	  cut_W_vs_hypfp->Fill(h_ypfp, W, FullWeight);
 	  
-	  cut_W_vs_hytar->Fill(h_ytar, W);
-	  cut_W_vs_hxptar->Fill(h_xptar, W);
-	  cut_W_vs_hyptar->Fill(h_yptar, W);
-	  cut_W_vs_hdelta->Fill(h_delta, W);
+	  cut_W_vs_hytar->Fill(h_ytar, W, FullWeight);
+	  cut_W_vs_hxptar->Fill(h_xptar, W, FullWeight);
+	  cut_W_vs_hyptar->Fill(h_yptar, W, FullWeight);
+	  cut_W_vs_hdelta->Fill(h_delta, W, FullWeight);
 
-	  cut_Em_vs_hxfp->Fill(h_xfp, Em);
-	  cut_Em_vs_hxpfp->Fill(h_xpfp, Em);
-	  cut_Em_vs_hyfp->Fill(h_yfp, Em);
-	  cut_Em_vs_hypfp->Fill(h_ypfp, Em);
+	  cut_Em_vs_hxfp->Fill(h_xfp, Em, FullWeight);
+	  cut_Em_vs_hxpfp->Fill(h_xpfp, Em, FullWeight);
+	  cut_Em_vs_hyfp->Fill(h_yfp, Em, FullWeight);
+	  cut_Em_vs_hypfp->Fill(h_ypfp, Em, FullWeight);
 	  
-	  cut_Em_vs_hytar->Fill(h_ytar, Em);
-	  cut_Em_vs_hxptar->Fill(h_xptar, Em);
-	  cut_Em_vs_hyptar->Fill(h_yptar, Em);
-	  cut_Em_vs_hdelta->Fill(h_delta, Em);
+	  cut_Em_vs_hytar->Fill(h_ytar, Em, FullWeight);
+	  cut_Em_vs_hxptar->Fill(h_xptar, Em, FullWeight);
+	  cut_Em_vs_hyptar->Fill(h_yptar, Em, FullWeight);
+	  cut_Em_vs_hdelta->Fill(h_delta, Em, FullWeight);
 	  
 
 	  //OPTICS CHECK (electron Arm Recon. vs. Focal Plane)
-	  cut_eytar_vs_exfp->Fill(e_xfp, e_ytar);
-	  cut_eytar_vs_expfp->Fill(e_xpfp, e_ytar);
-	  cut_eytar_vs_eyfp->Fill(e_yfp, e_ytar);
-	  cut_eytar_vs_eypfp->Fill(e_ypfp, e_ytar);
+	  cut_eytar_vs_exfp->Fill(e_xfp, e_ytar, FullWeight);
+	  cut_eytar_vs_expfp->Fill(e_xpfp, e_ytar, FullWeight);
+	  cut_eytar_vs_eyfp->Fill(e_yfp, e_ytar, FullWeight);
+	  cut_eytar_vs_eypfp->Fill(e_ypfp, e_ytar, FullWeight);
   
-	  cut_eyptar_vs_exfp->Fill(e_xfp, e_yptar);
-	  cut_eyptar_vs_expfp->Fill(e_xpfp, e_yptar);
-	  cut_eyptar_vs_eyfp->Fill(e_yfp, e_yptar);
-	  cut_eyptar_vs_eypfp->Fill(e_ypfp, e_yptar);
+	  cut_eyptar_vs_exfp->Fill(e_xfp, e_yptar, FullWeight);
+	  cut_eyptar_vs_expfp->Fill(e_xpfp, e_yptar, FullWeight);
+	  cut_eyptar_vs_eyfp->Fill(e_yfp, e_yptar, FullWeight);
+	  cut_eyptar_vs_eypfp->Fill(e_ypfp, e_yptar, FullWeight);
 
-	  cut_exptar_vs_exfp->Fill(e_xfp, e_xptar);
-	  cut_exptar_vs_expfp->Fill(e_xpfp, e_xptar);
-	  cut_exptar_vs_eyfp->Fill(e_yfp, e_xptar);
-	  cut_exptar_vs_eypfp->Fill(e_ypfp, e_xptar);
+	  cut_exptar_vs_exfp->Fill(e_xfp, e_xptar, FullWeight);
+	  cut_exptar_vs_expfp->Fill(e_xpfp, e_xptar, FullWeight);
+	  cut_exptar_vs_eyfp->Fill(e_yfp, e_xptar, FullWeight);
+	  cut_exptar_vs_eypfp->Fill(e_ypfp, e_xptar, FullWeight);
 
-	  cut_edelta_vs_exfp->Fill(e_xfp, e_delta);
-	  cut_edelta_vs_expfp->Fill(e_xpfp, e_delta);
-	  cut_edelta_vs_eyfp->Fill(e_yfp, e_delta);
-	  cut_edelta_vs_eypfp->Fill(e_ypfp, e_delta);
+	  cut_edelta_vs_exfp->Fill(e_xfp, e_delta, FullWeight);
+	  cut_edelta_vs_expfp->Fill(e_xpfp, e_delta, FullWeight);
+	  cut_edelta_vs_eyfp->Fill(e_yfp, e_delta, FullWeight);
+	  cut_edelta_vs_eypfp->Fill(e_ypfp, e_delta, FullWeight);
 
 	  //OPTICS CHECK (hadron Arm Recon. vs. Focal Plane)
-	  cut_hytar_vs_hxfp->Fill(h_xfp, h_ytar);
-	  cut_hytar_vs_hxpfp->Fill(h_xpfp, h_ytar);
-	  cut_hytar_vs_hyfp->Fill(h_yfp, h_ytar);
-	  cut_hytar_vs_hypfp->Fill(h_ypfp, h_ytar);
+	  cut_hytar_vs_hxfp->Fill(h_xfp, h_ytar, FullWeight);
+	  cut_hytar_vs_hxpfp->Fill(h_xpfp, h_ytar, FullWeight);
+	  cut_hytar_vs_hyfp->Fill(h_yfp, h_ytar, FullWeight);
+	  cut_hytar_vs_hypfp->Fill(h_ypfp, h_ytar, FullWeight);
   
-	  cut_hyptar_vs_hxfp->Fill(h_xfp, h_yptar);
-	  cut_hyptar_vs_hxpfp->Fill(h_xpfp, h_yptar);
-	  cut_hyptar_vs_hyfp->Fill(h_yfp, h_yptar);
-	  cut_hyptar_vs_hypfp->Fill(h_ypfp, h_yptar);
+	  cut_hyptar_vs_hxfp->Fill(h_xfp, h_yptar, FullWeight);
+	  cut_hyptar_vs_hxpfp->Fill(h_xpfp, h_yptar, FullWeight);
+	  cut_hyptar_vs_hyfp->Fill(h_yfp, h_yptar, FullWeight);
+	  cut_hyptar_vs_hypfp->Fill(h_ypfp, h_yptar, FullWeight);
 
-	  cut_hxptar_vs_hxfp->Fill(h_xfp, h_xptar);
-	  cut_hxptar_vs_hxpfp->Fill(h_xpfp, h_xptar);
-	  cut_hxptar_vs_hyfp->Fill(h_yfp, h_xptar);
-	  cut_hxptar_vs_hypfp->Fill(h_ypfp, h_xptar);
+	  cut_hxptar_vs_hxfp->Fill(h_xfp, h_xptar, FullWeight);
+	  cut_hxptar_vs_hxpfp->Fill(h_xpfp, h_xptar, FullWeight);
+	  cut_hxptar_vs_hyfp->Fill(h_yfp, h_xptar, FullWeight);
+	  cut_hxptar_vs_hypfp->Fill(h_ypfp, h_xptar, FullWeight);
 
-	  cut_hdelta_vs_hxfp->Fill(h_xfp, h_delta);
-	  cut_hdelta_vs_hxpfp->Fill(h_xpfp, h_delta);
-	  cut_hdelta_vs_hyfp->Fill(h_yfp, h_delta);
-	  cut_hdelta_vs_hypfp->Fill(h_ypfp, h_delta);
+	  cut_hdelta_vs_hxfp->Fill(h_xfp, h_delta, FullWeight);
+	  cut_hdelta_vs_hxpfp->Fill(h_xpfp, h_delta, FullWeight);
+	  cut_hdelta_vs_hyfp->Fill(h_yfp, h_delta, FullWeight);
+	  cut_hdelta_vs_hypfp->Fill(h_ypfp, h_delta, FullWeight);
+
+	  cut_Q2_vs_thnq->Fill(thbq/dtr, Q2, FullWeight);                                                                                     
+	  cut_Q2_vs_Pm->Fill(Pm, Q2, FullWeight);
 
 	}//End CUTS LOOP
       
       
-      epCT->Fill(epCoinTime);
-      ecal_etotnorm->Fill(pcal_etotnorm); 
+      epCT->Fill(epCoinTime, FullWeight);
+      ecal_etotnorm->Fill(pcal_etotnorm, FullWeight); 
 
       //Kinematics
-      Emiss_nuc->Fill(Em_nuc);                                                                               
-      Mmiss->Fill(M_recoil);
+      Emiss_nuc->Fill(Em_nuc, FullWeight);                                                                               
+      Mmiss->Fill(M_recoil, FullWeight);
 
-      Emiss->Fill(Em);
-      pm->Fill(Pm);
+      Emiss->Fill(Em, FullWeight);
+      pm->Fill(Pm, FullWeight);
       
-      pmX_lab->Fill(Pmx_lab);
-      pmY_lab->Fill(Pmy_lab);
-      pmZ_lab->Fill(Pmz_lab);
+      pmX_lab->Fill(Pmx_lab, FullWeight);
+      pmY_lab->Fill(Pmy_lab, FullWeight);
+      pmZ_lab->Fill(Pmz_lab, FullWeight);
       
-      pmX_q->Fill(Pmx_q);
-      pmY_q->Fill(Pmy_q);
-      pmZ_q->Fill(Pmz_q);
+      pmX_q->Fill(Pmx_q, FullWeight);
+      pmY_q->Fill(Pmy_q, FullWeight);
+      pmZ_q->Fill(Pmz_q, FullWeight);
 
-      Q_2->Fill(Q2);
-      omega->Fill(nu);
-      W_inv->Fill(W);
-      theta_elec->Fill(theta_e/dtr);
-      theta_prot->Fill(theta_p/dtr);
+      Q_2->Fill(Q2, FullWeight);
+      omega->Fill(nu, FullWeight);
+      W_inv->Fill(W, FullWeight);
+      theta_elec->Fill(theta_e/dtr, FullWeight);
+      theta_prot->Fill(theta_p/dtr, FullWeight);
 
 
       //Additional Kinematics Variables
-      W_2->Fill(W2); 
-      xbj->Fill(X); 
-      P_f->Fill(Pfv2);
-      k_f->Fill(kf);
-      theta_q->Fill(th_q/dtr);
-      q_vec->Fill(q3m);
-      thet_pq->Fill(thxq/dtr);
-      thet_pq_v2->Fill(theta_pq_v2/dtr);
-      theta_nq->Fill(thbq/dtr);
-      E_n->Fill(En);
+      W_2->Fill(W2, FullWeight); 
+      xbj->Fill(X, FullWeight); 
+      P_f->Fill(Pfv2, FullWeight);
+      k_f->Fill(kf, FullWeight);
+      theta_q->Fill(th_q/dtr, FullWeight);
+      q_vec->Fill(q3m, FullWeight);
+      thet_pq->Fill(thxq/dtr, FullWeight);
+      thet_pq_v2->Fill(theta_pq_v2/dtr, FullWeight);
+      theta_nq->Fill(thbq/dtr, FullWeight);
+      E_n->Fill(En, FullWeight);
 
-      Erecoil->Fill(E_recoil);                                                                               
+      Erecoil->Fill(E_recoil, FullWeight);                                                                               
                                     
-      KinN->Fill(Kn);                                                                                        
-      KinP->Fill(Kp); 
-      E_p->Fill(Ep);
+      KinN->Fill(Kn, FullWeight);                                                                                        
+      KinP->Fill(Kp, FullWeight); 
+      E_p->Fill(Ep, FullWeight);
 
       //Reconstructed Target Quantities (Lab Frame)
-      hx_tar->Fill(htar_x);
-      hy_tar->Fill(htar_y);
-      hz_tar->Fill(htar_z);
+      hx_tar->Fill(htar_x, FullWeight);
+      hy_tar->Fill(htar_y, FullWeight);
+      hz_tar->Fill(htar_z, FullWeight);
       
-      px_tar->Fill(ptar_x);
-      py_tar->Fill(ptar_y);
-      pz_tar->Fill(ptar_z);
+      px_tar->Fill(ptar_x, FullWeight);
+      py_tar->Fill(ptar_y, FullWeight);
+      pz_tar->Fill(ptar_z, FullWeight);
       	 
 
       //Hadron-Arm Target Reconstruction 
-      hytar->Fill(h_ytar);
-      hxptar->Fill(h_xptar);
-      hyptar->Fill(h_yptar);
-      hdelta->Fill(h_delta);
+      hytar->Fill(h_ytar, FullWeight);
+      hxptar->Fill(h_xptar, FullWeight);
+      hyptar->Fill(h_yptar, FullWeight);
+      hdelta->Fill(h_delta, FullWeight);
       
       //Hadron-Arm Focal Plane
-      hxfp->Fill(h_xfp);
-      hyfp->Fill(h_yfp);
-      hxpfp->Fill(h_xpfp);
-      hypfp->Fill(h_ypfp);
+      hxfp->Fill(h_xfp, FullWeight);
+      hyfp->Fill(h_yfp, FullWeight);
+      hxpfp->Fill(h_xpfp, FullWeight);
+      hypfp->Fill(h_ypfp, FullWeight);
       
       //Electron-Arm Target Reconstruction
-      eytar->Fill(e_ytar);
-      exptar->Fill(e_xptar);
-      eyptar->Fill(e_yptar);
-      edelta->Fill(e_delta);
+      eytar->Fill(e_ytar, FullWeight);
+      exptar->Fill(e_xptar, FullWeight);
+      eyptar->Fill(e_yptar, FullWeight);
+      edelta->Fill(e_delta, FullWeight);
       
       //Electron-Arm Focal Plane
-      exfp->Fill(e_xfp);
-      eyfp->Fill(e_yfp);
-      expfp->Fill(e_xpfp);
-      eypfp->Fill(e_ypfp);
+      exfp->Fill(e_xfp, FullWeight);
+      eyfp->Fill(e_yfp, FullWeight);
+      expfp->Fill(e_xpfp, FullWeight);
+      eypfp->Fill(e_ypfp, FullWeight);
 
       
       //Fill 2D HMS Focal Plane Quantities
-      h_xfp_vs_yfp->Fill(h_yfp, h_xfp);
-      e_xfp_vs_yfp->Fill(e_yfp, e_xfp);
+      h_xfp_vs_yfp->Fill(h_yfp, h_xfp, FullWeight);
+      e_xfp_vs_yfp->Fill(e_yfp, e_xfp, FullWeight);
 
       //Fill 2D reconstructed variables
-      hxptar_vs_exptar->Fill(e_xptar, h_xptar);
-      hyptar_vs_eyptar->Fill(e_yptar, h_yptar);
-      hdelta_vs_edelta->Fill(e_delta, h_delta);
+      hxptar_vs_exptar->Fill(e_xptar, h_xptar, FullWeight);
+      hyptar_vs_eyptar->Fill(e_yptar, h_yptar, FullWeight);
+      hdelta_vs_edelta->Fill(e_delta, h_delta, FullWeight);
 
       //Heep cross check
-      emiss_vs_pmiss->Fill(Pm, Em);
-      edelta_vs_eyptar->Fill(e_yptar, e_delta);
+      emiss_vs_pmiss->Fill(Pm, Em, FullWeight);
+      edelta_vs_eyptar->Fill(e_yptar, e_delta, FullWeight);
      	 
       //OPTICS CHECK (W / Em vs. electron arm)
-      W_vs_exfp->Fill(e_xfp, W);
-      W_vs_expfp->Fill(e_xpfp, W);
-      W_vs_eyfp->Fill(e_yfp, W);
-      W_vs_eypfp->Fill(e_ypfp, W);
+      W_vs_exfp->Fill(e_xfp, W, FullWeight);
+      W_vs_expfp->Fill(e_xpfp, W, FullWeight);
+      W_vs_eyfp->Fill(e_yfp, W, FullWeight);
+      W_vs_eypfp->Fill(e_ypfp, W, FullWeight);
       
-      W_vs_eytar->Fill(e_ytar, W);
-      W_vs_exptar->Fill(e_xptar, W);
-      W_vs_eyptar->Fill(e_yptar, W);
-      W_vs_edelta->Fill(e_delta, W);
+      W_vs_eytar->Fill(e_ytar, W, FullWeight);
+      W_vs_exptar->Fill(e_xptar, W, FullWeight);
+      W_vs_eyptar->Fill(e_yptar, W, FullWeight);
+      W_vs_edelta->Fill(e_delta, W, FullWeight);
 
-      Em_vs_exfp->Fill(e_xfp, Em);
-      Em_vs_expfp->Fill(e_xpfp, Em);
-      Em_vs_eyfp->Fill(e_yfp, Em);
-      Em_vs_eypfp->Fill(e_ypfp, Em);
+      Em_vs_exfp->Fill(e_xfp, Em, FullWeight);
+      Em_vs_expfp->Fill(e_xpfp, Em, FullWeight);
+      Em_vs_eyfp->Fill(e_yfp, Em, FullWeight);
+      Em_vs_eypfp->Fill(e_ypfp, Em, FullWeight);
       
-      Em_vs_eytar->Fill(e_ytar, Em);
-      Em_vs_exptar->Fill(e_xptar, Em);
-      Em_vs_eyptar->Fill(e_yptar, Em);
-      Em_vs_edelta->Fill(e_delta, Em);
+      Em_vs_eytar->Fill(e_ytar, Em, FullWeight);
+      Em_vs_exptar->Fill(e_xptar, Em, FullWeight);
+      Em_vs_eyptar->Fill(e_yptar, Em, FullWeight);
+      Em_vs_edelta->Fill(e_delta, Em, FullWeight);
       
       //OPTICS CHECK (W / Em vs. hadron arm)
-      W_vs_hxfp->Fill(h_xfp, W);
-      W_vs_hxpfp->Fill(h_xpfp, W);
-      W_vs_hyfp->Fill(h_yfp, W);
-      W_vs_hypfp->Fill(h_ypfp, W);
+      W_vs_hxfp->Fill(h_xfp, W, FullWeight);
+      W_vs_hxpfp->Fill(h_xpfp, W, FullWeight);
+      W_vs_hyfp->Fill(h_yfp, W, FullWeight);
+      W_vs_hypfp->Fill(h_ypfp, W, FullWeight);
       
-      W_vs_hytar->Fill(h_ytar, W);
-      W_vs_hxptar->Fill(h_xptar, W);
-      W_vs_hyptar->Fill(h_yptar, W);
-      W_vs_hdelta->Fill(h_delta, W);
+      W_vs_hytar->Fill(h_ytar, W, FullWeight);
+      W_vs_hxptar->Fill(h_xptar, W, FullWeight);
+      W_vs_hyptar->Fill(h_yptar, W, FullWeight);
+      W_vs_hdelta->Fill(h_delta, W, FullWeight);
 
-      Em_vs_hxfp->Fill(h_xfp, Em);
-      Em_vs_hxpfp->Fill(h_xpfp, Em);
-      Em_vs_hyfp->Fill(h_yfp, Em);
-      Em_vs_hypfp->Fill(h_ypfp, Em);
+      Em_vs_hxfp->Fill(h_xfp, Em, FullWeight);
+      Em_vs_hxpfp->Fill(h_xpfp, Em, FullWeight);
+      Em_vs_hyfp->Fill(h_yfp, Em, FullWeight);
+      Em_vs_hypfp->Fill(h_ypfp, Em, FullWeight);
       
-      Em_vs_hytar->Fill(h_ytar, Em);
-      Em_vs_hxptar->Fill(h_xptar, Em);
-      Em_vs_hyptar->Fill(h_yptar, Em);
-      Em_vs_hdelta->Fill(h_delta, Em);
+      Em_vs_hytar->Fill(h_ytar, Em, FullWeight);
+      Em_vs_hxptar->Fill(h_xptar, Em, FullWeight);
+      Em_vs_hyptar->Fill(h_yptar, Em, FullWeight);
+      Em_vs_hdelta->Fill(h_delta, Em, FullWeight);
       
+      Q2_vs_thnq->Fill(thbq/dtr, Q2, FullWeight);                    
+      Q2_vs_Pm->Fill(Pm, Q2, FullWeight);
     
   } //end entry loop
   

@@ -9,11 +9,25 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
   //TString simc_filename =  "weighted_ep_coin_simc_1854.root"; //"ep_coin_simc_1929.root";
   
   //Pre-defined SIMC/data root file names containing histogram object to comapare
-  TString simc_filename =  Form("D2simc_pm%d_laget%s_%s_set%d.root", pm, model.c_str(), rad.c_str(), set);
-  TString simcPWIA_filename =  Form("D2simc_pm%d_lagetpwia_%s_set%d.root", pm, rad.c_str(), set);
+  TString simc_filename;
+  TString simcPWIA_filename;
 
   //Data File
-  TString data_filename = Form("./D2data_pm%d_set%d.root",pm, set); 
+  TString data_filename; 
+  
+  if(set==-1){
+    simc_filename =  Form("D2simc_pm%d_laget%s_%s_total.root", pm, model.c_str(), rad.c_str());
+    simcPWIA_filename =  Form("D2simc_pm%d_lagetpwia_%s_total.root", pm, rad.c_str());
+    data_filename = Form("./D2data_pm%d_total.root",pm); 
+  }
+  
+  else{
+    simc_filename =  Form("D2simc_pm%d_laget%s_%s_set%d.root", pm, model.c_str(), rad.c_str(), set);
+    simcPWIA_filename =  Form("D2simc_pm%d_lagetpwia_%s_set%d.root", pm, rad.c_str(), set);
+    data_filename = Form("./D2data_pm%d_set%d.root",pm, set); 
+  }
+
+
 
   TString simc_path;
   TString simcPWIA_path;
@@ -267,16 +281,16 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
   simcPWIA_file->GetObject("cut_z_tarP", simc_ztarP_pwia);   
 
   //Set SIMC Histo Aesthetics
-  simc_xtar_pwia->SetLineColor(kBlack);
+  simc_xtar_pwia->SetLineColor(kBlue);
   simc_xtar_pwia->SetLineWidth(2);
-  simc_ytarH_pwia->SetLineColor(kBlack);
+  simc_ytarH_pwia->SetLineColor(kBlue);
   simc_ytarH_pwia->SetLineWidth(2);
-  simc_ztarH_pwia->SetLineColor(kBlack);
+  simc_ztarH_pwia->SetLineColor(kBlue);
   simc_ztarH_pwia->SetLineWidth(2);
 
-  simc_ytarP_pwia->SetLineColor(kBlack);          
+  simc_ytarP_pwia->SetLineColor(kBlue);          
   simc_ytarP_pwia->SetLineWidth(2);                   
-  simc_ztarP_pwia->SetLineColor(kBlack);                                          
+  simc_ztarP_pwia->SetLineColor(kBlue);                                          
   simc_ztarP_pwia->SetLineWidth(2); 
 
 
@@ -366,22 +380,22 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
   simcPWIA_file->GetObject("cut_hdelta", simc_hdelta_pwia);
 
   //Set SIMC Histo Aesthetics
-  simc_eytar_pwia->SetLineColor(kBlack);
+  simc_eytar_pwia->SetLineColor(kBlue);
   simc_eytar_pwia->SetLineWidth(2);
-  simc_exptar_pwia->SetLineColor(kBlack);
+  simc_exptar_pwia->SetLineColor(kBlue);
   simc_exptar_pwia->SetLineWidth(2);
-  simc_eyptar_pwia->SetLineColor(kBlack);
+  simc_eyptar_pwia->SetLineColor(kBlue);
   simc_eyptar_pwia->SetLineWidth(2);
-  simc_edelta_pwia->SetLineColor(kBlack);
+  simc_edelta_pwia->SetLineColor(kBlue);
   simc_edelta_pwia->SetLineWidth(2);
   
-  simc_hytar_pwia->SetLineColor(kBlack);
+  simc_hytar_pwia->SetLineColor(kBlue);
   simc_hytar_pwia->SetLineWidth(2);
-  simc_hxptar_pwia->SetLineColor(kBlack);
+  simc_hxptar_pwia->SetLineColor(kBlue);
   simc_hxptar_pwia->SetLineWidth(2);
-  simc_hyptar_pwia->SetLineColor(kBlack);
+  simc_hyptar_pwia->SetLineColor(kBlue);
   simc_hyptar_pwia->SetLineWidth(2);
-  simc_hdelta_pwia->SetLineColor(kBlack);
+  simc_hdelta_pwia->SetLineColor(kBlue);
   simc_hdelta_pwia->SetLineWidth(2);
 
 
@@ -472,22 +486,22 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
   simcPWIA_file->GetObject("cut_hypfp", simc_hypfp_pwia);
 
   //Set SIMC Histo Aesthetics
-  simc_exfp_pwia->SetLineColor(kBlack);
+  simc_exfp_pwia->SetLineColor(kBlue);
   simc_exfp_pwia->SetLineWidth(2);
-  simc_eyfp_pwia->SetLineColor(kBlack);
+  simc_eyfp_pwia->SetLineColor(kBlue);
   simc_eyfp_pwia->SetLineWidth(2);
-  simc_expfp_pwia->SetLineColor(kBlack);
+  simc_expfp_pwia->SetLineColor(kBlue);
   simc_expfp_pwia->SetLineWidth(2);
-  simc_eypfp_pwia->SetLineColor(kBlack);
+  simc_eypfp_pwia->SetLineColor(kBlue);
   simc_eypfp_pwia->SetLineWidth(2);
   
-  simc_hxfp_pwia->SetLineColor(kBlack);
+  simc_hxfp_pwia->SetLineColor(kBlue);
   simc_hxfp_pwia->SetLineWidth(2);
-  simc_hyfp_pwia->SetLineColor(kBlack);
+  simc_hyfp_pwia->SetLineColor(kBlue);
   simc_hyfp_pwia->SetLineWidth(2);
-  simc_hxpfp_pwia->SetLineColor(kBlack);
+  simc_hxpfp_pwia->SetLineColor(kBlue);
   simc_hxpfp_pwia->SetLineWidth(2);
-  simc_hypfp_pwia->SetLineColor(kBlack);
+  simc_hypfp_pwia->SetLineColor(kBlue);
   simc_hypfp_pwia->SetLineWidth(2);
 
 
@@ -638,52 +652,52 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
   simcPWIA_file->GetObject("cut_pmZ_q", simc_Pmz_pwia);
 
   //Set SIMC Histo Aesthetics
-  simc_Q2_pwia->SetLineColor(kBlack);
+  simc_Q2_pwia->SetLineColor(kBlue);
   simc_Q2_pwia->SetLineWidth(2);
-  simc_omega_pwia->SetLineColor(kBlack);
+  simc_omega_pwia->SetLineColor(kBlue);
   simc_omega_pwia->SetLineWidth(2);
-  simc_W2_pwia->SetLineColor(kBlack);
+  simc_W2_pwia->SetLineColor(kBlue);
   simc_W2_pwia->SetLineWidth(2);
-  simc_thq_pwia->SetLineColor(kBlack);
+  simc_thq_pwia->SetLineColor(kBlue);
   simc_thq_pwia->SetLineWidth(2);
   
-  simc_xbj_pwia->SetLineColor(kBlack);
+  simc_xbj_pwia->SetLineColor(kBlue);
   simc_xbj_pwia->SetLineWidth(2);
-  simc_th_elec_pwia->SetLineColor(kBlack);
+  simc_th_elec_pwia->SetLineColor(kBlue);
   simc_th_elec_pwia->SetLineWidth(2);
-  simc_kf_pwia->SetLineColor(kBlack);
+  simc_kf_pwia->SetLineColor(kBlue);
   simc_kf_pwia->SetLineWidth(2);
-  simc_emiss_pwia->SetLineColor(kBlack);
+  simc_emiss_pwia->SetLineColor(kBlue);
   simc_emiss_pwia->SetLineWidth(2);
   
-  simc_Pm_pwia->SetLineColor(kBlack);
+  simc_Pm_pwia->SetLineColor(kBlue);
   simc_Pm_pwia->SetLineWidth(2);
-  simc_Pf_pwia->SetLineColor(kBlack);
+  simc_Pf_pwia->SetLineColor(kBlue);
   simc_Pf_pwia->SetLineWidth(2);
-  simc_th_prot_pwia->SetLineColor(kBlack);
+  simc_th_prot_pwia->SetLineColor(kBlue);
   simc_th_prot_pwia->SetLineWidth(2);
-  simc_q_pwia->SetLineColor(kBlack);
+  simc_q_pwia->SetLineColor(kBlue);
   simc_q_pwia->SetLineWidth(2);
-  simc_thpq_pwia->SetLineColor(kBlack);
+  simc_thpq_pwia->SetLineColor(kBlue);
   simc_thpq_pwia->SetLineWidth(2);
-  simc_thnq_pwia->SetLineColor(kBlack);
+  simc_thnq_pwia->SetLineColor(kBlue);
   simc_thnq_pwia->SetLineWidth(2);
 
-  simc_MM_pwia->SetLineColor(kBlack);
+  simc_MM_pwia->SetLineColor(kBlue);
   simc_MM_pwia->SetLineWidth(2);
-  simc_En_pwia->SetLineColor(kBlack);
+  simc_En_pwia->SetLineColor(kBlue);
   simc_En_pwia->SetLineWidth(2);
-  simc_Ep_pwia->SetLineColor(kBlack);
+  simc_Ep_pwia->SetLineColor(kBlue);
   simc_Ep_pwia->SetLineWidth(2);
-  simc_Kn_pwia->SetLineColor(kBlack);
+  simc_Kn_pwia->SetLineColor(kBlue);
   simc_Kn_pwia->SetLineWidth(2);
-  simc_Kp_pwia->SetLineColor(kBlack);
+  simc_Kp_pwia->SetLineColor(kBlue);
   simc_Kp_pwia->SetLineWidth(2);
-  simc_Pmx_pwia->SetLineColor(kBlack);
+  simc_Pmx_pwia->SetLineColor(kBlue);
   simc_Pmx_pwia->SetLineWidth(2);
-  simc_Pmy_pwia->SetLineColor(kBlack);
+  simc_Pmy_pwia->SetLineColor(kBlue);
   simc_Pmy_pwia->SetLineWidth(2);
-  simc_Pmz_pwia->SetLineColor(kBlack);
+  simc_Pmz_pwia->SetLineColor(kBlue);
   simc_Pmz_pwia->SetLineWidth(2);
 
 
@@ -819,9 +833,14 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    leg8->AddEntry(simc_edelta,"SIMC: FSI");
    leg8->AddEntry(simc_edelta_pwia,"SIMC: PWIA");
    leg8->Draw();
-
-   c1->SaveAs(Form("eArm_TargRecon_pm%d_set%d.pdf", pm, set));
-
+   
+   if(set==-1){
+     c1->SaveAs(Form("eArm_TargRecon_pm%d_total.pdf", pm));
+   }
+   else{
+     c1->SaveAs(Form("eArm_TargRecon_pm%d_set%d.pdf", pm, set));
+   }
+   
    //------------------------------------------------------------------------------
 
    
@@ -878,8 +897,13 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    leg16->AddEntry(simc_eypfp_pwia,"SIMC: PWIA");
    leg16->Draw();
 
-   c2->SaveAs(Form("eArm_FocalPlane_pm%d_set%d.pdf", pm, set));                                                                                   
-
+   if(set==-1){
+     c2->SaveAs(Form("eArm_FocalPlane_pm%d_total.pdf", pm));                                                                                   
+   }
+   else{
+     c2->SaveAs(Form("eArm_FocalPlane_pm%d_set%d.pdf", pm, set));                                                                                   
+   }
+   
    //----------------------------------------------------------- 
  
    
@@ -962,9 +986,15 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    leg_Pmz->AddEntry(simc_Pmz_pwia,"SIMC: PWIA");
    leg_Pmz->Draw();
 
-   ck1->SaveAs(Form("Kinematics1_pm%d_set%d.pdf", pm, set));                                                                   
-
-
+                                                              
+   if(set==-1){
+      ck1->SaveAs(Form("Kinematics1_pm%d_total.pdf", pm));       
+   }
+   else{
+      ck1->SaveAs(Form("Kinematics1_pm%d_set%d.pdf", pm, set));       
+   }
+   
+ 
    //Kinematics 2:  Electron Kinematics
 
    //Set Legend
@@ -986,7 +1016,6 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    data_Q2->GetXaxis()->CenterTitle();
    simc_Q2->Draw();
    simc_Q2_pwia->Draw("sames");
-   simc_Q2_pwia->Draw("SAMES");
    data_Q2->Draw("sameshist");
    leg_Q2->AddEntry(data_Q2,"Data", "f");
    leg_Q2->AddEntry(simc_Q2,"SIMC: FSI");
@@ -1070,8 +1099,13 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    leg_q->AddEntry(simc_q_pwia,"SIMC: PWIA");
    leg_q->Draw();
 
-   ck2->SaveAs(Form("Kinematics2_pm%d_set%d.pdf", pm, set));                                                                   
-
+   if(set==-1){
+     ck2->SaveAs(Form("Kinematics2_pm%d_total.pdf", pm));                      
+  }
+   else{
+      ck2->SaveAs(Form("Kinematics2_pm%d_set%d.pdf", pm, set));                      
+   }
+ 
 
    
    //Kinematics 3: Proton Kinematics
@@ -1180,8 +1214,14 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    leg_thnq->AddEntry(simc_thnq_pwia,"SIMC: PWIA");
    leg_thnq->Draw();
 
-   ck3->SaveAs(Form("Kinematics3_pm%d_set%d.pdf", pm, set));                                                                   
-                                                               
+   
+   if(set==-1){
+     ck3->SaveAs(Form("Kinematics3_pm%d_total.pdf", pm));    
+   }
+   else{
+     ck3->SaveAs(Form("Kinematics3_pm%d_set%d.pdf", pm, set));    
+   }                                                         
+
 
  //-----------------PLOT TARGET  Variables SIMC/Data comparison-----------------------
 
@@ -1225,7 +1265,14 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    leghzt->AddEntry(simc_ztarH_pwia,"SIMC: PWIA");
    leghzt->Draw();
   
-   c4a->SaveAs(Form("hArm_TargVar_pm%d_set%d.pdf", pm, set));                                                                                              
+                                                                                         
+   if(set==-1){
+     c4a->SaveAs(Form("hArm_TargVar_pm%d_total.pdf", pm));        
+   }
+   else{
+     c4a->SaveAs(Form("hArm_TargVar_pm%d_set%d.pdf", pm, set));        
+   }
+   
 
    TCanvas *c4b = new TCanvas("c4b", "SHMS Target Variables", 5000, 3000);
    c4b->Divide(3,1);
@@ -1256,8 +1303,16 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    legpzt->AddEntry(simc_ztarP,"SIMC: FSI");
    legpzt->AddEntry(simc_ztarP_pwia,"SIMC: PWIA");
    legpzt->Draw();
-  
-   c4b->SaveAs(Form("pArm_TargVar_pm%d_set%d.pdf", pm, set));      
+     
+   if(set==-1){
+     c4b->SaveAs(Form("pArm_TargVar_pm%d_total.pdf", pm));      
+   }
+	
+   else{
+     c4b->SaveAs(Form("pArm_TargVar_pm%d_set%d.pdf", pm, set));      
+   }
+
+
    //--------PLOT HADRON ARM QUANTITIES--------
 
 
@@ -1311,8 +1366,12 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    htr_l4->AddEntry(simc_hdelta_pwia,"SIMC: PWIA");
    htr_l4->Draw();
 
-   htr->SaveAs(Form("hArm_TargRecon_pm%d_set%d.pdf", pm, set));
-
+   if(set==-1){
+     htr->SaveAs(Form("hArm_TargRecon_pm%d_total.pdf", pm));
+   }
+   else{
+     htr->SaveAs(Form("hArm_TargRecon_pm%d_set%d.pdf", pm, set));
+   }
    //------------------------------------------------------------------------------
 
    
@@ -1363,8 +1422,12 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
    hfp_l4->AddEntry(simc_hypfp_pwia,"SIMC: PWIA");
    hfp_l4->Draw();
 
-   hfp->SaveAs(Form("hArm_FocalPlane_pm%d_set%d.pdf", pm, set));                                                                                   
-
+   if(set==-1){
+     hfp->SaveAs(Form("hArm_FocalPlane_pm%d_total.pdf", pm));                                                                                   
+   }
+   else{
+     hfp->SaveAs(Form("hArm_FocalPlane_pm%d_set%d.pdf", pm, set));                                                                                   
+   }
    //----------------------------------------------------------- 
  
   

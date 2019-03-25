@@ -23,7 +23,7 @@ static const Double_t me = 0.00051099;
 // D E F I N E    H I S T O G R A M    B I N N I N G
 //=====================================================
 
-Double_t nbins = 30;
+Double_t nbins = 30;  //30 for 580/750 MeV
 
 
 //----------Kinematic Quantities---------
@@ -260,12 +260,12 @@ Double_t xbj_xmax = 1.5;
 
 //Pm = 580
 //Missing Mass                                       
-Double_t Mm_nbins = 50;                                          
+Double_t Mm_nbins = 30;                                          
 Double_t Mm_xmin = 0.9;    
 Double_t Mm_xmax = 0.985;    
 
 //Emiss                                    
-Double_t Em_nbins = 80; 
+Double_t Em_nbins = 70; 
 Double_t Em_xmin = -0.1;                       
 Double_t Em_xmax = 0.1;  
 
@@ -285,17 +285,17 @@ Double_t Pmz_nbins = 40.;
 Double_t Pmz_xmin = -2.;                       
 Double_t Pmz_xmax = 2.; 
 
-Double_t exfp_xmin = -40.;
-Double_t exfp_xmax = 40.;
+Double_t exfp_xmin = -15.;
+Double_t exfp_xmax = 15.;
 
-Double_t eyfp_xmin = -40.;
-Double_t eyfp_xmax = 40.;
+Double_t eyfp_xmin = -15.;
+Double_t eyfp_xmax = 15.;
 
 Double_t expfp_xmin = -0.1;
 Double_t expfp_xmax = 0.1;
 
-Double_t eypfp_xmin = -0.1;
-Double_t eypfp_xmax = 0.1;
+Double_t eypfp_xmin = -0.05;
+Double_t eypfp_xmax = 0.05;
 
 Double_t edelta_xmin = -5.;
 Double_t edelta_xmax = 15;
