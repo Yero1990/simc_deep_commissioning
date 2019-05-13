@@ -8,13 +8,13 @@ void carbon_check()
  //Define Central Angle for HMS/SHMS
   Double_t ptheta_cent = 8.938 * TMath::Pi()/180.;   //3289: 12.194, 3255:12.2  deg
   Double_t xBPM_tar =0.026621;   //Projected beam position at target in cm (EPICS Coordinate System, +x beam right)
-  Double_t yBPM_tar =0.017114;
+  Double_t yBPM_tar =0.017116;
   //SHMS X Mispointing   : -0.126000 cm
   //SHMS Y Mispointing   : -0.060000 cm
 
   //Read DATA ROOTfiles
   //TString filename =Form("../../../hallc_replay/ROOTfiles/shms_coin_replay_deep_check_%d_50000_ZtarOrg.root",run);        
-  TString filename ="../../../hallc_replay/ROOTfiles/shms_coin_replay_heep_check_3286_-1_oldMatrix.root";                                                
+  TString filename ="../../../hallc_replay/ROOTfiles/coin_replay_heep_check_3286_-1.root";                                                
 
   TFile *data_file = new TFile(filename, "READ"); 
   TTree *T = (TTree*)data_file->Get("T");
@@ -168,11 +168,11 @@ void carbon_check()
   Double_t  kf;
   
 
-  T->SetBranchAddress("P.kin.scat_ang_rad",&theta_e);
-  T->SetBranchAddress("P.kin.W",&W);
-  T->SetBranchAddress("P.kin.Q2",&Q2);
-  T->SetBranchAddress("P.kin.x_bj",&X);
-  T->SetBranchAddress("P.kin.nu",&nu);
+  T->SetBranchAddress("P.kin.primary.scat_ang_rad",&theta_e);
+  T->SetBranchAddress("P.kin.primary.W",&W);
+  T->SetBranchAddress("P.kin.primary.Q2",&Q2);
+  T->SetBranchAddress("P.kin.primary.x_bj",&X);
+  T->SetBranchAddress("P.kin.primary.nu",&nu);
   T->SetBranchAddress("P.gtr.p",&kf);
 
 
@@ -241,7 +241,7 @@ void carbon_check()
     
 
 
-    c_edelta = e_delta>-12.&&e_delta<22.;
+    c_edelta = e_delta>3.5&&e_delta<8.5;
     
     //APPLY CUTS: BEGIN CUTS LOOP
     if (pcal_etotnorm>0.6&&c_edelta)

@@ -384,9 +384,9 @@ void compare_deep(int set, int pm, string model, string rad)
   simc_file->GetObject("cut_Ep", simc_Ep);
   simc_file->GetObject("cut_Kn", simc_Kn);
   simc_file->GetObject("cut_Kp", simc_Kp);
-  simc_file->GetObject("cut_pmX_q", simc_Pmx);
-  simc_file->GetObject("cut_pmY_q", simc_Pmy);
-  simc_file->GetObject("cut_pmZ_q", simc_Pmz);
+  simc_file->GetObject("cut_pmxq_v2", simc_Pmx);
+  simc_file->GetObject("cut_pmyq_v2", simc_Pmy);
+  simc_file->GetObject("cut_pmzq_v2", simc_Pmz);
 
   //Set SIMC Histo Aesthetics
   simc_Q2->SetLineColor(kRed);

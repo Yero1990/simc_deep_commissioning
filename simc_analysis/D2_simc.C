@@ -2,6 +2,15 @@
 
 #include "set_deep_histos.h"
 
+//Define Prototypes for Auxiliary Functions
+void GeoToSph( Double_t  th_geo, Double_t  ph_geo,
+	       Double_t& th_sph, Double_t& ph_sph);
+
+void SetCentralAngles(Double_t th_cent, Double_t ph_cent);
+
+void TransportToLab( Double_t p, Double_t xptar, Double_t yptar,
+		     TVector3& pvect );  
+
 void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 {
 
@@ -23,7 +32,7 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   Double_t t_LT = 1.;
 
   if (Qnorm){
-  if(set==0&&Pmiss==80){
+  if(set==1&&Pmiss==80){
     
     charge_factor = 142.553;   //BCM4A
     
@@ -123,9 +132,9 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 
   TString filename; 
 
-  filename = Form("../worksim_voli/d2_pm%d_laget%s_rad_set%d.root", Pmiss, model.c_str(), set);
+  filename = Form("../worksim_voli/d2_pm%d_laget%s_%s_set%d.root", Pmiss, model.c_str(), rad.c_str(), set);
   
-  if(set==-1){ filename = Form("../worksim_voli/d2_pm%d_laget%s_rad_total.root", Pmiss, model.c_str());}
+  if(set==-1){ filename = Form("../worksim_voli/d2_pm%d_laget%s_%s_total.root", Pmiss, model.c_str(), rad.c_str());}
 
  
  TFile *data_file = new TFile(filename, "READ"); 
@@ -337,6 +346,7 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   TH1F *cut_MM2 = new TH1F("cut_MM2", "Missing Mass Squared, MM2", MM2_nbins, MM2_xmin, MM2_xmax );
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+  TH1F *cut_pm_v2 = new TH1F("cut_pm_v2","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
   TH1F *cut_Kred = new TH1F("cut_Kred","Pmiss*K_{red} =[ E_{p}P_{p}/(2#pi)^{3}] #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
   TH1F *cut_pm_red = new TH1F("cut_pm_red","Reduced Cross Section, #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
   TH1F *cut_pm_red2 = new TH1F("cut_pm_red2","Reduced Cross Section, #sigma_{cc}", Pm_nbins, Pm_xmin, Pm_xmax); 
@@ -347,6 +357,7 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   cut_Kred->Sumw2();
   cut_pm_red->Sumw2();
   cut_pm_red2->Sumw2();
+  cut_pm_v2->Sumw2();
 
   TH1F *cut_pmX_lab = new TH1F("cut_pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
   TH1F *cut_pmY_lab = new TH1F("cut_pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
@@ -380,9 +391,15 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 
   TH1F *cut_Mmiss = new TH1F("cut_Mmiss","Missing Mass", Mm_nbins, Mm_xmin, Mm_xmax);         
   TH1F *cut_Erecoil = new TH1F("cut_Erecoil","Recoil Neutron Energy", En_nbins, En_xmin, En_xmax);   
-  TH1F *cut_pmx = new TH1F("cut_pmx","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);            
-  TH1F *cut_pmy = new TH1F("cut_pmy","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);                                                                             
-  TH1F *cut_pmz = new TH1F("cut_pmz","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);                    
+  
+  TH1F *cut_pmxL_v2 = new TH1F("cut_pmxL_v2","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);            
+  TH1F *cut_pmyL_v2 = new TH1F("cut_pmyL_v2","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);                                                                             
+  TH1F *cut_pmzL_v2 = new TH1F("cut_pmzL_v2","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);                    
+   
+  TH1F *cut_pmxq_v2 = new TH1F("cut_pmxq_v2","Pmx missing momentum", Pmx_nbins, Pmx_xmin, Pmx_xmax);            
+  TH1F *cut_pmyq_v2 = new TH1F("cut_pmyq_v2","Pmy missing momentum", Pmy_nbins, Pmy_xmin, Pmy_xmax);                                                                             
+  TH1F *cut_pmzq_v2 = new TH1F("cut_pmzq_v2","Pmz missing momentum", Pmz_nbins, Pmz_xmin, Pmz_xmax);                    
+ 
   TH1F *cut_KinN = new TH1F("cut_Kn","Neutron Kin. Energy", Kn_nbins, Kn_xmin, Kn_xmax);                        
   TH1F *cut_KinP = new TH1F("cut_Kp","Proton Kin. Energy", Kp_nbins, Kp_xmin, Kp_xmax);    
   TH1F *cut_E_p = new TH1F("cut_Ep","Proton Final Energy", Ep_nbins, Ep_xmin, Ep_xmax);  
@@ -512,6 +529,11 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 
   TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "Q2 vs. #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax, Q2_nbins, Q2_xmin, Q2_xmax);         
   TH2F *cut_Q2_vs_Pm = new TH2F("cut_Q2_vs_Pm", "Q2 vs. Pm", Pm_nbins, Pm_xmin, Pm_xmax, Q2_nbins, Q2_xmin, Q2_xmax);  
+
+  //Solid Angle Acceptance Plots                                                                                                                                           
+  TH2F *cut_exptar_vs_eyptar = new TH2F("cut_exptar_vs_eyptar", "SHMS eX'_{tar} vs. eY'_{tar}", eyptar_nbins, eyptar_xmin, eyptar_xmax, exptar_nbins, exptar_xmin, exptar_xmax);             
+  TH2F *cut_hxptar_vs_hyptar = new TH2F("cut_hxptar_vs_hyptar", "HMS hX'_{tar} vs. hY'_{tar}", hyptar_nbins, hyptar_xmin, hyptar_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);              
+  
   
   Float_t  Normfac;
   Float_t  h_delta;
@@ -654,8 +676,41 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   SNT->SetBranchAddress("SF_weight_recon", &SF_weight_recon);
   SNT->SetBranchAddress("h_Thf", &h_Thf);
   SNT->SetBranchAddress("Ein_v", &Ein_v);
+
+  //Declare Neccessary Variables to Determine the 4-Momentum of Recoil System
+  TLorentzVector fP0;           // Beam 4-momentum
+  TLorentzVector fP1;           // Scattered electron 4-momentum
+  TLorentzVector fA;            // Target 4-momentum
+  TLorentzVector fA1;           // Final system 4-momentum
+  TLorentzVector fQ;            // Momentum transfer 4-vector
+  TLorentzVector fX;            // Detected secondary particle 4-momentum (GeV)
+  TLorentzVector fB;            // Recoil system 4-momentum (GeV)
+
+  TVector3 Pf_vec;
+  TVector3 kf_vec;
+
   
+  //Central in-plane (th) and out-of-plane (ph) (should be zero for both spectrometers)
+  Double_t h_th = -38.896;    //the neg. sign indicates which side of the beam pipe the spec. is on (- means beam right)
+  Double_t h_ph = 0.;
   
+  Double_t e_th = 12.194;
+  Double_t e_ph = 0.;
+
+
+
+
+  //Declare necessary variables for rotaion from +z to +q
+  TVector3 qvec(0.,0.,0.);
+  TVector3 kfvec(0.,0.,0.);
+  TRotation rot_to_q;
+  TVector3 bq(0.,0.,0.);   //recoil system in lab frame (Pmx, Pmy, Pmz)
+  TVector3 p_miss_q(0.,0.,0.);   //recoil system in q-frame
+  Double_t Pm_alt;
+
+
+
+
   //Define Additional Kinematic Variables
   Double_t Eb = 10.6005;  //GeV Beam Energy
   Double_t W2;             //Invarianrt Mass Squared
@@ -675,6 +730,18 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   Double_t th_nq;       //Angle between q-vector and neutron
   Double_t th_q;         //Angle between q-vector and beamline (+z axis --lab)
   Double_t th_pq;          //version 2 of theta_pq
+  Double_t qx, qy, qz;
+  Double_t kfx, kfy, kfz;
+  Double_t Pmx_v2, Pmy_v2, Pmz_v2, Pm_v2;
+  Double_t PmPer_v2, PmOop_v2, PmPar_v2;
+
+
+
+  //Define Histograms for Emiss cut study                                                                                                                                           
+  TH1F *pm_noemcut = new TH1F("pm_noemcut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax);                                                                                         
+  TH1F *pm_em30cut = new TH1F("pm_em30cut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax);                                                                                
+  TH1F *pm_em60cut = new TH1F("pm_em60cut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax);                                                                                        
+  TH1F *pm_em90cut = new TH1F("pm_em90cut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax); 
 
   //Determine Full Weight Quantities (Assume one for heep check)
   Double_t FullWeight;
@@ -695,8 +762,13 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   Bool_t c_th_nq;
   Bool_t c_MM;
 
-  Bool_t c_general;  //c_Em&&c_hdelta&&c_edelta
-  Bool_t c_kin;      //kinematic cuts to selec PWIA region
+  //Acceptance Cuts                                                                                                                                
+  Bool_t c_exptar;                                                                                                                                    
+  Bool_t c_eyptar;                                                                                                                               
+  Bool_t c_hxptar;                                                                                                            
+  Bool_t c_hyptar;                                                                                                                    
+  Bool_t c_eSolid;                                                                                                                          
+  Bool_t c_hSolid; 
 
   //=======================
   // E N T R Y    L O O P
@@ -709,14 +781,16 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
     SNT->GetEntry(i);
    
     //If cross section sigma = 0, continue to next event
-    if(sig==0) continue;
+    //    if(sig==0) continue;
 
- 
+
+
+
     //-----Define Additional Kinematic Variables--------
     Ein = Ein / 1000.;   //This beam energy has Eloss, therefore, it is slightly smaller than 10.6005 (10.5992)
     W2 = W*W;
     ki = sqrt(Ein*Ein - me*me);    //use beam energy without Eloss corrections, as they are NOT done in data as well                       
-    kf = e_pf/1000.;
+    kf = e_pf/1000.;               //final electron momentum magnitude
     Ee = sqrt(me*me + kf*kf);
     Pf = h_pf/1000.;
     En = sqrt(MN*MN + Pm*Pm);
@@ -726,26 +800,64 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
     th_q = acos( (ki - kf*cos(theta_e))/q ); //th_q = theta_p + theta_pq;
     th_pq =  th_q - theta_p;
     th_nq = acos((q - Pf*cos(th_pq))/Pm);
-
     MM = TMath::Sqrt( TMath::Power(nu+MD-sqrt(MP*MP+Pf*Pf),2) - Pm*Pm );
-    //MM = TMath::Sqrt( Em*Em - Pm*Pm );
-
     MM_2 = MM*MM;
-
     Kp = Ep - MP;
     Kn = En - MN;
+        
+
     
+    //Calculate electron final momentum 3-vector
+    SetCentralAngles(e_th, e_ph);
+    TransportToLab(kf, e_xptar, e_yptar, kf_vec);
+
+
+    //Calculate 4-Vectors
+    fP0.SetXYZM(0.0, 0.0, ki, me);  //set initial e- 4-momentum
+    fP1.SetXYZM(kf_vec.X(), kf_vec.Y(), kf_vec.Z(), me);  //set final e- 4-momentum
+    fA.SetXYZM(0.0, 0.0, 0.0, MD);  //Set initial target at rest
+    fQ = fP0 - fP1;
+    fA1 = fA + fQ;   //final target (sum of final hadron four momenta)
+
+    //Get Detected Particle 4-momentum
+    SetCentralAngles(h_th, h_ph);
+    TransportToLab(Pf, h_xptar, h_yptar, Pf_vec);
+    fX.SetVectM(Pf_vec, MP);    //SET FOUR VECTOR OF detected particle
+    fB = fA1 - fX;   //4-MOMENTUM OF UNDETECTED PARTICLE 
+
+    Pmx_v2 = fB.X();
+    Pmy_v2 = fB.Y(); 
+    Pmz_v2 = fB.Z(); 
+
+    Pm_v2 = sqrt(Pmx_v2*Pmx_v2 + Pmy_v2*Pmy_v2 + Pmz_v2*Pmz_v2);
+
+    //--------Rotate the recoil system from +z to +q-------
+    qvec = fQ.Vect();
+    kfvec = fP1.Vect();
+
+    rot_to_q.SetZAxis( qvec, kfvec).Invert();
+
+    bq = fB.Vect();
+    
+    bq *= rot_to_q;
+    p_miss_q = -bq;
+
+    PmPar_v2 = p_miss_q.Z();
+    PmPer_v2 = p_miss_q.X();
+    PmOop_v2 = p_miss_q.Y();
 
     //Define cuts
     c_Em = Em<0.04;
+    c_exptar = abs(e_xptar)<0.025; 
+    c_eyptar = e_yptar > -0.027 && e_yptar < 0.027;                  
+    c_eSolid = c_exptar&&c_eyptar; 
     c_hdelta = h_delta > -8. && h_delta < 8.;
-    c_edelta = e_delta > -10. && h_delta < 22.;
-    c_Q2 = Q2 >=4.0;
+    c_edelta = e_delta > -2.7 && e_delta < 2.7;
+    c_Q2 = Q2 >4.2;
     c_th_nq = (th_nq/dtr) >= 35. &&  (th_nq/dtr) <=45. ;
-    //c_th_nq = (th_nq/dtr) >= 55. &&  (th_nq/dtr) <=65. ;
-    //c_th_nq = (th_nq/dtr) >= 45. &&  (th_nq/dtr) <=55. ;
-
-    //    c_MM = MM > 0.92 && MM < 0.96;
+    c_th_nq = (th_nq/dtr) >= 55. &&  (th_nq/dtr) <=65. ;
+    c_th_nq = (th_nq/dtr) >= 45. &&  (th_nq/dtr) <=55. ;
+    c_MM = MM > 0.92 && MM < 0.96;
 
     //Full Weight
     FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/nentries;
@@ -763,16 +875,13 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
     red_xsec_simc2 = Weight / (red_xsec_factor);
 
 
-
-    //    cout << "Full Weight = " << FullWeight << endl;
+    // cout << "Full Weight = " << FullWeight << endl;
     // cout << "Sig = " << sig << endl;
     //cout << "FPS = " << Fps << endl;
 
-    if(set==-1&&Pmiss==580){  FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/(nentries); }  //Multiply by 2 mC, since we added 2 rootfiles, each with 1 mC
-    if(set==-1&&Pmiss==750){  FullWeight = (Normfac*Weight*charge_factor*e_trkEff*h_trkEff*t_LT)/(nentries); }  //Multiply by 3 mC, since we added 2 rootfiles, each with 1 mC
 
     //APPLY CUTS: BEGIN CUTS LOOP
-      if (c_Em&&c_hdelta&&c_edelta&&c_th_nq&&c_Q2)
+      if (c_Em&&c_hdelta&&c_edelta)
 	{
 
 	  //Fill Phase Space
@@ -797,14 +906,23 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
 	  cut_pm->Fill(Pm, FullWeight);
-	  	  
-	  cut_pmX_lab->Fill(Pmx, FullWeight);
+	  cut_pm_v2->Fill(Pm_v2, FullWeight);
+
+	  cut_pmX_lab->Fill(-Pmx, FullWeight);
 	  cut_pmY_lab->Fill(Pmy, FullWeight);
 	  cut_pmZ_lab->Fill(Pmz, FullWeight);
-	  
-	  cut_pmX_q->Fill(-PmPer, FullWeight);
+
+	  cut_pmxL_v2->Fill(Pmx_v2, FullWeight);
+	  cut_pmyL_v2->Fill(Pmy_v2, FullWeight);
+	  cut_pmzL_v2->Fill(Pmz_v2, FullWeight);
+
+	  cut_pmX_q->Fill(PmPer, FullWeight);
 	  cut_pmY_q->Fill(PmOop, FullWeight);
 	  cut_pmZ_q->Fill(PmPar, FullWeight);
+
+	  cut_pmxq_v2->Fill(PmPer_v2, FullWeight);
+	  cut_pmyq_v2->Fill(PmOop_v2, FullWeight);
+	  cut_pmzq_v2->Fill(PmPar_v2, FullWeight);
 
 	  cut_Q_2->Fill(Q2, FullWeight);
 	  cut_omega->Fill(nu, FullWeight);
@@ -947,6 +1065,10 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
 
 	  cut_Q2_vs_thnq->Fill(th_nq/dtr, Q2, FullWeight);
 	  cut_Q2_vs_Pm->Fill(Pm, Q2, FullWeight);
+
+	  //Solid Angle Acceptance                                                                                                    
+          cut_exptar_vs_eyptar->Fill(e_yptar, e_xptar, FullWeight);                                                              
+          cut_hxptar_vs_hyptar->Fill(h_yptar, h_xptar, FullWeight); 
 
 	}//End CUTS LOOP
 
@@ -1121,7 +1243,22 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
       
       Q2_vs_thnq->Fill(th_nq/dtr, Q2, FullWeight);                                                                                                                  
       Q2_vs_Pm->Fill(Pm, Q2, FullWeight); 
-      
+
+
+      //Missing Energy Study                                                                                                                                                             
+      if (c_hdelta&&c_edelta&&c_eSolid){                                                                                                                                                   
+	pm_noemcut->Fill(Pm, FullWeight);                                                                                                                                                   
+      }                                                                                                                                                                             
+      if (c_hdelta&&c_edelta&&c_eSolid&&Em<0.03){                                                                                                                                          
+        pm_em30cut->Fill(Pm, FullWeight);                                                                                                                                               
+      }                                                                                                                                                                                             
+      if (c_hdelta&&c_edelta&&c_eSolid&&Em<0.06){                                                                                                                                                      
+        pm_em60cut->Fill(Pm, FullWeight);                                                                                                                                                           
+      }                                                                                                                                                                                          
+      if (c_hdelta&&c_edelta&&c_eSolid&&Em<0.09){                                                                                                                                                      
+        pm_em90cut->Fill(Pm, FullWeight);                                                                                                                                                           
+      } 
+     
   } //end entry loop
 
   
@@ -1129,4 +1266,53 @@ void D2_simc(int set, int Pmiss, string model, string rad, bool Qnorm=false)
   outROOT->Write();
 
   
+}
+
+
+
+//Define Auxiliary Functions
+
+  void GeoToSph( Double_t  th_geo, Double_t  ph_geo,
+		 Double_t& th_sph, Double_t& ph_sph){
+
+  // Convert geographical to spherical angles. Units are rad.
+
+  static const Double_t twopi = 2.0*TMath::Pi();
+  Double_t ct = cos(th_geo), cp = cos(ph_geo);
+  Double_t tmp = ct*cp;
+  th_sph = acos( tmp );
+  tmp = sqrt(1.0 - tmp*tmp);
+  ph_sph = (fabs(tmp) < 1e-6 ) ? 0.0 : acos( sqrt(1.0-ct*ct)*cp/tmp );
+  if( th_geo/twopi-floor(th_geo/twopi) > 0.5 ) ph_sph = TMath::Pi() - ph_sph;
+  if( ph_geo/twopi-floor(ph_geo/twopi) > 0.5 ) ph_sph = -ph_sph;
+  }
+
+  void SetCentralAngles(Double_t th_cent, Double_t ph_cent)
+  {
+
+
+
+    fThetaGeo = TMath::DegToRad()*th_cent; fPhiGeo = TMath::DegToRad()*ph_cent;
+    GeoToSph( fThetaGeo, fPhiGeo, fThetaSph, fPhiSph );
+    fSinThGeo = TMath::Sin( fThetaGeo ); fCosThGeo = TMath::Cos( fThetaGeo );
+    fSinPhGeo = TMath::Sin( fPhiGeo );   fCosPhGeo = TMath::Cos( fPhiGeo );
+    Double_t st, ct, sp, cp;
+    st = fSinThSph = TMath::Sin( fThetaSph ); ct = fCosThSph = TMath::Cos( fThetaSph );
+    sp = fSinPhSph = TMath::Sin( fPhiSph );   cp = fCosPhSph = TMath::Cos( fPhiSph );
+    
+    Double_t norm = TMath::Sqrt(ct*ct + st*st*cp*cp);
+    TVector3 nx( st*st*sp*cp/norm, -norm, st*ct*sp/norm );
+    TVector3 ny( ct/norm,          0.0,   -st*cp/norm   );
+    TVector3 nz( st*cp,            st*sp, ct            );
+    
+    fToLabRot.SetToIdentity().RotateAxes( nx, ny, nz );
+  }
+
+
+void TransportToLab( Double_t p, Double_t xptar, Double_t yptar,
+		     TVector3& pvect) 
+{
+  TVector3 v( xptar, yptar, 1.0 );
+  v *= p/TMath::Sqrt( 1.0+xptar*xptar+yptar*yptar );
+  pvect = fToLabRot * v;
 }

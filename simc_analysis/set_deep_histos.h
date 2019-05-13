@@ -9,6 +9,7 @@
 TString hadron_arm="HMS";
 TString electron_arm = "SHMS";
 
+
 // define some constants
 static const Double_t pi = 3.141592654;
 static const Double_t dtr = pi/180.;
@@ -23,7 +24,7 @@ static const Double_t me = 0.00051099;
 // D E F I N E    H I S T O G R A M    B I N N I N G
 //=====================================================
 
-Double_t nbins = 30;  //30 for 580/750 MeV
+Double_t nbins = 100;  //30 for 580/750 MeV
 
 
 //----------Kinematic Quantities---------
@@ -168,7 +169,7 @@ Double_t eypfp_nbins = nbins;
 
 
 
-/*
+
 //Pmiss = 80 MeV
 //Missing Mass          
 Double_t Mm_nbins = 50;                                       
@@ -255,9 +256,10 @@ Double_t En_xmax = 0.96;
 
 Double_t xbj_xmin = 0.5;                                                                
 Double_t xbj_xmax = 1.5; 
-*/
 
 
+
+/*
 //Pm = 580
 //Missing Mass                                       
 Double_t Mm_nbins = 30;                                          
@@ -273,15 +275,15 @@ Double_t Pm_nbins = 40;    //40 MeV bin width
 Double_t Pm_xmin = 0.1;     
 Double_t Pm_xmax = 1.5;  
 
-Double_t Pmx_nbins = 40.;  
+Double_t Pmx_nbins = 100.;  
 Double_t Pmx_xmin = -2.;                        
 Double_t Pmx_xmax = 2.;   
 
-Double_t Pmy_nbins = 40.;  
+Double_t Pmy_nbins = 100.;  
 Double_t Pmy_xmin = -2.;                        
 Double_t Pmy_xmax = 2.; 
 
-Double_t Pmz_nbins = 40.;  
+Double_t Pmz_nbins = 100.;  
 Double_t Pmz_xmin = -2.;                       
 Double_t Pmz_xmax = 2.; 
 
@@ -343,6 +345,20 @@ Double_t En_xmax = 2.;
 
 Double_t xbj_xmin = 0.5;    
 Double_t xbj_xmax = 2.0; 
+
+*/
+
+
+
+//Variables Used in Auxiliary Function
+TRotation       fToLabRot;              //Rotation matrix from TRANSPORT to lab
+Double_t        fThetaGeo;              //In-plane geographic central angle (rad)
+Double_t        fPhiGeo;                //Out-of-plane geographic central angle (rad)
+Double_t        fThetaSph, fPhiSph;     //Central angles in spherical coords. (rad)
+Double_t        fSinThGeo, fCosThGeo;   //Sine and cosine of central angles
+Double_t        fSinPhGeo, fCosPhGeo;   // in geographical coordinates
+Double_t        fSinThSph, fCosThSph;   //Sine and cosine of central angles in 
+Double_t        fSinPhSph, fCosPhSph;   // spherical coordinates
 
 
 #endif

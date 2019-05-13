@@ -109,7 +109,7 @@ void get_normfac(string ifile)
   string line;
   string found;
   size_t pos;
-  file.open (ifile); 
+  file.open (ifile.c_str()); 
 
   //find the line containing normfac
   while (getline(file, line))    //6 being the 6th line
@@ -124,7 +124,7 @@ void get_normfac(string ifile)
 
   //write to file
   ofile.open("normfact.data", std::fstream::out);
-  ofile << found;
+  ofile << found << endl;
   ofile.close();
   
 }

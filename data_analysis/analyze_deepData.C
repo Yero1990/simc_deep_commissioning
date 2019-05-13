@@ -20,11 +20,20 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
 
     if(set==0&&Pmiss==80){                                                                                                           
                                                                                                                                               
+      charge_factor = 38.549;   //BCM4A                                                                                                        
+      c_LT = 0.981919;          //computer live time                                                                              
+      t_LT = 0.931061;          //total live time               
+      e_trkEff = 0.9691;       //shms e- trk eff                                                          
+      h_trkEff = 0.9919;        //hms had trk eff
+    }
+
+    if(set==1&&Pmiss==80){                                                                                                           
+                                                                                                                                              
       charge_factor = 142.553;   //BCM4A                                                                                                                                                                                   
       c_LT = 0.97881;          //computer live time                                                                              
       t_LT = 0.909529;          //total live time                                                                                                                                                                                                       
-      e_trkEff = 0.966524;       //shms e- trk eff                                                          
-      h_trkEff = 0.989003;        //hms had trk eff
+      e_trkEff = 0.9650;       //shms e- trk eff                                                          
+      h_trkEff = 0.9890;        //hms had trk eff
     }
 
     //Combined 580 data sets 
@@ -115,8 +124,8 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
 }
   //Read DATA ROOTfiles
   TString filename; 
-  
-  if(set==0&&Pmiss==80){ filename = "../../hallc_replay/ROOTfiles/coin_replay_deep_check_3289_-1.root"; }
+  if(set==0&&Pmiss==80){ filename = "../../hallc_replay/ROOTfiles/coin_replay_deep_check_3264_-1.root"; }
+  if(set==1&&Pmiss==80){ filename = "../../hallc_replay/ROOTfiles/coin_replay_deep_check_3289_-1.root"; }
 
   if(set==-1&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_total.root"; }
   if(set==1&&Pmiss==580){ filename = "../../hallc_replay/ROOTfiles/pm580_set1.root"; }
@@ -338,9 +347,11 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
   //Kinematics Quantities
   TH1F *cut_Emiss = new TH1F("cut_Emiss","missing energy", Em_nbins, Em_xmin, Em_xmax);       //min width = 21.6 (0.0216)MeV,  CUT_OUNTS/25 MeV
   TH1F *cut_pm = new TH1F("cut_pm","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
+  TH1F *cut_pm_LH2scale = new TH1F("cut_pm_LH2scale","missing momentum", Pm_nbins, Pm_xmin, Pm_xmax);  //min width = 32 MeV (0.032)
 
   cut_Emiss->Sumw2();
   cut_pm->Sumw2();
+  cut_pm_LH2scale->Sumw2();
 
   TH1F *cut_pmX_lab = new TH1F("cut_pmX_Lab","Pmiss X (Lab) ", Pmx_nbins, Pmx_xmin, Pmx_xmax); 
   TH1F *cut_pmY_lab = new TH1F("cut_pmY_Lab","Pmiss Y (Lab) ", Pmy_nbins, Pmy_xmin, Pmy_xmax);  
@@ -398,8 +409,6 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
   TH1F *cut_py_tar = new TH1F("cut_py_tar", "SHMS y-Target (Lab)", ytar_nbins, ytar_xmin, ytar_xmax);
   TH1F *cut_pz_tar = new TH1F("cut_pz_tar", "SHMS z-Target (Lab)", ztar_nbins, ztar_xmin, ztar_xmax);
     
-
-
   //Hadron arm Reconstructed Quantities ( xtar, ytar, xptar, yptar, delta)
   TH1F *cut_hytar = new TH1F("cut_hytar", hadron_arm + " Y_{tar}", hytar_nbins, hytar_xmin, hytar_xmax);
   TH1F *cut_hxptar = new TH1F("cut_hxptar", hadron_arm + " X'_{tar}", hxptar_nbins, hxptar_xmin, hxptar_xmax);
@@ -439,7 +448,7 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
   TH2F *cut_hxptar_vs_exptar = new TH2F("cut_hxptar_vs_exptar", "HMS vs. SHMS, X'_{tar}", exptar_nbins, exptar_xmin, exptar_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
   TH2F *cut_hyptar_vs_eyptar = new TH2F("cut_hyptar_vs_eyptar", "HMS vs. SHMS, Y'_{tar}", eyptar_nbins, eyptar_xmin, eyptar_xmax, hyptar_nbins, hyptar_xmin, hyptar_xmax);
   TH2F *cut_hdelta_vs_edelta = new TH2F("cut_hdelta_vs_edelta", "HMS vs. SHMS, #delta", edelta_nbins, edelta_xmin, edelta_xmax, hdelta_nbins, hdelta_xmin, hdelta_xmax);
-  
+
   //OPTICS CHECK (W correlations with electron arm Focal Plane / Target Quantities)
   TH2F *cut_W_vs_exfp = new TH2F("cut_W_vs_exfp", "cut_W vs eX_{fp}", exfp_nbins, exfp_xmin, exfp_xmax, W_nbins, W_xmin, W_xmax);
   TH2F *cut_W_vs_expfp = new TH2F("cut_W_vs_expfp", "cut_W vs eX'_{fp}", expfp_nbins, expfp_xmin, expfp_xmax, W_nbins, W_xmin, W_xmax);
@@ -526,7 +535,12 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
 
   TH2F *cut_Q2_vs_thnq = new TH2F("cut_Q2_vs_thnq", "Q2 vs. #theta_{nq}", thnq_nbins, thnq_xmin, thnq_xmax, Q2_nbins, Q2_xmin, Q2_xmax);       
   TH2F *cut_Q2_vs_Pm = new TH2F("cut_Q2_vs_Pm", "Q2 vs. Pm", Pm_nbins, Pm_xmin, Pm_xmax, Q2_nbins, Q2_xmin, Q2_xmax);   
-      
+
+  //Solid Angle Acceptance Plots
+  TH2F *cut_exptar_vs_eyptar = new TH2F("cut_exptar_vs_eyptar", "SHMS eX'_{tar} vs. eY'_{tar}", eyptar_nbins, eyptar_xmin, eyptar_xmax, exptar_nbins, exptar_xmin, exptar_xmax);
+  TH2F *cut_hxptar_vs_hyptar = new TH2F("cut_hxptar_vs_hyptar", "HMS hX'_{tar} vs. hY'_{tar}", hyptar_nbins, hyptar_xmin, hyptar_xmax, hxptar_nbins, hxptar_xmin, hxptar_xmax);
+
+
   //Set Variable Names and Branches
  
   //------Kinematics
@@ -678,10 +692,18 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
   T->SetBranchAddress("P.ngcer.npeSum",&pngcer_npesum);
 
 
+
+  //Define Histograms for Emiss cut study
+  TH1F *pm_noemcut = new TH1F("pm_noemcut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax);
+  TH1F *pm_em30cut = new TH1F("pm_em30cut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax); 
+  TH1F *pm_em60cut = new TH1F("pm_em60cut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax);
+  TH1F *pm_em90cut = new TH1F("pm_em90cut", "Pmiss Study", Pm_nbins, Pm_xmin, Pm_xmax);
+
   //Determine Full Weight
   //Each data event will be corrected for by dividing it by charge, efficencys and live time
   Double_t FullWeight = 1. / (charge_factor*e_trkEff*h_trkEff*t_LT);
- 
+  Double_t FullWeight_LH2scale = 1. / (charge_factor*e_trkEff*h_trkEff*t_LT*0.90);
+
   //Define Boolean for Kin. Cuts
   Bool_t c_Em;
   Bool_t c_ctime;  //coincidence time cut
@@ -689,6 +711,14 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
   Bool_t c_edelta;
   Bool_t c_ecal;
   Bool_t c_ngc_NpeSum;
+  
+  //Acceptance Cuts
+  Bool_t c_exptar;
+  Bool_t c_eyptar;
+  Bool_t c_hxptar;
+  Bool_t c_hyptar;
+  Bool_t c_eSolid;
+  Bool_t c_hSolid;
 
   //Kinematic Cuts to select PWIA region
   Bool_t c_Q2;
@@ -719,13 +749,16 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
     Ep = sqrt(MP*MP + Pfv2*Pfv2);
 
     //Define Cuts
-    c_Em = Em_nuc<0.04;
+    c_Em = Em_nuc>-0.015&&Em_nuc<0.04;
+    c_exptar = abs(e_xptar)<0.025;
+    c_eyptar = e_yptar > -0.027 && e_yptar < 0.027;
+    c_eSolid = c_exptar&&c_eyptar;
     c_ctime = epCoinTime>10.5 && epCoinTime<15.5;
     c_hdelta = h_delta>-8. && h_delta<8.;
-    c_edelta = e_delta>-10. && e_delta<22.;
-    c_ecal = pcal_etotnorm >0.6;
+    c_edelta = e_delta>-2.7 && e_delta<2.7;
+    c_ecal = pcal_etotnorm >=0.6;
     c_ngc_NpeSum = pngcer_npesum > 0.5;
-    c_Q2 = Q2 >= 4.0;
+    c_Q2 = Q2 >= 4.2;
     c_th_nq = (thbq/dtr) >= 35. && (thbq/dtr) <= 45.;
     //c_th_nq = (thbq/dtr) >= 55. && (thbq/dtr) <= 65.;
     //c_th_nq = (thbq/dtr) >= 45. && (thbq/dtr) <= 55.;
@@ -734,7 +767,7 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
     //c_MM = M_recoil > 0.92 && M_recoil < 0.96;
 
     //APPLY CUTS: BEGIN CUTS LOOP
-    if (c_Em&&c_hdelta&&c_edelta&&c_ecal&&c_ctime&&c_th_nq&&c_Q2)
+    if (c_Em&&c_hdelta&&c_edelta&&c_ecal)
     {
 
       cut_epCT->Fill(epCoinTime, FullWeight);
@@ -743,6 +776,7 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
 	  //Kinematics
 	  cut_Emiss->Fill(Em, FullWeight);
 	  cut_pm->Fill(Pm, FullWeight);
+	  cut_pm_LH2scale->Fill(Pm, FullWeight_LH2scale);
 
 	  cut_pmX_lab->Fill(Pmx_lab, FullWeight);
 	  cut_pmY_lab->Fill(Pmy_lab, FullWeight);
@@ -915,6 +949,10 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
 
 	  cut_Q2_vs_thnq->Fill(thbq/dtr, Q2, FullWeight);                                                                                     
 	  cut_Q2_vs_Pm->Fill(Pm, Q2, FullWeight);
+	  
+	  //Solid Angle Acceptance                                                                                                      
+	  cut_exptar_vs_eyptar->Fill(e_yptar, e_xptar, FullWeight);
+	  cut_hxptar_vs_hyptar->Fill(h_yptar, h_xptar, FullWeight);
 
 	}//End CUTS LOOP
       
@@ -1054,7 +1092,22 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
       
       Q2_vs_thnq->Fill(thbq/dtr, Q2, FullWeight);                    
       Q2_vs_Pm->Fill(Pm, Q2, FullWeight);
-    
+
+      //Missing Energy Study
+      if (c_hdelta&&c_edelta&&c_ecal&&c_eSolid){   	 
+	  pm_noemcut->Fill(Pm, FullWeight);
+	}
+      if (c_hdelta&&c_edelta&&c_eSolid&&c_ecal&&Em_nuc<0.03){ 
+	pm_em30cut->Fill(Pm, FullWeight);
+      }
+      if (c_hdelta&&c_edelta&&c_eSolid&&c_ecal&&Em_nuc<0.06){  
+	pm_em60cut->Fill(Pm, FullWeight); 
+      }
+      if (c_hdelta&&c_edelta&&c_eSolid&&c_ecal&&Em_nuc<0.09){
+	pm_em90cut->Fill(Pm, FullWeight); 
+      }    
+
+
   } //end entry loop
   
    

@@ -716,7 +716,7 @@ void comparePWIA_deep(int set, int pm, string model, string rad)
   data_file->GetObject("cut_kf", data_kf);
   data_file->GetObject("cut_Emiss_nuc", data_emiss);
 
-  data_file->GetObject("cut_pm", data_Pm);
+  data_file->GetObject("cut_pm_LH2scale", data_Pm);
   data_file->GetObject("cut_P_f", data_Pf);
   data_file->GetObject("cut_theta_prot", data_th_prot);
   data_file->GetObject("cut_q", data_q);
