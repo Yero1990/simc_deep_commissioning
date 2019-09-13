@@ -1,6 +1,8 @@
-void get_normfac(string ifile);
+#include "utilities.h"
 
-void run_simc_d2()
+//void get_normfac(string ifile);
+
+void run_simc_d2(string ikin_filename)
 {
   ofstream ofile;
 
@@ -8,98 +10,77 @@ void run_simc_d2()
   string INDIR = "./infiles/";
   string OUTDIR = "./outfiles/";
   string WORKSIM="./worksim_voli/";
-
+  string WORKDISK="./SIMC/";
   //********** read input kinematics data file *************
 
-  ifstream ikin;
-  string ikin_file = "input_kinematics.data";
-  string line;
-
-  vector <string> ikin_vec;
-
-  
-  ikin.open(ikin_file);
-
-  if (!ikin)
-    {
-      cerr << "Unable to open file";
-      exit(1);   // call system to stop
-    }
-
-  while (ikin >> line)
-    {
-      
-      //ignore commented input files
-      if ( line[0]=='#')
-	{
-	  cout << "ignoring " + line << endl;
-	  
-	}
-
-      //read kinematic input file
-      else
-	{
-	  cout << "Reading " + line << endl;
-	  ikin_vec.push_back(line);
-
-	}
-      
-    }
 
   //************************************************************
 
   string CMD; // string command to be used as terminal commands
-  //Loop over each kinematic input file
   
-  //Loop over each kinematic input file
-    for (int i = 0; i<ikin_vec.size(); i++)
-      {
-	string input_path = INDIR+ikin_vec[i];
-	string ikin_file = ikin_vec[i];
-
-	cout << "removing ./infiles/current.data . . . " << endl;
-
-	gSystem->Exec("rm ./infiles/current.data"); 
-	
-	cout << "copy: " << input_path.c_str() << " to ./infiles/current.data " << endl;
-	
-	//copy input file name to current.data
-	gSystem->CopyFile(input_path.c_str(), "./infiles/current.data"); 
-			
-	//Run SIMC  
-	gSystem->Exec("./run_simc.sh current.data");
-	
-	//extract normalization factor 
-	get_normfac(OUTDIR+"current.hist");
-
-	//convert to root file
-	gSystem->Exec("root -l -q fmake_tree.C");
-	    
-
-	//replace '.data' with '.root' in file name
-	size_t pos = ikin_file.find("data");
-
-	ikin_file.replace(pos, std::string("data").length(), "root");   // 5 = length( $name )
-	
-	
-	string oldname = WORKSIM + "simc.root";
-	string newname = WORKSIM + ikin_file;
-
-	//define command to change file name 
-	CMD = "mv " + oldname + " " + newname;
-
-	//Execute command to change root file name
-	gSystem->Exec(CMD.c_str());
-
-	ofile << ikin_file << endl;;
-	ofile.close();
-	
-
-      }
-    
+  string input_path = INDIR+ikin_filename;
   
+  //cout << "removing ./infiles/current.data . . . " << endl;
+  
+  //gSystem->Exec("rm ./infiles/current.data"); 
+  
+  //cout << "copy: " << input_path.c_str() << " to ./infiles/current.data " << endl;
+  
+  //copy input file name to current.data
+  //gSystem->CopyFile(input_path.c_str(), "./infiles/current.data"); 
+  
+  
+  //Run SIMC  
+  //gSystem->Exec("./run_simc.sh current.data");
+  string cmd1 ="./run_simc.sh "+ikin_filename;
+  gSystem->Exec(cmd1.c_str());
+
+  //replace '.data' with '.hist' in file name
+  size_t pos = ikin_filename.find("data");
+  string hfname = ikin_filename.replace(pos, std::string("data").length(), "hist");   // 5 = length( $name )
+  
+  cout << "data file name: " << ikin_filename << endl;
+  cout << "hist file name: " << hfname << endl;
+  
+  string hfname_path = "outfiles/"+hfname;
+  //extract normalization factor 
+  // get_normfac(OUTDIR+"current.hist");
+  
+  Double_t normfac = stod(split(FindString("normfac",hfname_path.c_str())[0], '=')[1]);
+  string kin_ext = split(ikin_filename, '.')[0];
+  string normfact_name = "normfact_"+kin_ext+".data";
+  ofile.open(normfact_name, std::fstream::out);
+  ofile << normfac << endl;
+  ofile.close();
+
+  pos = ikin_filename.find("hist");
+  string kfname = ikin_filename.replace(pos, std::string("hist").length(), "data");
+
+  //convert to root file
+  string cmd = Form("root -l -b -q \"fmake_tree.C(\\\"%s\\\")\"", kfname.c_str());
+  gSystem->Exec(cmd.c_str());
+  
+  pos = ikin_filename.find("data");
+  
+  ikin_filename.replace(pos, std::string("data").length(), "root");   // 5 = length( $name )
+  
+  
+  string oldname = WORKSIM + ikin_filename;
+  string newname = WORKDISK + ikin_filename;
+  
+  //define command to change file name 
+  CMD = "mv " + oldname + " " + newname;
+  
+  //Execute command to change root file name
+  gSystem->Exec(CMD.c_str());
+  
+  ofile << ikin_filename << endl;;
+  ofile.close();
+  
+ 
 }
 
+/*
 //---------------------------------------
 void get_normfac(string ifile)
 {
@@ -109,6 +90,10 @@ void get_normfac(string ifile)
   string line;
   string found;
   size_t pos;
+
+
+
+
   file.open (ifile.c_str()); 
 
   //find the line containing normfac
@@ -123,12 +108,10 @@ void get_normfac(string ifile)
   found.erase (0, 14);  //remove trailing spaces
 
   //write to file
-  ofile.open("normfact.data", std::fstream::out);
-  ofile << found << endl;
-  ofile.close();
+
   
 }
-
+*/
 
 
 

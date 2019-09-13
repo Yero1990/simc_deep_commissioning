@@ -623,7 +623,7 @@ void analyze_deepData(int set, int Pmiss, bool Qnorm=true)
   T->SetBranchAddress("H.kin.secondary.th_xq",&thxq);     //Polar angle of detected particle with q    ----> theta_pq angle between proton and q-vector
   T->SetBranchAddress("H.kin.secondary.ph_xq",&phxq);     //Azimuth angle of detected particle with q    ----> phi_pq angle between proton and q-vector
   T->SetBranchAddress("H.kin.secondary.th_bq",&thbq);      //Polar angle of recoil system with q (rad) ----> theta_nq angle between neutron and q-vector
-  T->SetBranchAddress("H.kin.secondary.ph_bq",&thbq);      //Azimuth of recoil system with scattering plane (rad) ----> phi_nq angle between neutron and q-vector
+  T->SetBranchAddress("H.kin.secondary.ph_bq",&phbq);      //Azimuth of recoil system with scattering plane (rad) ----> phi_nq angle between neutron and q-vector
 
 
   //-------SHMS Focal Plane / Target

@@ -1,12 +1,12 @@
 ! e120-10-003: pmiss = 80 MeV  --NO Eloss corrections were applied
 ! Simulated radiative corrections and Energy Loss
-!
+! Systematics Studies: Varied SHMS e' angle by (+ 1 mr or 0.05729 deg:  12.194 + 0.05729 = 12.251)
 ! 'TF' stands for 'this field'
 ! ONE equals TRUE unless specified otherwise
 
  =?
  &EXPERIMENT
-     ngen  =  1000000			!  POS: # of successes
+     ngen  =  5000000			!  POS: # of successes
      EXPER%charge  =   1.0		!  total charge (mC)
      doing_phsp  =  F		!  (T = TRUE)	- If all of the doing_* are
      doing_kaon  =  F		!  (T = TRUE)   false, then doing (e,e'p).
@@ -30,6 +30,12 @@
      spec%p%sig_musc  = 1.0e-6, 1.0e-6                 ! add extra mult scatt in pArm focal plane           
      spec%e%sig_smear = 1.0e-8, 1.0e-8, 1.0e-8, 0.04   !0.075 add extra smear. in recon eArm (Ytar, xptar, yptar, delta) 
      spec%p%sig_smear = 1.0e-8, 1.0e-8, 1.0e-8, 0.04   !0.075 add extra smear. in  recon pArm 
+     spec%e%shift%p_mom  =   1.0                       !  shift e-momentum for reconstruction [MeV] (for systematic studies)	
+     spec%e%shift%theta  =   0.                        !  shift e-angle for reconstruction [rad]
+     spec%e%shift%phi  =   0.                          !  shift e-Oop angle for reconstruction
+     spec%p%shift%p_mom  =   0.                        !  shift p-momentum for reconstruction (for systematic studies)	
+     spec%p%shift%theta  =   0.                        !  shift p-angle for reconstruction
+     spec%p%shift%phi  =   0.                          !  shift p-Oop angle for reconstruction
 
 / 
 
