@@ -59,7 +59,12 @@ void run_simc_d2(string ikin_filename)
   //convert to root file
   string cmd = Form("root -l -b -q \"fmake_tree.C(\\\"%s\\\")\"", kfname.c_str());
   gSystem->Exec(cmd.c_str());
-  
+
+  //Delete normfac datafile, as it is not needed anymore
+  cmd = "rm "+normfact_name;
+  gSystem->Exec(cmd.c_str());
+
+
   pos = ikin_filename.find("data");
   
   ikin_filename.replace(pos, std::string("data").length(), "root");   // 5 = length( $name )

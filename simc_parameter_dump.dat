@@ -6,7 +6,7 @@
  EXTRA_DBASE_FILE="extra_hydrogen_rad.data                                     ",
  /
 &EXPERIMENT
- NGEN=        500,
+ NGEN=    5000000,
  EBEAM=  10600.500000000000     ,
  DEBEAM=  5.3002500000000001     ,
  EXPER%CHARGE=  1.0000000000000000     ,
@@ -242,7 +242,7 @@
  INTCOR_MODE=          1,
  /
 &SIMULATE
- NGEN=        500,
+ NGEN=    5000000,
  MC_SMEAR=T,
  MC_SMEAR_ADDL=F,
  RECON_MC_SMEAR_ADDL=T,
@@ -430,6 +430,6 @@
 &THEORY_CTRL
  THEORY_PAR%MODEL="LAGET_DEUT                                                                      ",
  THEORY_PAR%DATA_FILE="./                                                                              ",
- THEORY_PAR%PARAMETER= 3*1.0000000000000000       , 7*0.0000000000000000       ,
+ THEORY_PAR%PARAMETER=  0.0000000000000000     , 2*1.0000000000000000       , 7*0.0000000000000000       ,
  THEORY_PAR%FLAGS= 10*F,
  /

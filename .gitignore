@@ -1,0 +1,5 @@
+#ignore all .zip files
+*.zip
+
+#ignore this directory as it is too larger to push to git
+/Laget

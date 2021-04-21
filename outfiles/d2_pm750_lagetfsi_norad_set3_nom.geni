@@ -1,0 +1,23 @@
+ HMS Trials:              103428591
+ Slit hor/vert/corners     36056165    18043382           0
+ Q1 entrance/mid/exit         76535    10520962     4001113
+ Q2 entrance/mid/exit       1197654     2919808      201660
+ Q3 entrance/mid/exit        545779      770362      129816
+ Dipole entrance/exit        197523     8044950
+ Events reaching hut       20722882
+ DC1, DC2, Scin, Cal         120259      184964      658685           0
+ Successes                 19758974
+
+ SHMS Trials:              19758974
+ Slit hor/vert/corners      3085848       75010      989292
+ Q1 entrance/mid/exit             0        2056      617047
+ Q2 entrance/mid/exit             0           0           0
+ Q3 entrance/mid                  0           9
+ D1 entrance/mid 1-2              0       10454      129177
+ D1 mid 3-5                  124863        2965           4
+ D1 mid 6/exit                    4          66
+ Events reaching hut        5548318
+ DC1, DC2, Scin, Cal             24          19
+ S1, S2, S3, Cal                  0           0           0           0
+ Successes                  5548275
+
